@@ -112,15 +112,57 @@ public class MilterModificationServiceTest {
   }
 
   @Test public void testAddRecipient() throws MilterException {
-    // TODO
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    MilterPacket packet = new MilterPacket('+'
+        , HEX.toByteArray("737570706f7274406578616d706c652e6f726700"));
+
+    contextMock.sendPacket(packet);
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    service.addRecipient(contextMock, "support@example.org");
+
+    EasyMock.verify(contextMock);
   }
 
   @Test public void testAddRecipientEsmtpPar() throws MilterException {
-    // TODO
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    MilterPacket packet = new MilterPacket('2'
+        , HEX.toByteArray("737570706f7274406578616d706c652e6f7267006172677300"));
+
+    contextMock.sendPacket(packet);
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    service.addRecipientEsmtpPar(contextMock, "support@example.org", "args");
+
+    EasyMock.verify(contextMock);
   }
 
   @Test public void testDeleteRecipient() throws MilterException {
-    // TODO
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    MilterPacket packet = new MilterPacket('-'
+        , HEX.toByteArray("737570706f7274406578616d706c652e6f726700"));
+
+    contextMock.sendPacket(packet);
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    service.deleteRecipient(contextMock, "support@example.org");
+
+    EasyMock.verify(contextMock);
   }
 
   @Test public void testReplaceBody() throws MilterException {
