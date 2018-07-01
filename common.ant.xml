@@ -1,0 +1,307 @@
+<?xml version="1.0"?>
+<!--
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<project name="common" xmlns:jacoco="antlib:org.jacoco.ant">
+
+  <!-- Global Properties -->
+  <property environment="env" />
+  <property name="src.dir" location="src" />
+  <property name="resources.dir" location="resources" />
+  <property name="test.dir" location="test" />
+  <property name="lib.dir" location="${root.dir}/lib" />
+  <property name="build.dir" location="build" />
+  <property name="docs.dir" location="${build.dir}/docs" />
+  <property file="build.properties" />
+
+  <tstamp />
+  <condition property="version" value="${module.version}" else="${module.version}-snapshot${DSTAMP}">
+    <istrue value="${release}" />
+  </condition>
+  <condition property="version.impl" value="${version}" else="${version}${TSTAMP}">
+    <istrue value="${release}" />
+  </condition>
+
+  <property name="module.packagenames" value="org.nightcode.*" />
+  <property name="module.jar" location="${build.dir}/${ant.project.name}-${version}.jar" />
+  <property name="javadoc.jar" location="${build.dir}/${ant.project.name}-${version}-javadoc.jar" />
+  <property name="sources.jar" location="${build.dir}/${ant.project.name}-${version}-sources.jar" />
+
+  <property name="halt.on.failure" value="true" />
+
+  <property name="compiler.version" value="1.8" />
+  <property name="ant-contrib.version" value="1.0b3" />
+  <property name="junit.version" value="4.12" />
+  <property name="hamcrest-core.version" value="1.3" />
+  <property name="easymock.version" value="3.6" />
+  <property name="objenesis.version" value="2.6" />
+  <property name="checkstyle.version" value="6.11.2-all" />
+
+  <condition property="findbugs.check" value="${env.FINDBUGS_HOME}" else="/usr/local/findbugs">
+    <isset property="env.FINDBUGS_HOME" />
+  </condition>
+  <property name="findbugs.dir" value="${findbugs.check}" />
+  <property name="findbugs.out" value="${build.dir}/findbugs" />
+
+  <property name="coverage.enabled" value="true" />
+  <property name="coverage.dir" value="${build.dir}/coverage" />
+
+  <condition property="jacoco.check" value="${env.JACOCO_HOME}" else="/usr/local/jacoco">
+    <isset property="env.JACOCO_HOME" />
+  </condition>
+  <property name="jacoco.dir" value="${jacoco.check}" />
+  <property name="jacoco.out" value="${coverage.dir}/jacoco" />
+
+  <property name="checkstyle.config" value="${root.dir}/checkstyle.xml" />
+
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+    <classpath>
+      <pathelement location="${lib.dir}/build/ant-contrib-${ant-contrib.version}.jar" />
+    </classpath>
+  </taskdef>
+
+  <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask">
+    <classpath>
+      <pathelement location="${findbugs.dir}/lib/findbugs-ant.jar" />
+    </classpath>
+  </taskdef>
+
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+    <classpath path="${jacoco.dir}/lib/jacocoant.jar"/>
+  </taskdef>
+
+  <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties">
+    <classpath>
+      <pathelement location="${lib.dir}/build/checkstyle-${checkstyle.version}.jar" />
+    </classpath>
+  </taskdef>
+
+  <presetdef name="nightcode.javac">
+    <javac srcdir="${src.dir}"
+           destdir="${build.dir}/classes"
+           debug="true"
+           debuglevel="lines,vars,source"
+           source="${compiler.version}"
+           target="${compiler.version}"
+           nowarn="true"
+           encoding="utf-8"
+           includeantruntime="false">
+        <classpath refid="compile.classpath" />
+        <compilerarg value="-Xlint:unchecked"/>
+        <compilerarg value="-XDignore.symbol.file"/> 
+    </javac>
+  </presetdef>
+
+  <presetdef name="nightcode.jar">
+    <jar jarfile="${module.jar}"
+         manifest="${build.dir}/META-INF/MANIFEST.MF">
+      <fileset dir="${build.dir}/classes" />
+    </jar>
+  </presetdef>
+
+  <macrodef name="dependency.check">
+    <attribute name="name" />
+    <attribute name="location" />
+    <sequential>
+      <property name="@{name}" location="@{location}" />
+      <condition property="@{name}.exists">
+        <and>
+          <available file="${@{name}}" />
+        </and>
+      </condition>
+      <fail unless="@{name}.exists" message="Cannot find dependency ${@{name}}" />
+    </sequential>
+  </macrodef>
+
+  <target name="clean" description="Cleans this module's generated files.">
+    <delete dir="${build.dir}" />
+  </target>
+
+  <target name="compile" description="Compile Java source.">
+    <mkdir dir="${build.dir}/classes" />
+    <nightcode.javac />
+    <copy toDir="${build.dir}/classes" failonerror="false">
+      <fileset dir="${resources.dir}" excludes="**/*.java" />
+    </copy>
+  </target>
+
+  <target name="test.compile" depends="compile" description="Compile test source.">
+    <mkdir dir="${build.dir}/test" />
+    <nightcode.javac srcdir="${test.dir}" destdir="${build.dir}/test">
+      <classpath>
+        <pathelement location="${build.dir}/classes" />
+        <path refid="compile.classpath" />
+        <path refid="test.classpath" />
+      </classpath>
+    </nightcode.javac>
+    <copy toDir="${build.dir}/test">
+      <fileset dir="${test.dir}" excludes="**/*.java" />
+    </copy>
+  </target>
+
+  <target name="test" depends="test.compile" description="Execute JUnit tests.">
+    <mkdir dir="${build.dir}/test/reports" />
+
+    <junit fork="yes" printsummary="yes" failureproperty="test.failure">
+      <jvmarg line="-Xmx512m" />
+      <jvmarg line="-Xss512k" />
+      <classpath>
+        <pathelement location="${build.dir}/test" />
+        <pathelement location="${build.dir}/classes" />
+        <path refid="compile.classpath" />
+        <path refid="test.classpath" />
+      </classpath>
+
+      <batchtest todir="${build.dir}/test/reports">
+        <fileset dir="${test.dir}">
+          <include name="**/*Test.java" />
+        </fileset>
+        <formatter type="plain" />
+        <formatter type="xml" />
+      </batchtest>
+    </junit>
+
+    <condition property="stop.build" value="true">
+      <and>
+        <istrue value="${halt.on.failure}" />
+        <isset property="test.failure" />
+      </and>
+    </condition>
+
+    <fail message="One or more tests failed for: ${ant.project.name}" if="stop.build" status="2" />
+  </target>
+
+  <target name="findbugs" depends="findbugs.mkdirs, build">
+    <findbugs home="${findbugs.dir}" effort="max"
+              output="xml" outputFile="${findbugs.out}/findbugs.xml">
+      <auxClasspath refid="compile.classpath" />
+      <sourcePath path="${src.dir}" />
+      <class location="${module.jar}" />
+    </findbugs>
+  </target>
+
+  <target name="coverage" depends="test.compile" description="Execute coverage task.">
+    <antcall target="coverage.mkdirs" />
+
+    <jacoco:coverage enabled="${coverage.enabled}" destfile="${jacoco.out}/jacoco.exec">
+      <junit fork="yes" forkmode="once" printsummary="yes" failureproperty="test.failure">
+        <jvmarg line="-Xmx512m" />
+        <jvmarg line="-Xss512k" />
+        <classpath>
+          <pathelement location="${build.dir}/test" />
+          <pathelement location="${build.dir}/classes" />
+          <path refid="compile.classpath" />
+          <path refid="test.classpath" />
+        </classpath>
+
+        <batchtest todir="${build.dir}/test/reports">
+          <fileset dir="${test.dir}">
+            <include name="**/*Test.java" />
+          </fileset>
+          <formatter type="plain" />
+          <formatter type="xml" />
+        </batchtest>
+      </junit>
+    </jacoco:coverage>
+
+    <condition property="stop.build" value="true">
+      <and>
+        <istrue value="${halt.on.failure}" />
+        <isset property="test.failure" />
+      </and>
+    </condition>
+
+    <fail message="One or more tests failed for: ${ant.project.name}" if="stop.build" status="2" />
+
+    <jacoco:report>
+      <executiondata>
+        <file file="${jacoco.out}/jacoco.exec" />
+      </executiondata>
+      <structure name="${ant.project.name}">
+        <classfiles>
+          <fileset dir="${build.dir}/classes" />
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+          <fileset dir="${src.dir}" />
+        </sourcefiles>
+      </structure>
+      <html destdir="${jacoco.out}/report" />
+    </jacoco:report>
+  </target>
+
+  <target name="checkstyle" depends="build" description="Checks source code style">
+    <checkstyle config="${checkstyle.config}" classpath="${build.dir}/classes">
+      <fileset dir="${src.dir}" includes="**/*.java" />
+      <formatter type="plain" />
+      <formatter type="xml" toFile="${build.dir}/checkstyle_errors.xml" />
+    </checkstyle>
+  </target>
+
+  <target name="build" depends="compile, manifest" description="Build and package this module.">
+    <nightcode.jar />
+  </target>
+
+  <target name="dist" depends="clean, build, test, checkstyle, source, javadoc" />
+
+  <target name="manifest" description="Generate manifest.">
+    <mkdir dir="${build.dir}/META-INF" />
+    <manifest file="${build.dir}/META-INF/MANIFEST.MF">
+      <attribute name="Specification-Title" value="${ant.project.name}" />
+      <attribute name="Specification-Version" value="${version}" />
+      <attribute name="Specification-Vendor" value="NightCode" />
+      <attribute name="Implementation-Title" value="${ant.project.name}" />
+      <attribute name="Implementation-Version" value="${version.impl}" />
+      <attribute name="Implementation-Vendor" value="NightCode" />
+    </manifest>
+  </target>
+
+  <target name="source">
+    <mkdir dir="${build.dir}"/>
+    <jar jarfile="${sources.jar}">
+      <fileset dir="${src.dir}"/>
+    </jar>
+  </target>
+
+  <target name="javadoc">
+    <mkdir dir="${build.dir}"/>
+    <property name="javadoc.classpath" refid="compile.classpath" />
+
+    <javadoc packagenames="${module.packagenames}"
+             destdir="${docs.dir}"
+             bootclasspath="${java.home}/lib/rt.jar"
+             maxmemory="256M"
+             author="true"
+             version="true"
+             use="true"
+             classpath="${javadoc.classpath}">
+      <fileset dir="${src.dir}" />
+      <arg value="-XDignore.symbol.file"/>
+      <arg value="-Xdoclint:none"/>
+    </javadoc>
+    <jar jarfile="${javadoc.jar}">
+      <fileset dir="${docs.dir}" />
+    </jar>
+  </target>
+
+  <target name="coverage.mkdirs" if="coverage.enabled">
+    <mkdir dir="${build.dir}/test/reports" />
+    <delete dir="${jacoco.out}" />
+    <mkdir dir="${jacoco.out}" />
+  </target>
+
+  <target name="findbugs.mkdirs">
+    <delete dir="${findbugs.out}" />
+    <mkdir dir="${findbugs.out}" />
+  </target>
+
+</project>

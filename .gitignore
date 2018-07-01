@@ -1,0 +1,15 @@
+.DS_Store
+
+target/
+out/
+build/
+!lib/build/
+
+.idea/
+*.ipr
+*.iws
+*.iml
+
+.classpath
+.project
+.settings/

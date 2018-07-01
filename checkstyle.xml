@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN" "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+
+<module name="Checker">
+  <module name="NewlineAtEndOfFile" />
+  <module name="FileLength" />
+  <module name="FileTabCharacter" />
+
+  <module name="SeverityMatchFilter">
+    <property name="severity" value="info"/>
+    <property name="acceptOnMatch" value="false"/>
+  </module>
+  <!-- Trailing spaces -->
+  <module name="RegexpSingleline">
+    <property name="format" value="\s+$" />
+    <property name="message" value="Line has trailing spaces." />
+  </module>
+
+  <module name="JavadocPackage" />
+
+  <module name="TreeWalker">
+    <!-- Block Checks -->
+    <module name="AvoidNestedBlocks" />
+    <module name="LeftCurly" />
+    <module name="NeedBraces" />
+    <module name="RightCurly" />
+
+    <!-- Class Design -->
+    <module name="FinalClass" />
+    <module name="HideUtilityClassConstructor" />
+    <module name="InterfaceIsType" />
+
+    <!-- Coding -->
+    <module name="CovariantEquals" />
+    <module name="EmptyStatement" />
+    <module name="EqualsAvoidNull" />
+    <module name="EqualsHashCode" />
+    <module name="IllegalInstantiation" />
+    <module name="InnerAssignment" />
+    <module name="MissingSwitchDefault" />
+    <module name="SimplifyBooleanExpression" />
+    <module name="SimplifyBooleanReturn" />
+
+    <!-- Imports -->
+    <module name="AvoidStarImport" />
+    <module name="RedundantImport" />
+    <module name="UnusedImports" />
+
+    <!-- Miscellaneous -->
+    <module name="ArrayTypeStyle" />
+    <module name="TodoComment" />
+    <module name="UpperEll" />
+
+    <!-- Modifiers -->
+    <module name="RedundantModifier" />
+
+    <!-- Naming Conventions -->
+    <module name="ConstantName" />
+    <module name="LocalFinalVariableName" />
+    <module name="LocalVariableName" />
+    <module name="MemberName" />
+    <module name="MethodName" />
+    <module name="PackageName" />
+    <module name="ParameterName" />
+    <module name="StaticVariableName" />
+    <module name="TypeName" />
+
+    <!-- Size Violations -->
+    <module name="LineLength">
+      <property name="max" value="120" />
+    </module>
+    <module name="MethodLength" />
+    <module name="ParameterNumber">
+      <property name="max" value="8" />
+    </module>
+
+    <!-- Whitespace -->
+    <module name="GenericWhitespace" />
+    <module name="EmptyForIteratorPad" />
+    <module name="MethodParamPad" />
+    <module name="NoWhitespaceAfter" />
+    <module name="NoWhitespaceBefore">
+      <property name="allowLineBreaks" value="true"/>
+    </module>
+    <module name="OperatorWrap" />
+    <module name="ParenPad" />
+    <module name="TypecastParenPad" />
+    <module name="WhitespaceAfter" />
+    <module name="WhitespaceAround" />
+  </module>
+</module>
