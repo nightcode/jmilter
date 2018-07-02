@@ -20,8 +20,6 @@ import org.nightcode.milter.codec.MilterPacketDecoder;
 import org.nightcode.milter.codec.MilterPacketEncoder;
 import org.nightcode.milter.config.GatewayConfig;
 
-import java.net.Proxy;
-
 import javax.inject.Provider;
 
 import io.netty.channel.ChannelInitializer;
@@ -30,7 +28,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.proxy.Socks5ProxyHandler;
 
 /**
  * Implementation of ChannelInitializer.
@@ -39,24 +36,14 @@ public class SessionInitializer extends ChannelInitializer<SocketChannel> {
 
   private final GatewayConfig config;
   private final Provider<SimpleChannelInboundHandler<MilterPacket>> provider;
-  private final Proxy proxy;
 
   SessionInitializer(GatewayConfig config, Provider<SimpleChannelInboundHandler<MilterPacket>> provider) {
-    this(config, provider, Proxy.NO_PROXY);
-  }
-
-  SessionInitializer(GatewayConfig config, Provider<SimpleChannelInboundHandler<MilterPacket>> provider, Proxy poxy) {
     this.config = config;
     this.provider = provider;
-    this.proxy = poxy;
   }
 
   @Override protected void initChannel(SocketChannel channel) {
     ChannelPipeline pipeline = channel.pipeline();
-
-    if (!Proxy.NO_PROXY.equals(proxy) && Proxy.Type.SOCKS.equals(proxy.type())) {
-      pipeline.addLast("Socks5", new Socks5ProxyHandler(proxy.address()));
-    }
 
     if (config.isTcpLoggingEnabled()) {
       pipeline.addLast(new LoggingHandler(LogLevel.valueOf(config.getTcpLogLevel())));

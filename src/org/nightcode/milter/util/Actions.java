@@ -148,13 +148,13 @@ public final class Actions {
   private final int bitmap;
   private final byte[] buffer = new byte[4];
 
-  public Actions(byte[] buffer, int offset) {
-    if (offset + 4 > buffer.length) {
-      throw new IllegalStateException("invalid supplied buffer length " + buffer.length
+  public Actions(byte[] src, int offset) {
+    if (offset + 4 > src.length) {
+      throw new IllegalStateException("invalid supplied buffer length " + src.length
           + " for offset " + offset + " and data length 4 bytes");
     }
 
-    System.arraycopy(buffer, offset, this.buffer, 0, 4);
+    System.arraycopy(src, offset, this.buffer, 0, 4);
     bitmap = ((buffer[0] & 0xFF) << 24)
         + ((buffer[1] & 0xFF) << 16)
         + ((buffer[2] & 0xFF) <<  8)

@@ -23,15 +23,17 @@ public class ActionsTest {
 
   private static final Hexs HEX = Hexs.hex();
 
-  @Test public void testNewInstanceFromByteArrayWithOffset() {
+  @Test public void testNewInstance() {
     byte[] payload = HEX.toByteArray("000001ff");
 
     Actions actions = new Actions(payload, 0);
+    Assert.assertEquals(0x000001FF, actions.bitmap());
     Assert.assertArrayEquals(HEX.toByteArray("000001ff"), actions.array());
 
     payload = HEX.toByteArray("00000006000001ff001fffff");
 
     actions = new Actions(payload, 4);
+    Assert.assertEquals(0x000001FF, actions.bitmap());
     Assert.assertArrayEquals(HEX.toByteArray("000001ff"), actions.array());
   }
 }

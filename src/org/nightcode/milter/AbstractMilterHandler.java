@@ -113,7 +113,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     }
     context.setMtaActions(mtaActions);
 
-    if ((context.milterActions().bitmap() & context.getMtaActions().bitmap()) != context.milterActions().bitmap()) {
+    if ((context.getMtaActions().bitmap() & context.milterActions().bitmap()) != context.milterActions().bitmap()) {
       LOGGER.log(Level.WARNING, String.format("MTA %s doesn't fulfill Milter requirements %s"
           , context.getMtaActions(), context.milterActions()));
       abortSession(context, null);

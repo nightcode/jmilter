@@ -24,7 +24,7 @@
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
   <packaging>jar</packaging>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.1.1-SNAPSHOT</version>
   <name>JMilter</name>
   <description>Java implementation of the Sendmail Milter protocol.</description>
   <url>http://github.com/nightcode/jmilter/</url>
@@ -104,12 +104,6 @@
       </dependency>
       <dependency>
         <groupId>io.netty</groupId>
-        <artifactId>netty-codec-socks</artifactId>
-        <version>${netty.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
         <artifactId>netty-resolver</artifactId>
         <version>${netty.version}</version>
         <scope>provided</scope>
@@ -117,12 +111,6 @@
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-handler</artifactId>
-        <version>${netty.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-handler-proxy</artifactId>
         <version>${netty.version}</version>
         <scope>provided</scope>
       </dependency>
@@ -163,19 +151,11 @@
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
-      <artifactId>netty-codec-socks</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
       <artifactId>netty-resolver</artifactId>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-handler-proxy</artifactId>
     </dependency>
 
     <dependency>

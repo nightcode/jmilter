@@ -23,15 +23,17 @@ public class ProtocolStepsTest {
 
   private static final Hexs HEX = Hexs.hex();
 
-  @Test public void testNewInstanceFromByteArrayWithOffset() {
+  @Test public void testNewInstance() {
     byte[] payload = HEX.toByteArray("001fffff");
 
     ProtocolSteps protocolSteps = new ProtocolSteps(payload, 0);
+    Assert.assertEquals(0x001FFFFF, protocolSteps.bitmap());
     Assert.assertArrayEquals(HEX.toByteArray("001fffff"), protocolSteps.array());
 
     payload = HEX.toByteArray("00000006000001ff001fffff");
 
     protocolSteps = new ProtocolSteps(payload, 8);
+    Assert.assertEquals(0x001FFFFF, protocolSteps.bitmap());
     Assert.assertArrayEquals(HEX.toByteArray("001fffff"), protocolSteps.array());
   }
 }
