@@ -1,7 +1,7 @@
 # JMilter
 
 [![Build Status](https://travis-ci.org/nightcode/jmilter.svg?branch=master)](https://travis-ci.org/nightcode/jmilter)
-[![Maven Central](https://img.shields.io/maven-central/v/org.nightcode/jmilter.svg)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jmilter)
+[![Maven Central](https://img.shields.io/maven-central/v/org.nightcode/jmilter.svg)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jmilter%22)
 
 Java implementation of the Sendmail Milter protocol.
 
