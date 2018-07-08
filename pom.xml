@@ -38,7 +38,7 @@
     <inject.version>1</inject.version>
     <jsr305.version>3.0.0</jsr305.version>
 
-    <yaranga.version>0.5.4</yaranga.version>
+    <yaranga.version>0.5.5</yaranga.version>
     <netty.version>4.1.24.Final</netty.version>
 
     <junit.version>4.12</junit.version>
