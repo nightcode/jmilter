@@ -131,7 +131,7 @@ public final class MilterPacket {
       this.payload = new byte[length];
       System.arraycopy(payload, offset, this.payload, 0, length);
     } else {
-      this.payload = payload;
+      this.payload = ZERO_ARRAY;
     }
   }
 
@@ -156,7 +156,7 @@ public final class MilterPacket {
    */
   public byte[] payload() {
     if (payload.length == 0) {
-      return payload;
+      return ZERO_ARRAY;
     }
     byte[] buffer = new byte[payload.length];
     System.arraycopy(payload, 0, buffer, 0, payload.length);

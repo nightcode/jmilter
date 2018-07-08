@@ -93,7 +93,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
   @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
       ProtocolSteps mtaProtocolSteps) throws MilterException {
     LOGGER.log(Level.FINER, String
-        .format("\t\tMTA { Version: %s %s %s }\n"
+        .format("\t\tMTA { Version: %s %s %s }%n"
                 + "\t\tMilter { Version: %s %s %s}"
             , mtaProtocolVersion
             , mtaActions

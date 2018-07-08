@@ -181,7 +181,7 @@
     <fail message="One or more tests failed for: ${ant.project.name}" if="stop.build" status="2" />
   </target>
 
-  <target name="findbugs" depends="findbugs.mkdirs, build">
+  <target name="findbugs" depends="build, findbugs.mkdirs">
     <findbugs home="${findbugs.dir}" effort="max"
               output="xml" outputFile="${findbugs.out}/findbugs.xml">
       <auxClasspath refid="compile.classpath" />

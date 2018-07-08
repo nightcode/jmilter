@@ -21,7 +21,6 @@ public class MilterContextImpl implements MilterContext {
 
   private final UUID id;
 
-  private final int milterProtocolVersion = PROTOCOL_VERSION;
   private final Actions milterActions;
   private final ProtocolSteps milterProtocolSteps;
   private final MilterPacketSender milterPacketSender;
@@ -90,7 +89,7 @@ public class MilterContextImpl implements MilterContext {
   }
 
   @Override public int milterProtocolVersion() {
-    return milterProtocolVersion;
+    return PROTOCOL_VERSION;
   }
 
   @Override public void sendContinue() throws MilterException {
