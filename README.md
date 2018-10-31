@@ -5,6 +5,41 @@
 
 Java implementation of the Sendmail Milter protocol.
 
+How to use
+----------
+
+code
+
+```java
+  GatewayConfig gatewayConfig = new GatewayConfig();
+  gatewayConfig.setAddress("0.0.0.0");
+  gatewayConfig.setPort(4545);
+  gatewayConfig.setTcpLoggingEnabled(true);
+  gatewayConfig.setTcpLogLevel("DEBUG");
+
+  // indicates what changes you intend to do with messages
+  Actions milterActions = Actions.builder()
+      .addHeader()
+      .build();
+
+  // indicates which steps you want to skip
+  ProtocolSteps milterProtocolSteps = ProtocolSteps.builder()
+      .noHelo()
+      .noData()
+      .noBody()
+      .build();
+
+  // a simple milter handler that only adds header "X-Received"
+  MilterHandler milterHandler = new ExampleMilterHandler(milterActions, milterProtocolSteps);
+ 
+  MilterGatewayManager gatewayManager = new MilterGatewayManager(gatewayConfig
+      , () -> new MilterChannelHandler(milterHandler), ServiceManager.instance());
+
+  gatewayManager.start();
+```
+
+The test folder contains the complete example code.
+
 Download
 --------
 
