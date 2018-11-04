@@ -22,11 +22,14 @@ import org.nightcode.milter.util.ProtocolSteps;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 
 public class ExampleMilterHandler extends AbstractMilterHandler {
 
+  private static final Logger LOGGER = Logger.getLogger(ExampleMilterHandler.class.getName());
+  
   private static final Hexs HEX = Hexs.hex();
 
   ExampleMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps) {
