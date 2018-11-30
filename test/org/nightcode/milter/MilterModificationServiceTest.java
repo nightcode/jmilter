@@ -19,9 +19,15 @@ import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.util.ProtocolSteps;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 
+import org.easymock.Capture;
 import org.easymock.EasyMock;
+import org.junit.Assert;
 import org.junit.Test;
+
+import static org.nightcode.milter.MessageModificationService.MILTER_CHUNK_SIZE;
 
 public class MilterModificationServiceTest {
 
@@ -181,6 +187,44 @@ public class MilterModificationServiceTest {
     service.replaceBody(contextMock, "new body\r\n".getBytes(StandardCharsets.UTF_8));
 
     EasyMock.verify(contextMock);
+  }
+
+  @Test public void testReplaceLargeBody() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    Capture<MilterPacket> packet1 = EasyMock.newCapture();
+    Capture<MilterPacket> packet2 = EasyMock.newCapture();
+    Capture<MilterPacket> packet3 = EasyMock.newCapture();
+    
+    contextMock.sendPacket(EasyMock.capture(packet1));
+    EasyMock.expectLastCall().once();
+    contextMock.sendPacket(EasyMock.capture(packet2));
+    EasyMock.expectLastCall().once();
+    contextMock.sendPacket(EasyMock.capture(packet3));
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    byte[] newBody = new byte[MILTER_CHUNK_SIZE * 2 + 5];
+    ThreadLocalRandom.current().nextBytes(newBody);
+    newBody[newBody.length - 2] = 0x0A;
+    newBody[newBody.length - 1] = 0x0D;
+    
+    service.replaceBody(contextMock, newBody);
+
+    EasyMock.verify(contextMock);
+
+    Assert.assertEquals('b', packet1.getValue().command());
+    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, 0, MILTER_CHUNK_SIZE)
+        , packet1.getValue().payload());
+    Assert.assertEquals('b', packet2.getValue().command());
+    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, MILTER_CHUNK_SIZE, MILTER_CHUNK_SIZE * 2)
+        , packet2.getValue().payload());
+    Assert.assertEquals('b', packet3.getValue().command());
+    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, MILTER_CHUNK_SIZE * 2, newBody.length)
+        , packet3.getValue().payload());
   }
 
   @Test public void testProgress() throws MilterException {

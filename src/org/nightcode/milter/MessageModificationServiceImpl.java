@@ -79,7 +79,7 @@ class MessageModificationServiceImpl implements MessageModificationService {
           .build();
       context.sendPacket(packet);
       offset += length;
-      if (offset + length < body.length) {
+      if (offset + length >= body.length) {
         length = body.length - offset;
       }
     }
