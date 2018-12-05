@@ -83,7 +83,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
   }
 
   @Override public void abort(MilterContext context, @Nullable MilterPacket packet) throws MilterException {
-    context.sendContinue();
+    // do nothing
   }
 
   @Override public void data(MilterContext context, byte[] payload) throws MilterException {

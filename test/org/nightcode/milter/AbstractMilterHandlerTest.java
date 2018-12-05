@@ -22,7 +22,6 @@ import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import org.easymock.Capture;
 import org.easymock.EasyMock;
@@ -138,7 +137,7 @@ public class AbstractMilterHandlerTest {
     EasyMock.verify(packetSenderMock);
   }
   
-  @Test public void testAbortSession() throws MilterException {
+  @Test public void testAbortSession() {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
@@ -152,13 +151,6 @@ public class AbstractMilterHandlerTest {
     EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.HEADERS).once();
     EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.EOM).once();
     EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.HEADERS).once();
-
-    contextMock.sendContinue();
-    EasyMock.expectLastCall().once();
-    contextMock.sendContinue();
-    EasyMock.expectLastCall().andThrow(new MilterException("test"));
-
-    EasyMock.expect(contextMock.id()).andReturn(UUID.randomUUID());
     
     contextMock.destroy();
     EasyMock.expectLastCall().times(3);
