@@ -34,9 +34,16 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.ServerChannel;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.kqueue.KQueueEventLoopGroup;
+import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import static org.nightcode.milter.util.ExecutorUtils.namedThreadFactory;
 
 /**
  *
@@ -51,13 +58,14 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
 
   private final EventLoopGroup acceptorGroup;
   private final EventLoopGroup workerGroup;
+
   private final ServerBootstrap serverBootstrap;
   private final ServiceManager serviceManager;
 
   private final Provider<SimpleChannelInboundHandler<MilterPacket>> provider;
 
   private final ScheduledThreadPoolExecutor scheduledExecutor
-      = new ScheduledThreadPoolExecutor(1, ExecutorUtils.namedThreadFactory("MilterGatewayManager.scheduledExecutor"));
+      = new ScheduledThreadPoolExecutor(1, namedThreadFactory("MilterGatewayManager.scheduledExecutor"));
 
   /**
    * @param config gateway config
@@ -72,12 +80,42 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
     this.provider = provider;
     this.serviceManager = serviceManager;
 
-    acceptorGroup = new NioEventLoopGroup(1);
-    workerGroup = new NioEventLoopGroup();
+    String nettyTransport = System.getProperty("jmilter.netty.transport", "NIO");
+
+    EventLoopGroup tmpAcceptorGroup = null;
+    EventLoopGroup tmpWorkerGroup = null;
+    Class<? extends ServerChannel> serverChannelClass = null;
+    if ("EPOL".equalsIgnoreCase(nettyTransport)) {
+      try {
+        tmpAcceptorGroup = new EpollEventLoopGroup(1, namedThreadFactory("MilterGatewayManager.nettyEpollAcceptor"));
+        tmpWorkerGroup = new EpollEventLoopGroup(0, namedThreadFactory("MilterGatewayManager.nettyEpollWorker"));
+        serverChannelClass = EpollServerSocketChannel.class;
+      } catch (Throwable ex) {
+        LOGGER.log(Level.CONFIG, "can't initialize netty EPOLL transport, switch to NIO");
+      }
+    } else if ("KQUEUE".equalsIgnoreCase(nettyTransport)) {
+      try {
+        tmpAcceptorGroup = new KQueueEventLoopGroup(1, namedThreadFactory("MilterGatewayManager.nettyKQueueAcceptor"));
+        tmpWorkerGroup = new KQueueEventLoopGroup(0, namedThreadFactory("MilterGatewayManager.nettyKQueueWorker"));
+        serverChannelClass = KQueueServerSocketChannel.class;
+      } catch (Throwable ex) {
+        LOGGER.log(Level.CONFIG, "can't initialize netty KQUEUE transport, switch to NIO");
+      }
+    }
+
+    if (serverChannelClass == null) {
+      tmpAcceptorGroup = new NioEventLoopGroup(1, namedThreadFactory("MilterGatewayManager.nettyNioAcceptor"));
+      tmpWorkerGroup = new NioEventLoopGroup(0, namedThreadFactory("MilterGatewayManager.nettyNioWorker"));
+      serverChannelClass = NioServerSocketChannel.class;
+    }
+
+    acceptorGroup = tmpAcceptorGroup;
+    workerGroup = tmpWorkerGroup;
+
     serverBootstrap = new ServerBootstrap()
         .localAddress(this.config.getAddress(), this.config.getPort())
         .group(acceptorGroup, workerGroup)
-        .channel(NioServerSocketChannel.class)
+        .channel(serverChannelClass)
         .option(ChannelOption.SO_BACKLOG, 128)
         .option(ChannelOption.SO_REUSEADDR, true)
         .childOption(ChannelOption.SO_KEEPALIVE, true)
