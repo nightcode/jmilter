@@ -6,17 +6,7 @@ jdk:
 os:
   - linux
 
-before_install:
-  - export FINDBUGS_VERSION=3.0.1
-  - wget http://prdownloads.sourceforge.net/findbugs/findbugs-$FINDBUGS_VERSION.tar.gz?download -O /tmp/findbugs-$FINDBUGS_VERSION.tar.gz
-  - tar -xvf /tmp/findbugs-$FINDBUGS_VERSION.tar.gz
-  - export FINDBUGS_HOME=$PWD/findbugs-$FINDBUGS_VERSION
-  - export JACOCO_VERSION=0.8.1
-  - wget http://search.maven.org/remotecontent?filepath=org/jacoco/jacoco/$JACOCO_VERSION/jacoco-$JACOCO_VERSION.zip -O /tmp/jacoco-$JACOCO_VERSION.zip
-  - unzip /tmp/jacoco-$JACOCO_VERSION.zip -d jacoco-$JACOCO_VERSION
-  - export JACOCO_HOME=$PWD/jacoco-$JACOCO_VERSION
-
-script: ant dist 
+script: mvn clean install
 
 after_success:
   - mvn clean test jacoco:report
