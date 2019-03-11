@@ -5,8 +5,8 @@ public class GatewayConfig {
   private String address = "127.0.0.1";
   private int port;
 
-  private String tcpLogLevel = "INFO";
-  private boolean tcpLoggingEnabled = false;
+  private String logLevel = "INFO";
+  private boolean loggingEnabled = false;
 
   public String getAddress() {
     return address;
@@ -16,12 +16,12 @@ public class GatewayConfig {
     return port;
   }
 
-  public String getTcpLogLevel() {
-    return tcpLogLevel;
+  public String getLogLevel() {
+    return logLevel;
   }
 
-  public boolean isTcpLoggingEnabled() {
-    return tcpLoggingEnabled;
+  public boolean isLoggingEnabled() {
+    return loggingEnabled;
   }
 
   public void setAddress(String address) {
@@ -32,20 +32,20 @@ public class GatewayConfig {
     this.port = port;
   }
 
-  public void setTcpLogLevel(String tcpLogLevel) {
-    this.tcpLogLevel = tcpLogLevel;
+  public void setLogLevel(String logLevel) {
+    this.logLevel = logLevel;
   }
 
-  public void setTcpLoggingEnabled(boolean tcpLoggingEnabled) {
-    this.tcpLoggingEnabled = tcpLoggingEnabled;
+  public void setLoggingEnabled(boolean loggingEnabled) {
+    this.loggingEnabled = loggingEnabled;
   }
 
   @Override public String toString() {
     return "GatewayConfig{"
         + "address='" + address + '\''
         + ", port=" + port
-        + ", tcpLogLevel='" + tcpLogLevel + '\''
-        + ", tcpLoggingEnabled=" + tcpLoggingEnabled
+        + ", logLevel='" + logLevel + '\''
+        + ", loggingEnabled=" + loggingEnabled
         + '}';
   }
 }

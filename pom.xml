@@ -18,7 +18,7 @@
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
   <packaging>jar</packaging>
-  <version>0.2</version>
+  <version>0.2.1-SNAPSHOT</version>
 
   <name>JMilter</name>
   <description>Java implementation of the Sendmail Milter protocol.</description>
@@ -33,7 +33,7 @@
     <inject.version>1</inject.version>
     <jsr305.version>3.0.0</jsr305.version>
 
-    <yaranga.version>0.6</yaranga.version>
+    <yaranga.version>0.6.1</yaranga.version>
     <netty.version>4.1.33.Final</netty.version>
 
     <junit.version>4.12</junit.version>

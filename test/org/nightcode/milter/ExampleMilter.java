@@ -27,8 +27,8 @@ public final class ExampleMilter {
     GatewayConfig gatewayConfig = new GatewayConfig();
     gatewayConfig.setAddress("0.0.0.0");
     gatewayConfig.setPort(4545);
-    gatewayConfig.setTcpLoggingEnabled(true);
-    gatewayConfig.setTcpLogLevel("DEBUG");
+    gatewayConfig.setLoggingEnabled(true);
+    gatewayConfig.setLogLevel("DEBUG");
 
     // indicates what changes you intend to do with messages
     Actions milterActions = Actions.builder()

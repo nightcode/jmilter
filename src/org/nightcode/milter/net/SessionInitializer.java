@@ -45,8 +45,8 @@ public class SessionInitializer extends ChannelInitializer<SocketChannel> {
   @Override protected void initChannel(SocketChannel channel) {
     ChannelPipeline pipeline = channel.pipeline();
 
-    if (config.isTcpLoggingEnabled()) {
-      pipeline.addLast(new LoggingHandler(LogLevel.valueOf(config.getTcpLogLevel())));
+    if (config.isLoggingEnabled()) {
+      pipeline.addLast(new LoggingHandler(LogLevel.valueOf(config.getLogLevel())));
     }
 
     pipeline.addLast("FrameEncoder", new Int32LenFrameEncoder());
