@@ -22,6 +22,7 @@ import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.easymock.Capture;
 import org.easymock.EasyMock;
@@ -161,6 +162,210 @@ public class AbstractMilterHandlerTest {
     handler.abortSession(contextMock, packet);
     handler.abortSession(contextMock, packet);
     
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testConnect() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.connect(contextMock, "localhost", null);
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testHelo() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.helo(contextMock, "bla-bla");
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testEnvfrom() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.envfrom(contextMock, Collections.emptyList());
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testEnvrcpt() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.envrcpt(contextMock, Collections.emptyList());
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testHeader() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.header(contextMock, "headerName", "headerValue");
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testEoh() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.eoh(contextMock);
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testBody() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.body(contextMock, "bla-bla");
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testEom() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.eom(contextMock, null);
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testAbort() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    EasyMock.replay(contextMock);
+
+    handler.abort(contextMock, null);
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testData() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.data(contextMock, null);
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testUnknown() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void close(MilterContext context) {
+        // do nothing
+      }
+    };
+    contextMock.sendContinue();
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    handler.unknown(contextMock, null);
+
     EasyMock.verify(contextMock);
   }
 }

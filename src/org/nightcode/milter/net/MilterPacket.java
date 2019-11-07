@@ -184,7 +184,7 @@ public final class MilterPacket {
   @Override public String toString() {
     return "MilterPacket{"
         + "command=" + command
-        + ", payload=" + ((payload.length > 0) ? Hexs.hex().fromByteArray(payload) : "EMTPY")
+        + ", payload=" + ((payload.length > 0) ? Hexs.hex().fromByteArray(payload) : "EMPTY")
         + '}';
   }
 }
