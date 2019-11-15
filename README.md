@@ -4,7 +4,8 @@
 [![GitHub license](https://img.shields.io/github/license/nightcode/jmilter.svg)](https://github.com/nightcode/jmilter/blob/master/LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/org.nightcode/jmilter.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aorg.nightcode%20AND%20a%3Ajmilter)
 
-Java implementation of the Sendmail Milter protocol.
+Java implementation of the Sendmail Milter protocol. The details of the Milter protocol can be found [here][1].
+An introduction of using milter functionality with Postfix is available in the [Postfix before-queue Milter support][2] article.
 
 How to use
 ----------
@@ -44,7 +45,7 @@ The test folder contains the complete example code.
 Download
 --------
 
-Download [the latest jar][1] via Maven:
+Download [the latest jar][3] via Maven:
 ```xml
 <dependency>
   <groupId>org.nightcode</groupId>
@@ -56,4 +57,6 @@ Download [the latest jar][1] via Maven:
 Feedback is welcome. Please don't hesitate to open up a new [github issue](https://github.com/nightcode/jmilter/issues) or simply drop me a line at <dmitry@nightcode.org>.
 
 
- [1]: http://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.nightcode&a=jmilter&v=LATEST
+ [1]: https://raw.githubusercontent.com/avar/sendmail-pmilter/master/doc/milter-protocol.txt
+ [2]: http://www.postfix.org/MILTER_README.html
+ [3]: https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.nightcode&a=jmilter&v=LATEST
