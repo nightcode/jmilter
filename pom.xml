@@ -18,7 +18,7 @@
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
   <packaging>jar</packaging>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
 
   <name>JMilter</name>
   <description>Java implementation of the Sendmail Milter protocol.</description>
