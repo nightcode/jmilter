@@ -64,12 +64,7 @@ class MessageModificationServiceImpl implements MessageModificationService {
   }
 
   @Override public void replaceBody(MilterContext context, byte[] body) throws MilterException {
-    int length;
-    if (body.length > MILTER_CHUNK_SIZE) {
-      length = MILTER_CHUNK_SIZE;
-    } else {
-      length = body.length;
-    }
+    int length = Math.min(body.length, MILTER_CHUNK_SIZE);
 
     int offset = 0;
     while (offset < body.length) {

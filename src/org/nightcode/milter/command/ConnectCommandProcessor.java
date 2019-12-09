@@ -14,6 +14,8 @@
 
 package org.nightcode.milter.command;
 
+import org.nightcode.common.util.logging.LogManager;
+import org.nightcode.common.util.logging.Logger;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
@@ -24,12 +26,10 @@ import org.nightcode.milter.util.MilterPacketUtil;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 class ConnectCommandProcessor extends AbstractCommandHandler {
 
-  private static final Logger LOGGER = Logger.getLogger(ConnectCommandProcessor.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger(ConnectCommandProcessor.class);
 
   public static final int SMFIA_UNKNOWN = 'U'; // Unknown (NOTE: Omits "port" and "host" fields entirely)
   public static final int SMFIA_UNIX = 'L'; // Unix (AF_UNIX/AF_LOCAL) socket ("port" is 0)
@@ -50,7 +50,7 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
   @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     context.setSessionState(MilterState.CONNECT);
     if (!MilterPacketUtil.isLastZeroTerm(packet.payload())) {
-      LOGGER.log(Level.INFO, String.format("[%s] received invalid packet: %s", context.id(), packet));
+      LOGGER.info("[%s] received invalid packet: %s", context.id(), packet);
       handler.abortSession(context, packet);
       return;
     }
@@ -59,7 +59,7 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
     int i = MilterPacketUtil.indexOfZeroTerm(packet.payload());
 
     if ((i + LAST_ZERO_TERM_LENGTH) >= payloadLength) {
-      LOGGER.log(Level.INFO, String.format("[%s] wrong packet length: %s", context.id(), payloadLength));
+      LOGGER.info("[%s] wrong packet length: %s", context.id(), payloadLength);
       handler.abortSession(context, packet);
       return;
     }
@@ -72,7 +72,7 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
     int family = packet.payload()[i++];
     if (family == SMFIA_INET) {
       if (i + PORT_OFFSET >= payloadLength) {
-        LOGGER.log(Level.INFO, String.format("[%s] wrong packet length: %s", context.id(), payloadLength));
+        LOGGER.info("[%s] wrong packet length: %s", context.id(), payloadLength);
         handler.abortSession(context, packet);
         return;
       }
@@ -83,7 +83,7 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
       try {
         address = InetAddress.getByName(stringAddress);
       } catch (UnknownHostException ex) {
-        LOGGER.log(Level.INFO, String.format("[%s] invalid address value: %s", context.id(), stringAddress));
+        LOGGER.info("[%s] invalid address value: %s", context.id(), stringAddress);
         handler.abortSession(context, packet);
         return;
       }

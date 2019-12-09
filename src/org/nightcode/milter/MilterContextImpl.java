@@ -1,5 +1,7 @@
 package org.nightcode.milter;
 
+import org.nightcode.common.util.logging.LogManager;
+import org.nightcode.common.util.logging.Logger;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.Actions;
@@ -10,12 +12,10 @@ import org.nightcode.milter.util.ProtocolSteps;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MilterContextImpl implements MilterContext {
 
-  private static final Logger LOGGER = Logger.getLogger(MilterContext.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger(MilterContext.class);
 
   private static final int PROTOCOL_VERSION = 6;
 
@@ -99,13 +99,10 @@ public class MilterContextImpl implements MilterContext {
   @Override public void sendPacket(MilterPacket packet) throws MilterException {
     int noReplyBit = getSessionState().noReplyBit();
     if (noReplyBit != 0 && ((getSessionProtocolSteps().bitmap() & noReplyBit) != 0)) {
-      LOGGER.log(Level.FINER
-          , String.format("NR bit has non-zero value for state %s but attempt to send packet has been caught"
-              , getSessionState()));
+      LOGGER.debug("NR bit has non-zero value for state %s but attempt to send packet has been caught", sessionState);
       if ((milterProtocolSteps().bitmap() & noReplyBit) != 0
           && (getMtaProtocolSteps().bitmap() & noReplyBit) == 0) {
-        LOGGER.log(Level.FINE
-            , String.format("MTA doesn't support NR for state %s, trying to send SMFIR_CONTINUE", getSessionState()));
+        LOGGER.debug("MTA doesn't support NR for state %s, trying to send SMFIR_CONTINUE", sessionState);
         sendPacket0(MilterPacketUtil.SMFIS_CONTINUE);
       }
       return;
@@ -148,7 +145,7 @@ public class MilterContextImpl implements MilterContext {
     try {
       milterPacketSender.send(packet);
     } catch (IOException ex) {
-      throw new MilterException("can't send packet: " + packet, ex);
+      throw new MilterException("unable to send packet: " + packet, ex);
     }
   }
 }

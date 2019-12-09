@@ -14,6 +14,8 @@
 
 package org.nightcode.milter.command;
 
+import org.nightcode.common.util.logging.LogManager;
+import org.nightcode.common.util.logging.Logger;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.util.Actions;
@@ -22,12 +24,9 @@ import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.util.ProtocolSteps;
 import org.nightcode.milter.net.MilterPacket;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 class OptnegCommandProcessor extends AbstractCommandHandler {
 
-  private static final Logger LOGGER = Logger.getLogger(OptnegCommandProcessor.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger(OptnegCommandProcessor.class);
 
   private static final int PROTOCOL_MIN_VERSION = 2;
 
@@ -44,15 +43,14 @@ class OptnegCommandProcessor extends AbstractCommandHandler {
 
     int payloadLength = packet.payload().length;
     if (payloadLength != 12) {
-      LOGGER.log(Level.INFO, String.format("[%s] wrong packet length: %s", context.id(), payloadLength));
+      LOGGER.info("[%s] wrong packet length: %s", context.id(), payloadLength);
       handler.abortSession(context, packet);
       return;
     }
 
     int mtaProtocolVersion = packet.payload()[3];
     if (mtaProtocolVersion < PROTOCOL_MIN_VERSION) {
-      LOGGER.log(Level.INFO, String.format("[%s] MTA protocol version too old %s < %s"
-          , context.id(), mtaProtocolVersion, PROTOCOL_MIN_VERSION));
+      LOGGER.info("[%s] MTA protocol version too old %s < %s", context.id(), mtaProtocolVersion, PROTOCOL_MIN_VERSION);
       handler.abortSession(context, packet);
       return;
     }

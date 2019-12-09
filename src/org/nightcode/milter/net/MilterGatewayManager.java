@@ -22,8 +22,6 @@ import org.nightcode.milter.util.ExecutorUtils;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -50,8 +48,6 @@ import static org.nightcode.milter.util.ExecutorUtils.namedThreadFactory;
  */
 public class MilterGatewayManager extends AbstractService implements ChannelFutureListener {
 
-  private static final Logger LOGGER = Logger.getLogger(MilterGatewayManager.class.getName());
-
   private volatile ChannelFuture channelFuture;
 
   private final GatewayConfig config;
@@ -64,8 +60,8 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
 
   private final Provider<SimpleChannelInboundHandler<MilterPacket>> provider;
 
-  private final ScheduledThreadPoolExecutor scheduledExecutor
-      = new ScheduledThreadPoolExecutor(1, namedThreadFactory("MilterGatewayManager.scheduledExecutor"));
+  private final ScheduledThreadPoolExecutor executor
+      = new ScheduledThreadPoolExecutor(1, namedThreadFactory("MilterGatewayManager.executor"));
 
   /**
    * @param config gateway config
@@ -91,7 +87,7 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
         tmpWorkerGroup = new EpollEventLoopGroup(0, namedThreadFactory("MilterGatewayManager.nettyEpollWorker"));
         serverChannelClass = EpollServerSocketChannel.class;
       } catch (Throwable ex) {
-        LOGGER.log(Level.CONFIG, "can't initialize netty EPOLL transport, switch to NIO");
+        logger.config("can't initialize netty EPOLL transport, switch to NIO");
       }
     } else if ("KQUEUE".equalsIgnoreCase(nettyTransport)) {
       try {
@@ -99,7 +95,7 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
         tmpWorkerGroup = new KQueueEventLoopGroup(0, namedThreadFactory("MilterGatewayManager.nettyKQueueWorker"));
         serverChannelClass = KQueueServerSocketChannel.class;
       } catch (Throwable ex) {
-        LOGGER.log(Level.CONFIG, "can't initialize netty KQUEUE transport, switch to NIO");
+        logger.config("can't initialize netty KQUEUE transport, switch to NIO");
       }
     }
 
@@ -128,7 +124,7 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
   @Override public void operationComplete(ChannelFuture future) {
     future.removeListener(this);
     future.channel().close();
-    scheduledExecutor.schedule(this::connect, 1000, TimeUnit.MILLISECONDS);
+    executor.schedule(this::connect, 1000, TimeUnit.MILLISECONDS);
   }
 
   @Override protected void doStart() {
@@ -149,7 +145,7 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
         tmpChannelFuture.channel().close();
       }
       channelFuture = null;
-      ExecutorUtils.shutdown(scheduledExecutor);
+      ExecutorUtils.shutdown(executor);
       acceptorGroup.shutdownGracefully();
       workerGroup.shutdownGracefully();
       serviceManager.removeShutdownHook(this);
@@ -167,11 +163,10 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
         channelFuture = serverBootstrap.childHandler(sessionInitializer).bind().sync();
         channelFuture.channel().closeFuture().addListener(this);
       } catch (Exception ex) {
-        LOGGER.log(Level.WARNING, "can't bind to " + config.getAddress() + ":" + config.getPort()
-            + ", will try again after 5 sec.", ex);
-        scheduledExecutor.schedule(this::connect, 1000, TimeUnit.MILLISECONDS);
+        logger.warn(ex, "unable to bind to %s:%s, will try again after 5 sec.", config.getAddress(), config.getPort());
+        executor.schedule(this::connect, 1000, TimeUnit.MILLISECONDS);
       }
     });
-    scheduledExecutor.execute(() -> cf.complete(null));
+    executor.execute(() -> cf.complete(null));
   }
 }

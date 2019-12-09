@@ -28,8 +28,6 @@ import javax.annotation.Nullable;
 
 public class ExampleMilterHandler extends AbstractMilterHandler {
 
-  private static final Logger LOGGER = Logger.getLogger(ExampleMilterHandler.class.getName());
-  
   private static final Hexs HEX = Hexs.hex();
 
   ExampleMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps) {
@@ -38,42 +36,42 @@ public class ExampleMilterHandler extends AbstractMilterHandler {
 
   @Override public void connect(MilterContext context, String hostname, @Nullable InetAddress address)
       throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<CONNECT> hostname: %s, address: %s", hostname, address));
+    logger.debug("<CONNECT> hostname: %s, address: %s", hostname, address);
     super.connect(context, hostname, address);
   }
 
   @Override public void helo(MilterContext context, String helohost) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<HELO> helohost: %s", helohost));
+    logger.debug("<HELO> helohost: %s", helohost);
     super.helo(context, helohost);
   }
 
   @Override public void envfrom(MilterContext context, List<String> from) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<ENVFROM> from: %s", from));
+    logger.debug("<ENVFROM> from: %s", from);
     super.envfrom(context, from);
   }
 
   @Override public void envrcpt(MilterContext context, List<String> recipients) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<ENVRCPT> recipients: %s", recipients));
+    logger.debug("<ENVRCPT> recipients: %s", recipients);
     super.envrcpt(context, recipients);
   }
 
   @Override public void header(MilterContext context, String headerName, String headerValue) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<HEADER> headerName: %s, headerValue: %s", headerName, headerValue));
+    logger.debug("<HEADER> headerName: %s, headerValue: %s", headerName, headerValue);
     super.header(context, headerName, headerValue);
   }
 
   @Override public void eoh(MilterContext context) throws MilterException {
-    LOGGER.log(Level.FINE, "<EOH>");
+    logger.debug("<EOH>");
     super.eoh(context);
   }
 
   @Override public void body(MilterContext context, String bodyChunk) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<BODY> bodyChunk: %s", bodyChunk));
+    logger.debug("<BODY> bodyChunk: %s", bodyChunk);
     super.body(context, bodyChunk);
   }
 
   @Override public void eom(MilterContext context, @Nullable String bodyChunk) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<EOM> bodyChunk: %s", bodyChunk));
+    logger.debug("<EOM> bodyChunk: %s", bodyChunk);
 
     messageModificationService.addHeader(context, "X-Received", "Tue, 31 Oct 2018 17:56:00 -0700 (PDT)");
 
@@ -81,28 +79,27 @@ public class ExampleMilterHandler extends AbstractMilterHandler {
   }
 
   @Override public void abort(MilterContext context, MilterPacket packet) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<ABORT> abort: %s", packet));
+    logger.debug("<ABORT> abort: %s", packet);
     super.abort(context, packet);
   }
 
   @Override public void close(MilterContext context) {
-    LOGGER.log(Level.FINE, "<CLOSE>");
+    logger.debug("<CLOSE>");
   }
 
   @Override public void data(MilterContext context, byte[] payload) throws MilterException {
-    LOGGER.log(Level.FINE, "<DATA>");
+    logger.debug("<DATA>");
     super.data(context, payload);
   }
 
   @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
       ProtocolSteps mtaProtocolSteps) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<NEGOTIATE> %s, %s, %s", mtaProtocolVersion, mtaActions, mtaProtocolSteps));
+    logger.debug("<NEGOTIATE> %s, %s, %s", mtaProtocolVersion, mtaActions, mtaProtocolSteps);
     super.negotiate(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
   }
 
   @Override public void unknown(MilterContext context, byte[] payload) throws MilterException {
-    LOGGER.log(Level.FINE, String.format("<UNKNOWN> unknown: %s"
-        , payload.length > 0 ? HEX.fromByteArray(payload) : "NULL"));
+    logger.debug("<UNKNOWN> unknown: %s", payload.length > 0 ? HEX.fromByteArray(payload) : "NULL");
     super.unknown(context, payload);
   }
 }

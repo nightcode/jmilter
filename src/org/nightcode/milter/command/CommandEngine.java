@@ -14,18 +14,17 @@
 
 package org.nightcode.milter.command;
 
+import org.nightcode.common.util.logging.LogManager;
+import org.nightcode.common.util.logging.Logger;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.util.IntMap;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public final class CommandEngine {
 
-  private static final Logger LOGGER = Logger.getLogger(CommandEngine.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger(CommandEngine.class);
 
   private final IntMap<CommandProcessor> processors = new IntMap<>();
 
@@ -67,7 +66,7 @@ public final class CommandEngine {
     try {
       processor.submit(context, milterPacket);
     } catch (Exception ex) {
-      LOGGER.log(Level.WARNING, String.format("[%s] can't process milter packet: %s", context.id(), milterPacket), ex);
+      LOGGER.warn(ex, "[%s] unable to process milter packet: %s", context.id(), milterPacket);
       context.setSessionState(MilterState.ABORT);
       milterHandler.abortSession(context, milterPacket);
     }

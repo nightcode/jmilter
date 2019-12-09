@@ -14,12 +14,13 @@
 
 package org.nightcode.milter.net;
 
+import org.nightcode.common.util.logging.LogManager;
+import org.nightcode.common.util.logging.Logger;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.command.CommandEngine;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.UUID;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -47,7 +48,7 @@ public class MilterChannelHandler extends SimpleChannelInboundHandler<MilterPack
     }
   }
 
-  private static final Logger LOGGER = Logger.getLogger(MilterChannelHandler.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger(MilterChannelHandler.class);
 
   private final MilterHandler milterHandler;
   private final CommandEngine commandManager;
@@ -74,8 +75,8 @@ public class MilterChannelHandler extends SimpleChannelInboundHandler<MilterPack
 
   @Override public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     MilterContext milterContext = getMilterContext(ctx);
-    LOGGER.log(Level.WARNING, String.format("[%s] channel handler exception: %s"
-        , milterContext != null ? milterContext.id() : null, cause.getMessage()), cause);
+    UUID contextId = (milterContext != null) ? milterContext.id() : null;
+    LOGGER.warn(cause, "[%s] channel exception: %s", contextId, cause.getMessage());
 
     if (milterContext != null) {
       milterHandler.abortSession(milterContext, null);
