@@ -20,15 +20,11 @@ import org.nightcode.milter.MilterException;
 import org.nightcode.milter.codec.Int32LenFrameEncoder;
 import org.nightcode.milter.codec.MilterPacketEncoder;
 import org.nightcode.milter.command.CommandProcessor;
-import org.nightcode.milter.config.GatewayConfig;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
-
-import javax.annotation.Nullable;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -41,25 +37,18 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
-import io.netty.channel.local.LocalChannel;
-import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.CharsetUtil;
 import io.netty.util.NetUtil;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertTrue;
 
 public class MilterChannelHandlerTest {
 
@@ -81,14 +70,10 @@ public class MilterChannelHandlerTest {
 
     final CountDownLatch negotiateLatch = new CountDownLatch(1);
 
-    GatewayConfig gatewayConfig = new GatewayConfig();
-    gatewayConfig.setLoggingEnabled(true);
-    gatewayConfig.setLogLevel("DEBUG");
-
     try {
       serverBootstrap.group(new NioEventLoopGroup(2))
           .channel(NioServerSocketChannel.class)
-          .childHandler(new SessionInitializer(gatewayConfig, () -> new MilterChannelHandler(new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+          .childHandler(new SessionInitializer((new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
             @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
                 ProtocolSteps mtaProtocolSteps) throws MilterException {
               super.negotiate(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);

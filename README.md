@@ -13,12 +13,6 @@ How to use
 code
 
 ```java
-  GatewayConfig gatewayConfig = new GatewayConfig();
-  gatewayConfig.setAddress("0.0.0.0");
-  gatewayConfig.setPort(4545);
-  gatewayConfig.setLoggingEnabled(true);
-  gatewayConfig.setLogLevel("DEBUG");
-
   // indicates what changes you intend to do with messages
   Actions milterActions = Actions.builder()
       .addHeader()
@@ -33,14 +27,25 @@ code
 
   // a simple milter handler that only adds header "X-Received"
   MilterHandler milterHandler = new ExampleMilterHandler(milterActions, milterProtocolSteps);
- 
-  MilterGatewayManager gatewayManager = new MilterGatewayManager(gatewayConfig
-      , () -> new MilterChannelHandler(milterHandler), ServiceManager.instance());
+
+  // gateway address
+  String address = "0.0.0.0:4545";
+
+  MilterGatewayManager gatewayManager = new MilterGatewayManager(address, milterHandler, ServiceManager.instance());
 
   gatewayManager.start();
 ```
 
 The test folder contains the complete example code.
+
+#### Available options
+
+| Name                            | Possible values                 |
+| ------------------------------- | ------------------------------- |
+| jmilter.netty.transport         | NIO, EPOL, KQUEUE               |
+| jmilter.netty.reconnectTimeoutMs| [0, Long.MAX_VALUE]             |
+| jmilter.netty.loggingEnabled    | true, false                     |
+| jmilter.netty.logLevel          | TRACE, DEBUG, INFO, WARN, ERROR |
 
 Download
 --------

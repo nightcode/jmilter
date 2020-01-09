@@ -14,17 +14,14 @@
 
 package org.nightcode.milter.net;
 
+import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.codec.Int32LenFrameDecoder;
 import org.nightcode.milter.codec.Int32LenFrameEncoder;
 import org.nightcode.milter.codec.MilterPacketDecoder;
 import org.nightcode.milter.codec.MilterPacketEncoder;
-import org.nightcode.milter.config.GatewayConfig;
-
-import javax.inject.Provider;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
@@ -34,19 +31,22 @@ import io.netty.handler.logging.LoggingHandler;
  */
 public class SessionInitializer extends ChannelInitializer<SocketChannel> {
 
-  private final GatewayConfig config;
-  private final Provider<SimpleChannelInboundHandler<MilterPacket>> provider;
+  private final boolean loggingEnabled;
+  private final String logLevel;
+  private final MilterHandler milterHandler;
 
-  SessionInitializer(GatewayConfig config, Provider<SimpleChannelInboundHandler<MilterPacket>> provider) {
-    this.config = config;
-    this.provider = provider;
+  SessionInitializer(MilterHandler milterHandler) {
+    this.milterHandler = milterHandler;
+
+    loggingEnabled = Boolean.getBoolean("jmilter.netty.loggingEnabled");
+    logLevel = System.getProperty("jmilter.netty.logLevel", "INFO");
   }
 
   @Override protected void initChannel(SocketChannel channel) {
     ChannelPipeline pipeline = channel.pipeline();
 
-    if (config.isLoggingEnabled()) {
-      pipeline.addLast(new LoggingHandler(LogLevel.valueOf(config.getLogLevel())));
+    if (loggingEnabled) {
+      pipeline.addLast(new LoggingHandler(LogLevel.valueOf(logLevel)));
     }
 
     pipeline.addLast("FrameEncoder", new Int32LenFrameEncoder());
@@ -55,6 +55,6 @@ public class SessionInitializer extends ChannelInitializer<SocketChannel> {
     pipeline.addLast("FrameDecoder", new Int32LenFrameDecoder());
     pipeline.addLast("MilterPacketDecoder", new MilterPacketDecoder());
 
-    pipeline.addLast(provider.get());
+    pipeline.addLast("MilterChannelHandler", new MilterChannelHandler(milterHandler));
   }
 }

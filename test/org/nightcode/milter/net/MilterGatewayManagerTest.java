@@ -19,7 +19,6 @@ import org.nightcode.common.service.ServiceManager;
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.config.GatewayConfig;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
 
@@ -39,9 +38,7 @@ public class MilterGatewayManagerTest {
     try (ServerSocket socket = new ServerSocket(0)) {
       port = socket.getLocalPort();
     }
-    GatewayConfig config = new GatewayConfig();
-    config.setAddress("localhost");
-    config.setPort(port);
+    String address = "localhost:" + port;
 
     MilterHandler milterHandler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
       @Override public void close(MilterContext context) {
@@ -49,7 +46,7 @@ public class MilterGatewayManagerTest {
       }
     };
 
-    MilterGatewayManager manager = new MilterGatewayManager(config, () -> new MilterChannelHandler(milterHandler), ServiceManager.instance());
+    MilterGatewayManager manager = new MilterGatewayManager(address, milterHandler, ServiceManager.instance());
 
     Service.State state = manager.start().get(100, TimeUnit.MILLISECONDS);
     Assert.assertEquals(Service.State.RUNNING, state);
