@@ -55,7 +55,7 @@ Download [the latest jar][3] via Maven:
 <dependency>
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
-  <version>0.3.3</version>
+  <version>0.3.4</version>
 </dependency>
 ```
 
