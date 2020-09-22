@@ -26,10 +26,10 @@ code
       .build();
 
   // a simple milter handler that only adds header "X-Received"
-  MilterHandler milterHandler = new ExampleMilterHandler(milterActions, milterProtocolSteps);
+  MilterHandler milterHandler = new AddHeaderMilterHandler(milterActions, milterProtocolSteps);
 
   // gateway address
-  String address = "0.0.0.0:4545";
+  String address = = System.getProperty("jmilter.address", "0.0.0.0:4545");
 
   MilterGatewayManager gatewayManager = new MilterGatewayManager(address, milterHandler, ServiceManager.instance());
 

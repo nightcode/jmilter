@@ -12,25 +12,26 @@
  * the License.
  */
 
-package org.nightcode.milter;
+package org.nightcode.milter.samples;
 
 import org.nightcode.common.base.Hexs;
+import org.nightcode.milter.AbstractMilterHandler;
+import org.nightcode.milter.MilterContext;
+import org.nightcode.milter.MilterException;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
 
 import java.net.InetAddress;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 
-public class ExampleMilterHandler extends AbstractMilterHandler {
+public class AddHeaderMilterHandler extends AbstractMilterHandler {
 
   private static final Hexs HEX = Hexs.hex();
 
-  ExampleMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps) {
+  AddHeaderMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps) {
     super(milterActions, milterProtocolSteps);
   }
 

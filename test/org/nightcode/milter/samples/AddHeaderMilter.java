@@ -12,18 +12,21 @@
  * the License.
  */
 
-package org.nightcode.milter;
+package org.nightcode.milter.samples;
 
 import org.nightcode.common.service.ServiceManager;
+import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.net.MilterGatewayManager;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
 
 import java.net.UnknownHostException;
 
-public final class ExampleMilter {
+public final class AddHeaderMilter {
 
   public static void main(String[] args) throws UnknownHostException {
+    String address = System.getProperty("jmilter.address", "0.0.0.0:4545");
+
     // indicates what changes you intend to do with messages
     Actions milterActions = Actions.builder()
         .addHeader()
@@ -37,10 +40,9 @@ public final class ExampleMilter {
         .build();
 
     // a simple milter handler that only adds header "X-Received"
-    MilterHandler milterHandler = new ExampleMilterHandler(milterActions, milterProtocolSteps);
+    MilterHandler milterHandler = new AddHeaderMilterHandler(milterActions, milterProtocolSteps);
 
-    MilterGatewayManager gatewayManager = new MilterGatewayManager("0.0.0.0:4545", milterHandler, ServiceManager.instance());
-
+    MilterGatewayManager gatewayManager = new MilterGatewayManager(address, milterHandler, ServiceManager.instance());
     gatewayManager.start();
   }
 }
