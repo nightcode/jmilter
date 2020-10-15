@@ -34,7 +34,7 @@
     <yaranga.version>0.9.7</yaranga.version>
     <netty.version>4.1.52.Final</netty.version>
 
-    <junit.version>4.12</junit.version>
+    <junit.version>4.13.1</junit.version>
     <easymock.version>3.6</easymock.version>
   </properties>
 
