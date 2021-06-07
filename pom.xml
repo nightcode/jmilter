@@ -31,8 +31,8 @@
     <java.version>1.8</java.version>
 
     <inject.version>1</inject.version>
-    <yaranga.version>0.9.7</yaranga.version>
-    <netty.version>4.1.52.Final</netty.version>
+    <yaranga.version>0.10.12</yaranga.version>
+    <netty.version>4.1.65.Final</netty.version>
 
     <junit.version>4.13.1</junit.version>
     <easymock.version>3.6</easymock.version>
