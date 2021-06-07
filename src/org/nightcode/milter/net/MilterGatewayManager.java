@@ -25,8 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import javax.inject.Inject;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
@@ -72,10 +70,20 @@ public class MilterGatewayManager extends AbstractService implements ChannelFutu
    * @param milterHandler milter handler
    * @param serviceManager ServiceManager instance
    */
-  @Inject
   public MilterGatewayManager(String address, MilterHandler milterHandler, ServiceManager serviceManager)
+          throws UnknownHostException {
+    this(MilterGatewayManager.class.getSimpleName(), address, milterHandler, serviceManager);
+  }
+
+  /**
+   * @param name gateway name
+   * @param address gateway address
+   * @param milterHandler milter handler
+   * @param serviceManager ServiceManager instance
+   */
+  public MilterGatewayManager(String name, String address, MilterHandler milterHandler, ServiceManager serviceManager)
       throws UnknownHostException {
-    super(MilterGatewayManager.class.getSimpleName());
+    super(name);
     this.address = address;
     this.milterHandler = milterHandler;
     this.serviceManager = serviceManager;
