@@ -16,13 +16,13 @@ package org.nightcode.milter.codec;
 
 import java.util.Random;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.CorruptedFrameException;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 public class Int32LenFrameDecoderTest {
 

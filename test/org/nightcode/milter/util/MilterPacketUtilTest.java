@@ -14,8 +14,6 @@
 
 package org.nightcode.milter.util;
 
-import org.nightcode.common.base.Hexs;
-
 import java.util.List;
 
 import org.junit.Assert;

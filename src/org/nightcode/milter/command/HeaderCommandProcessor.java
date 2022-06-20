@@ -14,20 +14,19 @@
 
 package org.nightcode.milter.command;
 
-import org.nightcode.common.util.logging.LogManager;
-import org.nightcode.common.util.logging.Logger;
+import java.nio.charset.StandardCharsets;
+
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
 
-import java.nio.charset.StandardCharsets;
+import static java.lang.String.format;
 
 class HeaderCommandProcessor extends AbstractCommandHandler {
-
-  private static final Logger LOGGER = LogManager.getLogger(HeaderCommandProcessor.class);
 
   private static final int LAST_ZERO_TERM_LENGTH = 1;
 
@@ -43,7 +42,7 @@ class HeaderCommandProcessor extends AbstractCommandHandler {
     context.setSessionState(MilterState.HEADERS);
 
     if (!MilterPacketUtil.isLastZeroTerm(packet.payload())) {
-      LOGGER.info("[%s] received invalid packet: %s", context.id(), packet);
+      Log.info().log(getClass(), format("[%s] received invalid packet: %s", context.id(), packet));
       handler.abortSession(context, packet);
       return;
     }
@@ -52,7 +51,7 @@ class HeaderCommandProcessor extends AbstractCommandHandler {
     int i = MilterPacketUtil.indexOfZeroTerm(packet.payload());
 
     if ((i + LAST_ZERO_TERM_LENGTH) >= payloadLength) {
-      LOGGER.info("[%s] wrong packet length: %s", context.id(), payloadLength);
+      Log.info().log(getClass(), format("[%s] wrong packet length: %s", context.id(), payloadLength));
       handler.abortSession(context, packet);
       return;
     }

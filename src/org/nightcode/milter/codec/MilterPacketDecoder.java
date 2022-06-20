@@ -14,13 +14,12 @@
 
 package org.nightcode.milter.codec;
 
-import org.nightcode.milter.net.MilterPacket;
-
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
+import org.nightcode.milter.net.MilterPacket;
 
 /**
  * Decodes a received {@link ByteBuf} into a {@link MilterPacket}.

@@ -14,20 +14,20 @@
 
 package org.nightcode.milter;
 
-import org.nightcode.common.util.logging.LogManager;
-import org.nightcode.common.util.logging.Logger;
+import java.net.InetAddress;
+import java.util.List;
+
+import org.jetbrains.annotations.Nullable;
 import org.nightcode.milter.command.CommandProcessor;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ByteArrays;
+import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
 import org.nightcode.milter.util.ProtocolSteps;
 
-import java.net.InetAddress;
-import java.util.List;
-
-import javax.annotation.Nullable;
+import static java.lang.String.format;
 
 public abstract class AbstractMilterHandler implements MilterHandler {
 
@@ -35,8 +35,6 @@ public abstract class AbstractMilterHandler implements MilterHandler {
   private final ProtocolSteps milterProtocolSteps;
 
   protected final MessageModificationService messageModificationService;
-
-  protected final Logger logger = LogManager.getLogger(this);
 
   protected AbstractMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps) {
     this(milterActions, milterProtocolSteps, new MessageModificationServiceImpl());
@@ -90,17 +88,18 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.sendContinue();
   }
 
-  @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
-      ProtocolSteps mtaProtocolSteps) throws MilterException {
-    logger.debug("\t\tMTA { Version: %s %s %s }\n"
-                + "\t\tMilter { Version: %s %s %s}"
+  @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions, ProtocolSteps mtaProtocolSteps)
+      throws MilterException {
+    Log.debug().log(getClass(), format("protocol negotiation\n"
+            + "\tMTA    { Version: %s %s %s}\n"
+            + "\tMilter { Version: %s %s %s}"
             , mtaProtocolVersion
             , mtaActions
             , mtaProtocolSteps
             , context.milterProtocolVersion()
             , context.milterActions()
             , context.milterProtocolSteps()
-    );
+    ));
 
     context.setMtaProtocolVersion(mtaProtocolVersion);
 
@@ -113,7 +112,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.setMtaActions(mtaActions);
 
     if ((context.getMtaActions().bitmap() & context.milterActions().bitmap()) != context.milterActions().bitmap()) {
-      logger.warn("MTA %s doesn't fulfill Milter requirements %s", context.getMtaActions(), context.milterActions());
+      Log.warn().log(getClass(), format("MTA %s doesn't fulfill Milter requirements %s", context.getMtaActions(), context.milterActions()));
       abortSession(context, null);
       return;
     }
@@ -155,7 +154,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
       try {
         abort(context, packet);
       } catch (MilterException ex) {
-        logger.info(ex, "[%s] can't execute abort command", context.id());
+        Log.info().log(getClass(), () -> format("[%s] can't execute abort command", context.id()), ex);
       }
     }
     closeSession(context);

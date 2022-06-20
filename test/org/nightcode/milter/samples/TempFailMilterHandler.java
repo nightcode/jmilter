@@ -18,6 +18,7 @@ import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.ProtocolSteps;
 
 import static org.nightcode.milter.util.MilterPacketUtil.SMFIS_TEMPFAIL;
@@ -29,11 +30,11 @@ public class TempFailMilterHandler extends AbstractMilterHandler {
   }
 
   @Override public void eoh(MilterContext context) throws MilterException {
-    logger.info("sending TEMPFAIL..");
+    Log.info().log(getClass(), "sending TEMPFAIL..");
     context.sendPacket(SMFIS_TEMPFAIL);
   }
 
   @Override public void close(MilterContext context) {
-    logger.debug("<CLOSE>");
+    Log.debug().log(getClass(), "<CLOSE>");
   }
 }

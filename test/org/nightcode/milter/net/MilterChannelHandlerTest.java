@@ -14,22 +14,8 @@
 
 package org.nightcode.milter.net;
 
-import org.nightcode.milter.AbstractMilterHandler;
-import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterException;
-import org.nightcode.milter.codec.Int32LenFrameEncoder;
-import org.nightcode.milter.codec.MilterPacketEncoder;
-import org.nightcode.milter.command.CommandProcessor;
-import org.nightcode.milter.util.Actions;
-import org.nightcode.milter.util.ProtocolSteps;
-
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
-
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
@@ -47,6 +33,19 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.NetUtil;
+import org.nightcode.milter.AbstractMilterHandler;
+import org.nightcode.milter.MilterContext;
+import org.nightcode.milter.MilterException;
+import org.nightcode.milter.codec.Int32LenFrameEncoder;
+import org.nightcode.milter.codec.MilterPacketEncoder;
+import org.nightcode.milter.command.CommandProcessor;
+import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.util.ProtocolSteps;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 

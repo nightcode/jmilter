@@ -14,10 +14,10 @@
 
 package org.nightcode.milter.net;
 
-import org.nightcode.common.base.Hexs;
-
 import java.util.Arrays;
 import java.util.Objects;
+
+import org.nightcode.milter.util.Hexs;
 
 /**
  * Milter packet.

@@ -14,18 +14,17 @@
 
 package org.nightcode.milter.codec;
 
-import org.nightcode.milter.net.MilterPacket;
-
 import java.util.Random;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.buffer.UnpooledDirectByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.unix.PreferredDirectByteBufAllocator;
+import org.nightcode.milter.net.MilterPacket;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 public class MilterPacketDecoderTest {
 

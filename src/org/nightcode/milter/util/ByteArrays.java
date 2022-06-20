@@ -14,7 +14,8 @@
 
 package org.nightcode.milter.util;
 
-public final class ByteArrays {
+public enum ByteArrays {
+  ;
 
   public static byte[] intToByteArray(int src) {
     byte[] dst = new byte[4];
@@ -23,9 +24,5 @@ public final class ByteArrays {
     dst[2] = (byte) (src >>>  8);
     dst[3] = (byte) (src >>>  0);
     return dst;
-  }
-
-  private ByteArrays() {
-    throw new AssertionError();
   }
 }

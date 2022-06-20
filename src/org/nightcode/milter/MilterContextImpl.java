@@ -1,21 +1,20 @@
 package org.nightcode.milter;
 
-import org.nightcode.common.util.logging.LogManager;
-import org.nightcode.common.util.logging.Logger;
-import org.nightcode.milter.net.MilterPacket;
-import org.nightcode.milter.net.MilterPacketSender;
-import org.nightcode.milter.util.Actions;
-import org.nightcode.milter.util.IntMap;
-import org.nightcode.milter.util.MilterPacketUtil;
-import org.nightcode.milter.util.ProtocolSteps;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
-public class MilterContextImpl implements MilterContext {
+import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.net.MilterPacketSender;
+import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.util.IntMap;
+import org.nightcode.milter.util.Log;
+import org.nightcode.milter.util.MilterPacketUtil;
+import org.nightcode.milter.util.ProtocolSteps;
 
-  private static final Logger LOGGER = LogManager.getLogger(MilterContext.class);
+import static java.lang.String.format;
+
+public class MilterContextImpl implements MilterContext {
 
   private static final int PROTOCOL_VERSION = 6;
 
@@ -35,8 +34,7 @@ public class MilterContextImpl implements MilterContext {
 
   private final IntMap<Map<String, String>> macros = new IntMap<>();
 
-  public MilterContextImpl(Actions milterActions, ProtocolSteps milterProtocolSteps,
-      MilterPacketSender milterPacketSender) {
+  public MilterContextImpl(Actions milterActions, ProtocolSteps milterProtocolSteps, MilterPacketSender milterPacketSender) {
     this.milterActions = milterActions;
     this.milterProtocolSteps = milterProtocolSteps;
     this.milterPacketSender = milterPacketSender;
@@ -99,10 +97,11 @@ public class MilterContextImpl implements MilterContext {
   @Override public void sendPacket(MilterPacket packet) throws MilterException {
     int noReplyBit = getSessionState().noReplyBit();
     if (noReplyBit != 0 && ((getSessionProtocolSteps().bitmap() & noReplyBit) != 0)) {
-      LOGGER.debug("NR bit has non-zero value for state %s but attempt to send packet has been caught", sessionState);
+      Log.debug().log(getClass()
+          , () -> format("NR bit has non-zero value for state %s but attempt to send packet has been caught", sessionState));
       if ((milterProtocolSteps().bitmap() & noReplyBit) != 0
           && (getMtaProtocolSteps().bitmap() & noReplyBit) == 0) {
-        LOGGER.debug("MTA doesn't support NR for state %s, trying to send SMFIR_CONTINUE", sessionState);
+        Log.debug().log(getClass(), () -> format("MTA doesn't support NR for state %s, trying to send SMFIR_CONTINUE", sessionState));
         sendPacket0(MilterPacketUtil.SMFIS_CONTINUE);
       }
       return;

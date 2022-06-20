@@ -14,13 +14,13 @@
 
 package org.nightcode.milter.util;
 
-import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+
+import org.nightcode.milter.MilterState;
+import org.nightcode.milter.net.MilterPacket;
 
 import static org.nightcode.milter.MessageModificationService.SMFIR_ACCEPT;
 import static org.nightcode.milter.MessageModificationService.SMFIR_CONTINUE;
@@ -29,7 +29,8 @@ import static org.nightcode.milter.MessageModificationService.SMFIR_REJECT;
 import static org.nightcode.milter.MessageModificationService.SMFIR_SKIP;
 import static org.nightcode.milter.MessageModificationService.SMFIR_TEMPFAIL;
 
-public final class MilterPacketUtil {
+public enum MilterPacketUtil {
+  ;
 
   /**
    * Continue processing the current connection, message, or recipient.
@@ -145,8 +146,7 @@ public final class MilterPacketUtil {
 
   public static List<String> splitByZeroTerm(byte[] buffer, int offset) {
     if (offset < 0 || offset > buffer.length) {
-      throw new IllegalArgumentException("illegal 'offset' value: " + offset
-          + ", supplied buffer size: " + buffer.length);
+      throw new IllegalArgumentException("illegal 'offset' value: " + offset + ", supplied buffer size: " + buffer.length);
     }
     List<String> result = new ArrayList<>();
     int i;
@@ -156,9 +156,5 @@ public final class MilterPacketUtil {
       offset = ++i;
     }
     return result;
-  }
-
-  private MilterPacketUtil() {
-    throw new AssertionError();
   }
 }

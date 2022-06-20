@@ -14,18 +14,20 @@
 
 package org.nightcode.milter.samples;
 
-import org.nightcode.common.base.Hexs;
+import java.net.InetAddress;
+import java.util.List;
+
+import org.jetbrains.annotations.Nullable;
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.util.Hexs;
+import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.ProtocolSteps;
 
-import java.net.InetAddress;
-import java.util.List;
-
-import javax.annotation.Nullable;
+import static java.lang.String.format;
 
 public class AddHeaderMilterHandler extends AbstractMilterHandler {
 
@@ -35,44 +37,43 @@ public class AddHeaderMilterHandler extends AbstractMilterHandler {
     super(milterActions, milterProtocolSteps);
   }
 
-  @Override public void connect(MilterContext context, String hostname, @Nullable InetAddress address)
-      throws MilterException {
-    logger.debug("<CONNECT> hostname: %s, address: %s", hostname, address);
+  @Override public void connect(MilterContext context, String hostname, @Nullable InetAddress address) throws MilterException {
+    Log.debug().log(getClass(), format("<CONNECT> hostname: %s, address: %s", hostname, address));
     super.connect(context, hostname, address);
   }
 
   @Override public void helo(MilterContext context, String helohost) throws MilterException {
-    logger.debug("<HELO> helohost: %s", helohost);
+    Log.debug().log(getClass(), "<HELO> helohost: " + helohost);
     super.helo(context, helohost);
   }
 
   @Override public void envfrom(MilterContext context, List<String> from) throws MilterException {
-    logger.debug("<ENVFROM> from: %s", from);
+    Log.debug().log(getClass(), "<ENVFROM> from: " + from);
     super.envfrom(context, from);
   }
 
   @Override public void envrcpt(MilterContext context, List<String> recipients) throws MilterException {
-    logger.debug("<ENVRCPT> recipients: %s", recipients);
+    Log.debug().log(getClass(), "<ENVRCPT> recipients: " + recipients);
     super.envrcpt(context, recipients);
   }
 
   @Override public void header(MilterContext context, String headerName, String headerValue) throws MilterException {
-    logger.debug("<HEADER> headerName: %s, headerValue: %s", headerName, headerValue);
+    Log.debug().log(getClass(), format("<HEADER> headerName: %s, headerValue: %s", headerName, headerValue));
     super.header(context, headerName, headerValue);
   }
 
   @Override public void eoh(MilterContext context) throws MilterException {
-    logger.debug("<EOH>");
+    Log.debug().log(getClass(), "<EOH>");
     super.eoh(context);
   }
 
   @Override public void body(MilterContext context, String bodyChunk) throws MilterException {
-    logger.debug("<BODY> bodyChunk: %s", bodyChunk);
+    Log.debug().log(getClass(), "<BODY> bodyChunk: " + bodyChunk);
     super.body(context, bodyChunk);
   }
 
   @Override public void eom(MilterContext context, @Nullable String bodyChunk) throws MilterException {
-    logger.debug("<EOM> bodyChunk: %s", bodyChunk);
+    Log.debug().log(getClass(), "<EOM> bodyChunk: " + bodyChunk);
 
     messageModificationService.addHeader(context, "X-Received", "Tue, 31 Oct 2018 17:56:00 -0700 (PDT)");
 
@@ -80,27 +81,27 @@ public class AddHeaderMilterHandler extends AbstractMilterHandler {
   }
 
   @Override public void abort(MilterContext context, MilterPacket packet) throws MilterException {
-    logger.debug("<ABORT> abort: %s", packet);
+    Log.debug().log(getClass(), "<ABORT> abort: " + packet);
     super.abort(context, packet);
   }
 
   @Override public void close(MilterContext context) {
-    logger.debug("<CLOSE>");
+    Log.debug().log(getClass(), "<CLOSE>");
   }
 
   @Override public void data(MilterContext context, byte[] payload) throws MilterException {
-    logger.debug("<DATA>");
+    Log.debug().log(getClass(), "<DATA>");
     super.data(context, payload);
   }
 
   @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
       ProtocolSteps mtaProtocolSteps) throws MilterException {
-    logger.debug("<NEGOTIATE> %s, %s, %s", mtaProtocolVersion, mtaActions, mtaProtocolSteps);
+    Log.debug().log(getClass(), format("<NEGOTIATE> %s, %s, %s", mtaProtocolVersion, mtaActions, mtaProtocolSteps));
     super.negotiate(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
   }
 
   @Override public void unknown(MilterContext context, byte[] payload) throws MilterException {
-    logger.debug("<UNKNOWN> unknown: %s", payload.length > 0 ? HEX.fromByteArray(payload) : "NULL");
+    Log.debug().log(getClass(), format("<UNKNOWN> unknown: %s", payload.length > 0 ? HEX.fromByteArray(payload) : "NULL"));
     super.unknown(context, payload);
   }
 }

@@ -14,11 +14,12 @@
 
 package org.nightcode.milter.net;
 
+import java.io.Closeable;
 import java.io.IOException;
 
-public interface MilterPacketSender {
+public interface MilterPacketSender extends Closeable {
 
-  void close();
+  @Override void close();
 
   void send(MilterPacket packet) throws IOException;
 }

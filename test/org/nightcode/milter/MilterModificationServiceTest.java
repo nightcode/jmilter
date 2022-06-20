@@ -14,18 +14,18 @@
 
 package org.nightcode.milter;
 
-import org.nightcode.common.base.Hexs;
-import org.nightcode.milter.net.MilterPacket;
-import org.nightcode.milter.util.ProtocolSteps;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.easymock.Capture;
-import org.easymock.EasyMock;
+import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.util.Hexs;
+import org.nightcode.milter.util.ProtocolSteps;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.easymock.Capture;
+import org.easymock.EasyMock;
 
 import static org.nightcode.milter.MessageModificationService.MILTER_CHUNK_SIZE;
 

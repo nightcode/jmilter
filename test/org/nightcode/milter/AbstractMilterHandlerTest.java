@@ -14,20 +14,20 @@
 
 package org.nightcode.milter;
 
-import org.nightcode.common.base.Hexs;
+import java.io.IOException;
+import java.util.Collections;
+
 import org.nightcode.milter.command.CommandProcessor;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.util.Hexs;
 import org.nightcode.milter.util.ProtocolSteps;
 
-import java.io.IOException;
-import java.util.Collections;
-
-import org.easymock.Capture;
-import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
+import org.easymock.Capture;
+import org.easymock.EasyMock;
 
 public class AbstractMilterHandlerTest {
 
@@ -36,9 +36,9 @@ public class AbstractMilterHandlerTest {
   @Test public void testNegotiate() throws MilterException, IOException {
     MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
 
-    int mtaProtocolVersion = 6;
-    Actions mtaActions = new Actions(new byte[] {0x00, 0x00, 0x01, (byte) 0xFF}, 0);
-    ProtocolSteps mtaProtocolSteps = new ProtocolSteps(new byte[] { 0x00, 0x1F, (byte) 0xFF, (byte) 0xFF}, 0);
+    int           mtaProtocolVersion = 6;
+    Actions       mtaActions         = new Actions(new byte[]{0x00, 0x00, 0x01, (byte) 0xFF}, 0);
+    ProtocolSteps mtaProtocolSteps   = new ProtocolSteps(new byte[]{0x00, 0x1F, (byte) 0xFF, (byte) 0xFF}, 0);
 
     Actions milterActions = Actions.builder()
         .changeFrom()
@@ -48,7 +48,7 @@ public class AbstractMilterHandlerTest {
         .changeDeleteHeaders()
         .build();
     ProtocolSteps milterProtocolSteps = ProtocolSteps.DEF_PROTOCOL_STEPS;
-    
+
     MilterHandler handler = new AbstractMilterHandler(milterActions, milterProtocolSteps) {
       @Override public void close(MilterContext context) {
         // do nothing
@@ -63,7 +63,7 @@ public class AbstractMilterHandlerTest {
 
     packetSenderMock.send(EasyMock.capture(packetCapture));
     EasyMock.expectLastCall().once();
-    
+
     EasyMock.replay(packetSenderMock);
 
     context.setSessionState(MilterState.OPTION_NEGOTIATION);
@@ -76,15 +76,15 @@ public class AbstractMilterHandlerTest {
     Assert.assertEquals(mtaProtocolVersion, context.getMtaProtocolVersion());
     Assert.assertEquals(mtaActions, context.getMtaActions());
     Assert.assertEquals(mtaProtocolSteps, context.getMtaProtocolSteps());
-    
+
     Assert.assertEquals(MilterContext.PROTOCOL_VERSION, context.getSessionProtocolVersion());
     Assert.assertEquals(milterProtocolSteps, context.getSessionProtocolSteps());
-    
+
     MilterPacket target = packetCapture.getValue();
     Assert.assertEquals(CommandProcessor.SMFIC_OPTNEG, target.command());
     Assert.assertEquals("00000006"
             + HEX.fromByteArray(context.milterActions().array())
-            + HEX.fromByteArray(context.getSessionProtocolSteps().array())  
+            + HEX.fromByteArray(context.getSessionProtocolSteps().array())
         , HEX.fromByteArray(target.payload()));
 
     EasyMock.verify(packetSenderMock);
@@ -93,9 +93,9 @@ public class AbstractMilterHandlerTest {
   @Test public void testNegotiateAbortSession() throws MilterException {
     MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
 
-    int mtaProtocolVersion = 6;
-    Actions mtaActions = Actions.DEF_ACTIONS;
-    ProtocolSteps mtaProtocolSteps = ProtocolSteps.DEF_PROTOCOL_STEPS;
+    int           mtaProtocolVersion = 6;
+    Actions       mtaActions         = Actions.DEF_ACTIONS;
+    ProtocolSteps mtaProtocolSteps   = ProtocolSteps.DEF_PROTOCOL_STEPS;
 
     Actions milterActions = Actions.builder()
         .changeFrom()
@@ -137,7 +137,7 @@ public class AbstractMilterHandlerTest {
 
     EasyMock.verify(packetSenderMock);
   }
-  
+
   @Test public void testAbortSession() {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
@@ -152,16 +152,16 @@ public class AbstractMilterHandlerTest {
     EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.HEADERS).once();
     EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.EOM).once();
     EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.HEADERS).once();
-    
+
     contextMock.destroy();
     EasyMock.expectLastCall().times(3);
-    
+
     EasyMock.replay(contextMock);
 
     handler.abortSession(contextMock, packet);
     handler.abortSession(contextMock, packet);
     handler.abortSession(contextMock, packet);
-    
+
     EasyMock.verify(contextMock);
   }
 

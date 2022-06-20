@@ -14,6 +14,8 @@
 
 package org.nightcode.milter;
 
+import java.io.IOException;
+
 import org.nightcode.milter.command.CommandProcessor;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
@@ -21,10 +23,8 @@ import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.MilterPacketUtil;
 import org.nightcode.milter.util.ProtocolSteps;
 
-import java.io.IOException;
-
-import org.easymock.EasyMock;
 import org.junit.Test;
+import org.easymock.EasyMock;
 
 public class MilterContextTest {
 

@@ -14,15 +14,15 @@
 
 package org.nightcode.milter.command;
 
-import org.nightcode.common.base.Hexs;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.util.Hexs;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
+import org.easymock.EasyMock;
 
 public class UnknownCommandProcessorTest {
 

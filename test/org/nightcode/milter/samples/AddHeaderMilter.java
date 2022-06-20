@@ -14,18 +14,21 @@
 
 package org.nightcode.milter.samples;
 
-import org.nightcode.common.service.ServiceManager;
+import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.net.MilterGatewayManager;
 import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.util.NetUtils;
 import org.nightcode.milter.util.ProtocolSteps;
-
-import java.net.UnknownHostException;
 
 public final class AddHeaderMilter {
 
-  public static void main(String[] args) throws UnknownHostException {
-    String address = System.getProperty("jmilter.address", "0.0.0.0:4545");
+  public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
+    InetSocketAddress address = NetUtils.parseAddress(System.getProperty("jmilter.address", "0.0.0.0:4545"));
 
     // indicates what changes you intend to do with messages
     Actions milterActions = Actions.builder()
@@ -42,7 +45,8 @@ public final class AddHeaderMilter {
     // a simple milter handler that only adds header "X-Received"
     MilterHandler milterHandler = new AddHeaderMilterHandler(milterActions, milterProtocolSteps);
 
-    MilterGatewayManager gatewayManager = new MilterGatewayManager(address, milterHandler, ServiceManager.instance());
-    gatewayManager.start();
+    try (MilterGatewayManager gatewayManager = new MilterGatewayManager(address, milterHandler)) {
+      gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
+    }
   }
 }

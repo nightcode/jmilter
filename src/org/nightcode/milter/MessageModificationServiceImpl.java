@@ -14,14 +14,13 @@
 
 package org.nightcode.milter;
 
-import org.nightcode.milter.net.MilterPacket;
-import org.nightcode.milter.util.ByteArrays;
-import org.nightcode.milter.util.ProtocolSteps;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.util.ByteArrays;
+import org.nightcode.milter.util.ProtocolSteps;
 
 class MessageModificationServiceImpl implements MessageModificationService {
 

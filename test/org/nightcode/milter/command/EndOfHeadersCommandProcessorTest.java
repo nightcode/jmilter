@@ -20,8 +20,8 @@ import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.net.MilterPacket;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
+import org.easymock.EasyMock;
 
 public class EndOfHeadersCommandProcessorTest {
 

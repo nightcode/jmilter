@@ -14,14 +14,14 @@
 
 package org.nightcode.milter.command;
 
+import java.util.List;
+
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.util.MilterPacketUtil;
-
-import java.util.List;
 
 class EnvrcptCommandProcessor extends AbstractCommandHandler {
 

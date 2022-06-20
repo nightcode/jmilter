@@ -14,14 +14,14 @@
 
 package org.nightcode.milter.command;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.net.MilterPacket;
 import org.nightcode.milter.util.MilterPacketUtil;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 class MacrosCommandProcessor extends AbstractCommandHandler {
 

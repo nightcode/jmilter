@@ -14,8 +14,6 @@
 
 package org.nightcode.milter.util;
 
-import org.nightcode.common.base.Hexs;
-
 /**
  * Protocol steps.
  */
@@ -243,26 +241,26 @@ public final class ProtocolSteps {
     }
   }
 
-  public static final int NO_CONNECT = 0x00000001;
-  public static final int NO_HELO = 0x00000002;
-  public static final int NO_MAIL_FROM = 0x00000004;
-  public static final int NO_RECIPIENTS = 0x00000008;
-  public static final int NO_BODY = 0x00000010;
-  public static final int NO_HEADERS = 0x00000020;
-  public static final int NO_EOH = 0x00000040;
-  public static final int NO_REPLY_FOR_HEADERS = 0x00000080;
-  public static final int NO_UNKNOWN = 0x00000100;
-  public static final int NO_DATA = 0x00000200;
-  public static final int UNDERSTAND_SKIP = 0x00000400;
-  public static final int SEND_REJECT_RECIPIENTS = 0x00000800;
-  public static final int NO_REPLY_FOR_CONNECT = 0x00001000;
-  public static final int NO_REPLY_FOR_HELO = 0x00002000;
-  public static final int NO_REPLY_FOR_MAIL_FROM = 0x00004000;
-  public static final int NO_REPLY_FOR_RECIPIENTS = 0x00008000;
-  public static final int NO_REPLY_FOR_DATA = 0x00010000;
-  public static final int NO_REPLY_FOR_UNKNOWN = 0x00020000;
-  public static final int NO_REPLY_FOR_EOH = 0x00040000;
-  public static final int NO_REPLY_FOR_BODY = 0x00080000;
+  public static final int NO_CONNECT                 = 0x00000001;
+  public static final int NO_HELO                    = 0x00000002;
+  public static final int NO_MAIL_FROM               = 0x00000004;
+  public static final int NO_RECIPIENTS              = 0x00000008;
+  public static final int NO_BODY                    = 0x00000010;
+  public static final int NO_HEADERS                 = 0x00000020;
+  public static final int NO_EOH                     = 0x00000040;
+  public static final int NO_REPLY_FOR_HEADERS       = 0x00000080;
+  public static final int NO_UNKNOWN                 = 0x00000100;
+  public static final int NO_DATA                    = 0x00000200;
+  public static final int UNDERSTAND_SKIP            = 0x00000400;
+  public static final int SEND_REJECT_RECIPIENTS     = 0x00000800;
+  public static final int NO_REPLY_FOR_CONNECT       = 0x00001000;
+  public static final int NO_REPLY_FOR_HELO          = 0x00002000;
+  public static final int NO_REPLY_FOR_MAIL_FROM     = 0x00004000;
+  public static final int NO_REPLY_FOR_RECIPIENTS    = 0x00008000;
+  public static final int NO_REPLY_FOR_DATA          = 0x00010000;
+  public static final int NO_REPLY_FOR_UNKNOWN       = 0x00020000;
+  public static final int NO_REPLY_FOR_EOH           = 0x00040000;
+  public static final int NO_REPLY_FOR_BODY          = 0x00080000;
   public static final int HEADER_VALUE_LEADING_SPACE = 0x00100000;
 
   // The protocol steps of V1 filter

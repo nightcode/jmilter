@@ -1,14 +1,18 @@
 package org.nightcode.milter.util;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.String.format;
+
 /**
  * Executor's utility methods.
  */
-public final class ExecutorUtils {
+public enum ExecutorUtils {
+  ;
 
   private static final class NamedThreadFactory implements ThreadFactory {
     private final ThreadGroup group;
@@ -52,7 +56,10 @@ public final class ExecutorUtils {
     executorService.shutdown();
     try {
       if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-        executorService.shutdownNow();
+        List<Runnable> neverCommencedExecution = executorService.shutdownNow();
+        for (Runnable r : neverCommencedExecution) {
+          Log.warn().log(ExecutorUtils.class, () -> format("[%s]: shutdown now %s", executorService, r));
+        }
         executorService.awaitTermination(30, TimeUnit.SECONDS);
       }
     } catch (InterruptedException ex) {
@@ -60,9 +67,5 @@ public final class ExecutorUtils {
       Thread.currentThread().interrupt();
     }
     return executorService.isTerminated();
-  }
-
-  private ExecutorUtils() {
-    throw new AssertionError();
   }
 }

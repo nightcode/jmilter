@@ -14,19 +14,18 @@
 
 package org.nightcode.milter.net;
 
-import org.nightcode.common.service.Service;
-import org.nightcode.common.service.ServiceManager;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,7 +37,7 @@ public class MilterGatewayManagerTest {
     try (ServerSocket socket = new ServerSocket(0)) {
       port = socket.getLocalPort();
     }
-    String address = "localhost:" + port;
+    InetSocketAddress address = new InetSocketAddress("localhost", port);
 
     MilterHandler milterHandler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
       @Override public void close(MilterContext context) {
@@ -46,12 +45,13 @@ public class MilterGatewayManagerTest {
       }
     };
 
-    MilterGatewayManager manager = new MilterGatewayManager(address, milterHandler, ServiceManager.instance());
-
-    Service.State state = manager.start().get(100, TimeUnit.MILLISECONDS);
-    Assert.assertEquals(Service.State.RUNNING, state);
-    
-    state = manager.stop().get(100, TimeUnit.MILLISECONDS);
-    Assert.assertEquals(Service.State.TERMINATED, state);
+    MilterGatewayManager gatewayManager;
+    try (MilterGatewayManager manager = new MilterGatewayManager(address, milterHandler)) {
+      gatewayManager = manager;
+      gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
+      Assert.assertEquals(MilterGatewayManager.RUNNING, gatewayManager.getState());
+    }
+    Assert.assertNotNull(gatewayManager);
+    Assert.assertEquals(MilterGatewayManager.CLOSED, gatewayManager.getState());
   }
 }

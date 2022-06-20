@@ -14,16 +14,16 @@
 
 package org.nightcode.milter.command;
 
+import java.nio.charset.StandardCharsets;
+
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.net.MilterPacket;
 
-import java.nio.charset.StandardCharsets;
-
-import org.easymock.EasyMock;
 import org.junit.Test;
+import org.easymock.EasyMock;
 
 public class BodyCommandProcessorTest {
 

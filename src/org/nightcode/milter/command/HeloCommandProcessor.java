@@ -14,20 +14,19 @@
 
 package org.nightcode.milter.command;
 
-import org.nightcode.common.util.logging.LogManager;
-import org.nightcode.common.util.logging.Logger;
+import java.nio.charset.StandardCharsets;
+
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
 
-import java.nio.charset.StandardCharsets;
+import static java.lang.String.format;
 
 class HeloCommandProcessor extends AbstractCommandHandler {
-
-  private static final Logger LOGGER = LogManager.getLogger(HeloCommandProcessor.class);
 
   HeloCommandProcessor(MilterHandler handler) {
     super(handler);
@@ -42,7 +41,7 @@ class HeloCommandProcessor extends AbstractCommandHandler {
 
     int i = MilterPacketUtil.indexOfZeroTerm(packet.payload());
     if (i < 0) {
-      LOGGER.info("[%s] received invalid packet: %s", context.id(), packet);
+      Log.info().log(getClass(), format("[%s] received invalid packet: %s", context.id(), packet));
       handler.abortSession(context, packet);
       return;
     }

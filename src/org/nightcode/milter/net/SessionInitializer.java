@@ -14,17 +14,16 @@
 
 package org.nightcode.milter.net;
 
-import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.codec.Int32LenFrameDecoder;
-import org.nightcode.milter.codec.Int32LenFrameEncoder;
-import org.nightcode.milter.codec.MilterPacketDecoder;
-import org.nightcode.milter.codec.MilterPacketEncoder;
-
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import org.nightcode.milter.MilterHandler;
+import org.nightcode.milter.codec.Int32LenFrameDecoder;
+import org.nightcode.milter.codec.Int32LenFrameEncoder;
+import org.nightcode.milter.codec.MilterPacketDecoder;
+import org.nightcode.milter.codec.MilterPacketEncoder;
 
 /**
  * Implementation of ChannelInitializer.

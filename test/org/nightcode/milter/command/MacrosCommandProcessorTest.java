@@ -14,17 +14,17 @@
 
 package org.nightcode.milter.command;
 
-import org.nightcode.common.base.Hexs;
+import java.util.Map;
+
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.util.Hexs;
 
-import java.util.Map;
-
-import org.easymock.Capture;
-import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
+import org.easymock.Capture;
+import org.easymock.EasyMock;
 
 public class MacrosCommandProcessorTest {
 
