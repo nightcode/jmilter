@@ -21,7 +21,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.buffer.UnpooledDirectByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.unix.PreferredDirectByteBufAllocator;
-import org.nightcode.milter.net.MilterPacket;
 
 import org.junit.Assert;
 import org.junit.Test;

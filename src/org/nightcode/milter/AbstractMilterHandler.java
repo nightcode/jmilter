@@ -18,8 +18,7 @@ import java.net.InetAddress;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
-import org.nightcode.milter.command.CommandProcessor;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ByteArrays;
@@ -28,6 +27,7 @@ import org.nightcode.milter.util.MilterPacketUtil;
 import org.nightcode.milter.util.ProtocolSteps;
 
 import static java.lang.String.format;
+import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
 public abstract class AbstractMilterHandler implements MilterHandler {
 
@@ -139,7 +139,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     System.arraycopy(protocolSteps, 0, payload, version.length + actions.length, protocolSteps.length);
 
     MilterPacket response = MilterPacket.builder()
-        .command(CommandProcessor.SMFIC_OPTNEG)
+        .command(SMFIC_OPTNEG)
         .payload(payload)
         .build();
     context.sendPacket(response);

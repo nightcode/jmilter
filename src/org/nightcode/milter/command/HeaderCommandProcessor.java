@@ -16,15 +16,17 @@ package org.nightcode.milter.command;
 
 import java.nio.charset.StandardCharsets;
 
+import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
 
 import static java.lang.String.format;
+import static org.nightcode.milter.CommandCode.SMFIC_HEADER;
 
 class HeaderCommandProcessor extends AbstractCommandHandler {
 
@@ -34,7 +36,7 @@ class HeaderCommandProcessor extends AbstractCommandHandler {
     super(handler);
   }
 
-  @Override public int command() {
+  @Override public Code command() {
     return SMFIC_HEADER;
   }
 
@@ -51,7 +53,7 @@ class HeaderCommandProcessor extends AbstractCommandHandler {
     int i = MilterPacketUtil.indexOfZeroTerm(packet.payload());
 
     if ((i + LAST_ZERO_TERM_LENGTH) >= payloadLength) {
-      Log.info().log(getClass(), format("[%s] wrong packet length: %s", context.id(), payloadLength));
+      Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
       handler.abortSession(context, packet);
       return;
     }

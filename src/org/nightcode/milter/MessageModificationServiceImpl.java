@@ -18,9 +18,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.ByteArrays;
 import org.nightcode.milter.util.ProtocolSteps;
+
+import static org.nightcode.milter.ResponseCode.SMFIR_ADDHEADER;
+import static org.nightcode.milter.ResponseCode.SMFIR_ADDRCPT;
+import static org.nightcode.milter.ResponseCode.SMFIR_ADDRCPT_PAR;
+import static org.nightcode.milter.ResponseCode.SMFIR_CHGFROM;
+import static org.nightcode.milter.ResponseCode.SMFIR_CHGHEADER;
+import static org.nightcode.milter.ResponseCode.SMFIR_DELRCPT;
+import static org.nightcode.milter.ResponseCode.SMFIR_INSHEADER;
+import static org.nightcode.milter.ResponseCode.SMFIR_PROGRESS;
+import static org.nightcode.milter.ResponseCode.SMFIR_QUARANTINE;
+import static org.nightcode.milter.ResponseCode.SMFIR_REPLBODY;
 
 class MessageModificationServiceImpl implements MessageModificationService {
 
@@ -91,7 +102,7 @@ class MessageModificationServiceImpl implements MessageModificationService {
     send(SMFIR_QUARANTINE, context, reason);
   }
 
-  private void header(MilterContext context, int command, int index, String name, String value) throws MilterException {
+  private void header(MilterContext context, ResponseCode command, int index, String name, String value) throws MilterException {
     Objects.requireNonNull(name, "header name");
     Objects.requireNonNull(value, "header value");
 
@@ -134,7 +145,7 @@ class MessageModificationServiceImpl implements MessageModificationService {
     context.sendPacket(packet);
   }
 
-  private void send(int command, MilterContext context, String arg) throws MilterException {
+  private void send(ResponseCode command, MilterContext context, String arg) throws MilterException {
     byte[] buf = arg.getBytes(StandardCharsets.UTF_8);
     byte[] payload = new byte[buf.length + 1];
     System.arraycopy(buf, 0, payload, 0, buf.length);
@@ -146,7 +157,7 @@ class MessageModificationServiceImpl implements MessageModificationService {
     context.sendPacket(packet);
   }
 
-  private void send(int command, MilterContext context, String arg1, String arg2) throws MilterException {
+  private void send(ResponseCode command, MilterContext context, String arg1, String arg2) throws MilterException {
     int payloadLength = 0;
 
     byte[] buf1 = arg1.getBytes(StandardCharsets.UTF_8);

@@ -20,14 +20,14 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 
-import static org.nightcode.milter.MessageModificationService.SMFIR_ACCEPT;
-import static org.nightcode.milter.MessageModificationService.SMFIR_CONTINUE;
-import static org.nightcode.milter.MessageModificationService.SMFIR_DISCARD;
-import static org.nightcode.milter.MessageModificationService.SMFIR_REJECT;
-import static org.nightcode.milter.MessageModificationService.SMFIR_SKIP;
-import static org.nightcode.milter.MessageModificationService.SMFIR_TEMPFAIL;
+import static org.nightcode.milter.ResponseCode.SMFIR_ACCEPT;
+import static org.nightcode.milter.ResponseCode.SMFIR_CONTINUE;
+import static org.nightcode.milter.ResponseCode.SMFIR_DISCARD;
+import static org.nightcode.milter.ResponseCode.SMFIR_REJECT;
+import static org.nightcode.milter.ResponseCode.SMFIR_SKIP;
+import static org.nightcode.milter.ResponseCode.SMFIR_TEMPFAIL;
 
 public enum MilterPacketUtil {
   ;
@@ -35,26 +35,26 @@ public enum MilterPacketUtil {
   /**
    * Continue processing the current connection, message, or recipient.
    */
-  public static final MilterPacket SMFIS_CONTINUE = MilterPacket.builder().command((byte) SMFIR_CONTINUE).build();
+  public static final MilterPacket SMFIS_CONTINUE = MilterPacket.builder().command(SMFIR_CONTINUE).build();
 
   /**
    * For a connection-oriented routine, reject this connection; call close().
    * For a message-oriented routine (except abort()), reject this message.
    * For a recipient-oriented routine, reject the current recipient (but continue processing the current message).
    */
-  public static final MilterPacket SMFIS_REJECT = MilterPacket.builder().command((byte) SMFIR_REJECT).build();
+  public static final MilterPacket SMFIS_REJECT = MilterPacket.builder().command(SMFIR_REJECT).build();
 
   /**
    * For a message- or recipient-oriented routine, accept this message, but silently discard it.
    * Should not be returned by a connection-oriented routine.
    */
-  public static final MilterPacket SMFIS_DISCARD = MilterPacket.builder().command((byte) SMFIR_DISCARD).build();
+  public static final MilterPacket SMFIS_DISCARD = MilterPacket.builder().command(SMFIR_DISCARD).build();
 
   /**
    * For a connection-oriented routine, accept this connection without further filter processing; call close().
    * For a message- or recipient-oriented routine, accept this message without further filtering.
    */
-  public static final MilterPacket SMFIS_ACCEPT = MilterPacket.builder().command((byte) SMFIR_ACCEPT).build();
+  public static final MilterPacket SMFIS_ACCEPT = MilterPacket.builder().command(SMFIR_ACCEPT).build();
 
   /**
    * Return a temporary failure, i.e., the corresponding SMTP command will return an appropriate 4xx status code.
@@ -62,7 +62,7 @@ public enum MilterPacketUtil {
    * For a connection-oriented routine, fail for this connection; call close().
    * For a recipient-oriented routine, only fail for the current recipient; continue message processing.
    */
-  public static final MilterPacket SMFIS_TEMPFAIL = MilterPacket.builder().command((byte) SMFIR_TEMPFAIL).build();
+  public static final MilterPacket SMFIS_TEMPFAIL = MilterPacket.builder().command(SMFIR_TEMPFAIL).build();
 
   /**
    * Skip further callbacks of the same type in this transaction. Currently this return value
@@ -72,7 +72,7 @@ public enum MilterPacketUtil {
    * behavior with the MTA, i.e., it must check whether the protocol action SMFIP_SKIP is available
    * and if so, the milter must request it.
    */
-  public static final MilterPacket SMFIS_SKIP = MilterPacket.builder().command((byte) SMFIR_SKIP).build();
+  public static final MilterPacket SMFIS_SKIP = MilterPacket.builder().command(SMFIR_SKIP).build();
 
   private static final byte ZERO_TERM = (byte) 0;
 

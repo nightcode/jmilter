@@ -18,10 +18,12 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_EOH;
 
 public class EndOfHeadersCommandProcessorTest {
 
@@ -29,7 +31,7 @@ public class EndOfHeadersCommandProcessorTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x4e);
+    MilterPacket packet = new MilterPacket(SMFIC_EOH);
 
     EndOfHeadersCommandProcessor processor = new EndOfHeadersCommandProcessor(milterHandlerMock);
 

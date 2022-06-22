@@ -20,10 +20,12 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_BODY;
 
 public class BodyCommandProcessorTest {
 
@@ -32,7 +34,7 @@ public class BodyCommandProcessorTest {
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
     String bodyText = "test data\r\n";
-    MilterPacket packet = new MilterPacket((byte) 0x44, bodyText.getBytes(StandardCharsets.UTF_8));
+    MilterPacket packet = new MilterPacket(SMFIC_BODY, bodyText.getBytes(StandardCharsets.UTF_8));
 
     BodyCommandProcessor processor = new BodyCommandProcessor(milterHandlerMock);
 

@@ -16,15 +16,17 @@ package org.nightcode.milter.command;
 
 import java.nio.charset.StandardCharsets;
 
+import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
 
 import static java.lang.String.format;
+import static org.nightcode.milter.CommandCode.SMFIC_HELO;
 
 class HeloCommandProcessor extends AbstractCommandHandler {
 
@@ -32,7 +34,7 @@ class HeloCommandProcessor extends AbstractCommandHandler {
     super(handler);
   }
 
-  @Override public int command() {
+  @Override public Code command() {
     return SMFIC_HELO;
   }
 

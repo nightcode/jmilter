@@ -14,16 +14,18 @@
 
 package org.nightcode.milter.command;
 
+import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.ProtocolSteps;
 
 import static java.lang.String.format;
+import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
 class OptnegCommandProcessor extends AbstractCommandHandler {
 
@@ -33,7 +35,7 @@ class OptnegCommandProcessor extends AbstractCommandHandler {
     super(handler);
   }
 
-  @Override public int command() {
+  @Override public Code command() {
     return SMFIC_OPTNEG;
   }
 
@@ -42,7 +44,7 @@ class OptnegCommandProcessor extends AbstractCommandHandler {
 
     int payloadLength = packet.payload().length;
     if (payloadLength != 12) {
-      Log.info().log(getClass(), format("[%s] wrong packet length: %s", context.id(), payloadLength));
+      Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
       handler.abortSession(context, packet);
       return;
     }

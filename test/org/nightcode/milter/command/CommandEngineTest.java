@@ -21,11 +21,26 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_ABORT;
+import static org.nightcode.milter.CommandCode.SMFIC_BODY;
+import static org.nightcode.milter.CommandCode.SMFIC_BODYEOB;
+import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
+import static org.nightcode.milter.CommandCode.SMFIC_DATA;
+import static org.nightcode.milter.CommandCode.SMFIC_EOH;
+import static org.nightcode.milter.CommandCode.SMFIC_HEADER;
+import static org.nightcode.milter.CommandCode.SMFIC_HELO;
+import static org.nightcode.milter.CommandCode.SMFIC_MACRO;
+import static org.nightcode.milter.CommandCode.SMFIC_MAIL;
+import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
+import static org.nightcode.milter.CommandCode.SMFIC_QUIT;
+import static org.nightcode.milter.CommandCode.SMFIC_RCPT;
+import static org.nightcode.milter.CommandCode.SMFIC_UNKNOWN;
 
 public class CommandEngineTest {
 
@@ -89,7 +104,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_ABORT);
+    MilterPacket packet = new MilterPacket(SMFIC_ABORT);
 
     milterHandlerMock.abort(EasyMock.eq(milterContextMock), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
@@ -108,8 +123,7 @@ public class CommandEngineTest {
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
     String bodyText = "test data\r\n";
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_BODY
-        , bodyText.getBytes(StandardCharsets.UTF_8));
+    MilterPacket packet = new MilterPacket(SMFIC_BODY, bodyText.getBytes(StandardCharsets.UTF_8));
 
     milterHandlerMock.body(EasyMock.eq(milterContextMock), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
@@ -127,7 +141,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_CONNECT
+    MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3232392e3231302e393400"));
 
     milterHandlerMock.connect(EasyMock.eq(milterContextMock), EasyMock.anyObject(), EasyMock.anyObject());
@@ -147,7 +161,7 @@ public class CommandEngineTest {
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
     byte[] payload = HEX.toByteArray("54690031313331413641424542000000000154");
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_DATA, payload);
+    MilterPacket packet = new MilterPacket(SMFIC_DATA, payload);
 
     milterHandlerMock.data(EasyMock.eq(milterContextMock), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
@@ -165,7 +179,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_BODYEOB);
+    MilterPacket packet = new MilterPacket(SMFIC_BODYEOB);
 
     milterHandlerMock.eom(EasyMock.eq(milterContextMock), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
@@ -183,7 +197,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_EOH);
+    MilterPacket packet = new MilterPacket(SMFIC_EOH);
 
     milterHandlerMock.eoh(EasyMock.eq(milterContextMock));
     EasyMock.expectLastCall().once();
@@ -201,7 +215,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_MAIL
+    MilterPacket packet = new MilterPacket(SMFIC_MAIL
         , HEX.toByteArray("3c737570706f7274406578616d706c652e6f72673e"
         + "0053495a453d3135353200424f44593d384249544d494d4500"));
 
@@ -221,7 +235,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_RCPT
+    MilterPacket packet = new MilterPacket(SMFIC_RCPT
         , HEX.toByteArray("3c636c69656e74406578616d706c652e6f72673e"
         + "004f524350543d7266633832323b636c69656e74406578616d706c652e6f726700"));
 
@@ -241,7 +255,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_HEADER
+    MilterPacket packet = new MilterPacket(SMFIC_HEADER
         , HEX.toByteArray("46726f6d0020737570706f7274203c737570706f7274406578616d706c652e6f72673e00"));
 
     milterHandlerMock.header(EasyMock.eq(milterContextMock), EasyMock.anyObject(), EasyMock.anyObject());
@@ -260,7 +274,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_HELO
+    MilterPacket packet = new MilterPacket(SMFIC_HELO
         , HEX.toByteArray("6d61696c2e6578616d706c652e6f726700"));
 
     milterHandlerMock.helo(EasyMock.eq(milterContextMock), EasyMock.anyObject());
@@ -280,12 +294,12 @@ public class CommandEngineTest {
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
     MilterPacket packet = MilterPacket.builder()
-        .command((byte) CommandProcessor.SMFIC_MACRO)
+        .command(SMFIC_MACRO)
         .payload(HEX.toByteArray("436a006d782e6578616d706c652e6f7267007b6461656d6f6e5f6e616d657d00"
             + "6d782e6578616d706c652e6f7267007600506f737466697820322e31302e3100"))
         .build();
 
-    milterContextMock.setMacros(EasyMock.eq(CommandProcessor.SMFIC_CONNECT), EasyMock.anyObject());
+    milterContextMock.setMacros(EasyMock.eq(SMFIC_CONNECT.code()), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
     EasyMock.replay(milterHandlerMock);
@@ -301,7 +315,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_OPTNEG
+    MilterPacket packet = new MilterPacket(SMFIC_OPTNEG
         , HEX.toByteArray("00000006000001ff001fffff"));
 
     milterHandlerMock.negotiate(EasyMock.eq(milterContextMock)
@@ -321,7 +335,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_QUIT);
+    MilterPacket packet = new MilterPacket(SMFIC_QUIT);
 
     milterHandlerMock.close(EasyMock.eq(milterContextMock));
     EasyMock.expectLastCall().once();
@@ -339,7 +353,7 @@ public class CommandEngineTest {
 
     CommandEngine engine = new CommandEngine(milterHandlerMock);
 
-    MilterPacket packet = new MilterPacket((byte) CommandProcessor.SMFIC_UNKNOWN, HEX.toByteArray("c0febebe"));
+    MilterPacket packet = new MilterPacket(SMFIC_UNKNOWN, HEX.toByteArray("c0febebe"));
 
     milterHandlerMock.unknown(EasyMock.eq(milterContextMock), EasyMock.anyObject());
     EasyMock.expectLastCall().once();

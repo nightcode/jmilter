@@ -22,6 +22,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.command.CommandEngine;
 import org.nightcode.milter.util.Log;
 

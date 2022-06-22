@@ -18,7 +18,7 @@ import java.net.InetAddress;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;

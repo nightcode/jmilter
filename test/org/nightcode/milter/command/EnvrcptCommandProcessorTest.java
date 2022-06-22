@@ -21,11 +21,13 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_RCPT;
 
 public class EnvrcptCommandProcessorTest {
 
@@ -39,7 +41,7 @@ public class EnvrcptCommandProcessorTest {
     list.add("<client@example.org>");
     list.add("ORCPT=rfc822;client@example.org");
     
-    MilterPacket packet = new MilterPacket((byte) 0x52
+    MilterPacket packet = new MilterPacket(SMFIC_RCPT
         , HEX.toByteArray("3c636c69656e74406578616d706c652e6f72673e" 
         + "004f524350543d7266633832323b636c69656e74406578616d706c652e6f726700"));
 

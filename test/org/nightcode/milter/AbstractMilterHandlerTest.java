@@ -17,8 +17,7 @@ package org.nightcode.milter;
 import java.io.IOException;
 import java.util.Collections;
 
-import org.nightcode.milter.command.CommandProcessor;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.Hexs;
@@ -28,6 +27,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
+import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
 public class AbstractMilterHandlerTest {
 
@@ -81,7 +83,7 @@ public class AbstractMilterHandlerTest {
     Assert.assertEquals(milterProtocolSteps, context.getSessionProtocolSteps());
 
     MilterPacket target = packetCapture.getValue();
-    Assert.assertEquals(CommandProcessor.SMFIC_OPTNEG, target.command());
+    Assert.assertEquals(SMFIC_OPTNEG.code(), target.command());
     Assert.assertEquals("00000006"
             + HEX.fromByteArray(context.milterActions().array())
             + HEX.fromByteArray(context.getSessionProtocolSteps().array())
@@ -147,7 +149,7 @@ public class AbstractMilterHandlerTest {
       }
     };
 
-    MilterPacket packet = MilterPacket.builder().command(CommandProcessor.SMFIC_CONNECT).build();
+    MilterPacket packet = MilterPacket.builder().command(SMFIC_CONNECT).build();
 
     EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.HEADERS).once();
     EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.EOM).once();

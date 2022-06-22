@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package org.nightcode.milter.net;
+package org.nightcode.milter.codec;
 
 import java.util.Random;
 

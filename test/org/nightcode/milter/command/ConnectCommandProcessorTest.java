@@ -22,11 +22,13 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
 
 public class ConnectCommandProcessorTest {
 
@@ -39,7 +41,7 @@ public class ConnectCommandProcessorTest {
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
     InetAddress actualAddress = InetAddress.getByName("144.229.210.94");
-    MilterPacket packet = new MilterPacket((byte) 0x43
+    MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3232392e3231302e393400"));
 
     ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
@@ -61,7 +63,7 @@ public class ConnectCommandProcessorTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x43
+    MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0036f3553134342e3232392e3231302e393400"));
 
     ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
@@ -83,7 +85,7 @@ public class ConnectCommandProcessorTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x43
+    MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3239392e3231302e393400"));
 
     ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
@@ -106,7 +108,7 @@ public class ConnectCommandProcessorTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x43
+    MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3232392e3231302e3934"));
 
     ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
@@ -129,8 +131,8 @@ public class ConnectCommandProcessorTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet1 = new MilterPacket((byte) 0x43, HEX.toByteArray("5b3134342e3232392e3231302e39345d00"));
-    MilterPacket packet2 = new MilterPacket((byte) 0x43, HEX.toByteArray("5b3134342e3232392e3231302e39345d003400"));
+    MilterPacket packet1 = new MilterPacket(SMFIC_CONNECT, HEX.toByteArray("5b3134342e3232392e3231302e39345d00"));
+    MilterPacket packet2 = new MilterPacket(SMFIC_CONNECT, HEX.toByteArray("5b3134342e3232392e3231302e39345d003400"));
 
     ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
 

@@ -20,11 +20,13 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_HEADER;
 
 public class HeaderCommandHandlerTest {
 
@@ -36,7 +38,7 @@ public class HeaderCommandHandlerTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x4c
+    MilterPacket packet = new MilterPacket(SMFIC_HEADER
         , HEX.toByteArray("46726f6d0020737570706f7274203c737570706f7274406578616d706c652e6f72673e00"));
     
     HeaderCommandProcessor processor = new HeaderCommandProcessor(milterHandlerMock);
@@ -58,7 +60,7 @@ public class HeaderCommandHandlerTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x4c
+    MilterPacket packet = new MilterPacket(SMFIC_HEADER
         , HEX.toByteArray("46726f6d0020737570706f7274203c737570706f7274406578616d706c652e6f72673e"));
 
     HeaderCommandProcessor processor = new HeaderCommandProcessor(milterHandlerMock);
@@ -81,7 +83,7 @@ public class HeaderCommandHandlerTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x4c, HEX.toByteArray("46726f6d00"));
+    MilterPacket packet = new MilterPacket(SMFIC_HEADER, HEX.toByteArray("46726f6d00"));
 
     HeaderCommandProcessor processor = new HeaderCommandProcessor(milterHandlerMock);
 

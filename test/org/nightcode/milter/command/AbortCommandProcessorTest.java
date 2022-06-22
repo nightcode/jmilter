@@ -17,10 +17,12 @@ package org.nightcode.milter.command;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_ABORT;
 
 public class AbortCommandProcessorTest {
 
@@ -28,7 +30,7 @@ public class AbortCommandProcessorTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x41);
+    MilterPacket packet = new MilterPacket(SMFIC_ABORT);
 
     AbortCommandProcessor processor = new AbortCommandProcessor(milterHandlerMock);
 

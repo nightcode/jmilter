@@ -18,10 +18,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.MilterPacketUtil;
+
+import static org.nightcode.milter.CommandCode.SMFIC_MACRO;
 
 class MacrosCommandProcessor extends AbstractCommandHandler {
 
@@ -29,7 +32,7 @@ class MacrosCommandProcessor extends AbstractCommandHandler {
     super(handler);
   }
 
-  @Override public int command() {
+  @Override public Code command() {
     return SMFIC_MACRO;
   }
 

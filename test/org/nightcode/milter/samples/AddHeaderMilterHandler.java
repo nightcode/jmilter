@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.Hexs;
 import org.nightcode.milter.util.Log;

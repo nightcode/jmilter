@@ -17,7 +17,7 @@ package org.nightcode.milter;
 import java.util.Map;
 import java.util.UUID;
 
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
 

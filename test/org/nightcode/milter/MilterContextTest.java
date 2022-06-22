@@ -16,8 +16,7 @@ package org.nightcode.milter;
 
 import java.io.IOException;
 
-import org.nightcode.milter.command.CommandProcessor;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.MilterPacketUtil;
@@ -25,6 +24,8 @@ import org.nightcode.milter.util.ProtocolSteps;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
 
 public class MilterContextTest {
 
@@ -35,7 +36,7 @@ public class MilterContextTest {
         = new MilterContextImpl(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
 
     MilterPacket packet = MilterPacket.builder()
-        .command(CommandProcessor.SMFIC_CONNECT)
+        .command(SMFIC_CONNECT)
         .build();
 
     packetSenderMock.send(packet);
@@ -58,7 +59,7 @@ public class MilterContextTest {
         , ProtocolSteps.builder().noReplyForConnect().build(), packetSenderMock);
 
     MilterPacket packet = MilterPacket.builder()
-        .command(CommandProcessor.SMFIC_CONNECT)
+        .command(SMFIC_CONNECT)
         .build();
 
     packetSenderMock.send(MilterPacketUtil.SMFIS_CONTINUE);

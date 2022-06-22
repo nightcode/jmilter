@@ -12,27 +12,9 @@
  * the License.
  */
 
-package org.nightcode.milter.command;
+package org.nightcode.milter;
 
-import org.nightcode.milter.Code;
-import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterException;
-import org.nightcode.milter.codec.MilterPacket;
+public interface Code {
 
-public interface CommandProcessor {
-
-  /**
-   * Returns command code.
-   *
-   * @return command code
-   */
-  Code command();
-
-  /**
-   * Handles incoming Milter packet.
-   *
-   * @param context session context
-   * @param packet Milter packet
-   */
-   void submit(MilterContext context, MilterPacket packet) throws MilterException;
+  int code();
 }

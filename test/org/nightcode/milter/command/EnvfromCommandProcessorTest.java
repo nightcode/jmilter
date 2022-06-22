@@ -21,11 +21,13 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_MAIL;
 
 public class EnvfromCommandProcessorTest {
 
@@ -40,7 +42,7 @@ public class EnvfromCommandProcessorTest {
     list.add("SIZE=1552");
     list.add("BODY=8BITMIME");
     
-    MilterPacket packet = new MilterPacket((byte) 0x4d
+    MilterPacket packet = new MilterPacket(SMFIC_MAIL
         , HEX.toByteArray("3c737570706f7274406578616d706c652e6f72673e" 
         + "0053495a453d3135353200424f44593d384249544d494d4500"));
 

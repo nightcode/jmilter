@@ -17,6 +17,8 @@ package org.nightcode.milter.net;
 import java.io.Closeable;
 import java.io.IOException;
 
+import org.nightcode.milter.codec.MilterPacket;
+
 public interface MilterPacketSender extends Closeable {
 
   @Override void close();

@@ -12,11 +12,12 @@
  * the License.
  */
 
-package org.nightcode.milter.net;
+package org.nightcode.milter.codec;
 
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.nightcode.milter.Code;
 import org.nightcode.milter.util.Hexs;
 
 /**
@@ -52,6 +53,17 @@ public final class MilterPacket {
      */
     public Builder command(int val) {
       command = val;
+      return this;
+    }
+
+    /**
+     * Sets Milter protocol command.
+     *
+     * @param val milter command code
+     * @return current Builder instance
+     */
+    public Builder command(Code val) {
+      command = val.code();
       return this;
     }
 
@@ -101,9 +113,28 @@ public final class MilterPacket {
   /**
    * Creates a new Milter packet.
    *
+   * @param commandCode Milter command code
+   */
+  public MilterPacket(Code commandCode) {
+    this(commandCode, ZERO_ARRAY);
+  }
+
+  /**
+   * Creates a new Milter packet.
+   *
+   * @param command Milter protocol command
+   * @param payload Milter protocol payload
+   */
+  public MilterPacket(Code command, byte[] payload) {
+    this(command.code(), payload, 0, payload.length);
+  }
+
+  /**
+   * Creates a new Milter packet.
+   *
    * @param command Milter protocol command
    */
-  public MilterPacket(int command) {
+  MilterPacket(int command) {
     this(command, ZERO_ARRAY);
   }
 
@@ -113,7 +144,7 @@ public final class MilterPacket {
    * @param command Milter protocol command
    * @param payload Milter protocol payload
    */
-  public MilterPacket(int command, byte[] payload) {
+  MilterPacket(int command, byte[] payload) {
     this(command, payload, 0, payload.length);
   }
 
@@ -125,7 +156,7 @@ public final class MilterPacket {
    * @param offset offset in the supplied payload array
    * @param length length of Milter protocol payload
    */
-  public MilterPacket(int command, byte[] payload, int offset, int length) {
+  MilterPacket(int command, byte[] payload, int offset, int length) {
     this.command = command;
     if (payload.length != 0) {
       this.payload = new byte[length];
@@ -183,7 +214,7 @@ public final class MilterPacket {
 
   @Override public String toString() {
     return "MilterPacket{"
-        + "command=" + command
+        + "command=0x" + Integer.toHexString(command)
         + ", payload=" + ((payload.length > 0) ? Hexs.hex().fromByteArray(payload) : "EMPTY")
         + '}';
   }

@@ -18,15 +18,17 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
+import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
 
 import static java.lang.String.format;
+import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
 
 class ConnectCommandProcessor extends AbstractCommandHandler {
 
@@ -42,7 +44,7 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
     super(handler);
   }
 
-  @Override public int command() {
+  @Override public Code command() {
     return SMFIC_CONNECT;
   }
 
@@ -58,7 +60,7 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
     int i = MilterPacketUtil.indexOfZeroTerm(packet.payload());
 
     if ((i + LAST_ZERO_TERM_LENGTH) >= payloadLength) {
-      Log.info().log(getClass(), format("[%s] wrong packet length: %s", context.id(), payloadLength));
+      Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
       handler.abortSession(context, packet);
       return;
     }
@@ -71,7 +73,7 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
     int family = packet.payload()[i++];
     if (family == SMFIA_INET) {
       if (i + PORT_OFFSET >= payloadLength) {
-        Log.info().log(getClass(), format("[%s] wrong packet length: %s", context.id(), payloadLength));
+        Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
         handler.abortSession(context, packet);
         return;
       }

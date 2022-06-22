@@ -17,7 +17,7 @@ package org.nightcode.milter.command;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.IntMap;
 import org.nightcode.milter.util.Log;
 
@@ -28,7 +28,7 @@ public final class CommandEngine {
   private final IntMap<CommandProcessor> processors = new IntMap<>();
 
   private static void addProcessor(IntMap<CommandProcessor> processors, CommandProcessor commandHandler) {
-    processors.put(commandHandler.command(), commandHandler);
+    processors.put(commandHandler.command().code(), commandHandler);
   }
 
   private final MilterHandler milterHandler;

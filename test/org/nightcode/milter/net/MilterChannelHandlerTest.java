@@ -48,6 +48,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
 public class MilterChannelHandlerTest {
 
@@ -105,7 +106,7 @@ public class MilterChannelHandlerTest {
       Assert.assertTrue(channelFuture.awaitUninterruptibly().isSuccess());
 
       Channel clientChannel = channelFuture.channel();
-      clientChannel.writeAndFlush(Unpooled.copiedBuffer(new byte[] { (byte) CommandProcessor.SMFIC_OPTNEG
+      clientChannel.writeAndFlush(Unpooled.copiedBuffer(new byte[] { (byte) SMFIC_OPTNEG.code()
           , 0x00, 0x00,        0x00,        0x06
           , 0x00, 0x00,        0x01, (byte) 0xFF
           , 0x00, 0x1F, (byte) 0xFF, (byte) 0xFF

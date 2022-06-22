@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
 import org.nightcode.milter.util.ProtocolSteps;
 
@@ -28,6 +28,16 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 
 import static org.nightcode.milter.MessageModificationService.MILTER_CHUNK_SIZE;
+import static org.nightcode.milter.ResponseCode.SMFIR_ADDHEADER;
+import static org.nightcode.milter.ResponseCode.SMFIR_ADDRCPT;
+import static org.nightcode.milter.ResponseCode.SMFIR_ADDRCPT_PAR;
+import static org.nightcode.milter.ResponseCode.SMFIR_CHGFROM;
+import static org.nightcode.milter.ResponseCode.SMFIR_CHGHEADER;
+import static org.nightcode.milter.ResponseCode.SMFIR_DELRCPT;
+import static org.nightcode.milter.ResponseCode.SMFIR_INSHEADER;
+import static org.nightcode.milter.ResponseCode.SMFIR_PROGRESS;
+import static org.nightcode.milter.ResponseCode.SMFIR_QUARANTINE;
+import static org.nightcode.milter.ResponseCode.SMFIR_REPLBODY;
 
 public class MilterModificationServiceTest {
 
@@ -38,7 +48,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('h'
+    MilterPacket packet = new MilterPacket(SMFIR_ADDHEADER
         , HEX.toByteArray("444b494d2d46696c74657200204f70656e444b494d2046696c7465722076322e31312e"
         + "30206d782e6578616d706c652e6f7267204230394245353800"));
 
@@ -60,7 +70,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('m'
+    MilterPacket packet = new MilterPacket(SMFIR_CHGHEADER
         , HEX.toByteArray("00000005444b494d2d46696c74657200204f70656e444b494d2046696c7465722076322e31312e"
         + "30206d782e6578616d706c652e6f7267204230394245353800"));
 
@@ -82,7 +92,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('i'
+    MilterPacket packet = new MilterPacket(SMFIR_INSHEADER
         , HEX.toByteArray("00000001444b494d2d46696c74657200204f70656e444b494d2046696c7465722076322e31312e" 
         + "30206d782e6578616d706c652e6f7267204230394245353800"));
 
@@ -104,7 +114,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('e'
+    MilterPacket packet = new MilterPacket(SMFIR_CHGFROM
         , HEX.toByteArray("737570706f7274406578616d706c652e6f7267006172677300"));
 
     contextMock.sendPacket(packet);
@@ -122,7 +132,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('+'
+    MilterPacket packet = new MilterPacket(SMFIR_ADDRCPT
         , HEX.toByteArray("737570706f7274406578616d706c652e6f726700"));
 
     contextMock.sendPacket(packet);
@@ -140,7 +150,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('2'
+    MilterPacket packet = new MilterPacket(SMFIR_ADDRCPT_PAR
         , HEX.toByteArray("737570706f7274406578616d706c652e6f7267006172677300"));
 
     contextMock.sendPacket(packet);
@@ -158,7 +168,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('-'
+    MilterPacket packet = new MilterPacket(SMFIR_DELRCPT
         , HEX.toByteArray("737570706f7274406578616d706c652e6f726700"));
 
     contextMock.sendPacket(packet);
@@ -176,7 +186,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('b'
+    MilterPacket packet = new MilterPacket(SMFIR_REPLBODY
         , HEX.toByteArray("6e657720626f64790d0a"));
 
     contextMock.sendPacket(packet);
@@ -232,7 +242,7 @@ public class MilterModificationServiceTest {
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('p');
+    MilterPacket packet = new MilterPacket(SMFIR_PROGRESS);
 
     contextMock.sendPacket(packet);
     EasyMock.expectLastCall().once();
@@ -249,7 +259,7 @@ public class MilterModificationServiceTest {
     
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket('q', HEX.toByteArray("7465737400"));
+    MilterPacket packet = new MilterPacket(SMFIR_QUARANTINE, HEX.toByteArray("7465737400"));
     
     contextMock.sendPacket(packet);
     EasyMock.expectLastCall().once();

@@ -20,27 +20,6 @@ public interface MessageModificationService {
 
   int MILTER_CHUNK_SIZE = 65535;
 
-  int SMFIR_ADDRCPT     = '+'; // Add recipient (modification action)
-  int SMFIR_DELRCPT     = '-'; // Remove recipient (modification action)
-  int SMFIR_ADDRCPT_PAR = '2'; // Add recipient (incl. ESMTP args)
-  int SMFIR_SHUTDOWN    = '4'; // 421: shutdown (internal to MTA)
-  int SMFIR_ACCEPT      = 'a'; // Accept message completely (accept/reject action)
-  int SMFIR_REPLBODY    = 'b'; // Replace body (modification action)
-  int SMFIR_CONTINUE    = 'c'; // Accept and keep processing (accept/reject action)
-  int SMFIR_DISCARD     = 'd'; // Set discard flag for entire message (accept/reject action)
-  int SMFIR_CHGFROM     = 'e'; // Change envelope sender (from)
-  int SMFIR_CONN_FAIL   = 'f'; // Cause a connection failure
-  int SMFIR_ADDHEADER   = 'h'; // Add header (modification action)
-  int SMFIR_INSHEADER   = 'i'; // Insert header
-  int SMFIR_SETSYMLIST  = 'l'; // Set list of symbols (macros)
-  int SMFIR_CHGHEADER   = 'm'; // Change header (modification action)
-  int SMFIR_PROGRESS    = 'p'; // Progress (asynchronous action)
-  int SMFIR_QUARANTINE  = 'q'; // Quarantine message (modification action)
-  int SMFIR_REJECT      = 'r'; // Reject command/recipient with a 5xx (accept/reject action)
-  int SMFIR_SKIP        = 's'; // Skip
-  int SMFIR_TEMPFAIL    = 't'; // Reject command/recipient with a 4xx (accept/reject action)
-  int SMFIR_REPLYCODE   = 'y'; // Send specific Nxx reply message (accept/reject action)
-
   /**
    * Add a header to the message.
    *

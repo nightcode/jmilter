@@ -20,11 +20,13 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_HELO;
 
 public class HeloCommandProcessorTest {
 
@@ -36,7 +38,7 @@ public class HeloCommandProcessorTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x48, HEX.toByteArray("6d61696c2e6578616d706c652e6f726700"));
+    MilterPacket packet = new MilterPacket(SMFIC_HELO, HEX.toByteArray("6d61696c2e6578616d706c652e6f726700"));
 
     HeloCommandProcessor processor = new HeloCommandProcessor(milterHandlerMock);
 
@@ -57,7 +59,7 @@ public class HeloCommandProcessorTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x48, HEX.toByteArray("6d61696c2e6578616d706c652e6f7267"));
+    MilterPacket packet = new MilterPacket(SMFIC_HELO, HEX.toByteArray("6d61696c2e6578616d706c652e6f7267"));
 
     HeloCommandProcessor processor = new HeloCommandProcessor(milterHandlerMock);
 

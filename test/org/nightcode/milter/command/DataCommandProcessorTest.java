@@ -18,11 +18,13 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_DATA;
 
 public class DataCommandProcessorTest {
 
@@ -33,7 +35,7 @@ public class DataCommandProcessorTest {
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
     byte[] payload = HEX.toByteArray("54690031313331413641424542000000000154");
-    MilterPacket packet = new MilterPacket((byte) 0x54, payload);
+    MilterPacket packet = new MilterPacket(SMFIC_DATA, payload);
 
     DataCommandProcessor processor = new DataCommandProcessor(milterHandlerMock);
 

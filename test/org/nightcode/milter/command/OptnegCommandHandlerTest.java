@@ -20,7 +20,7 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
-import org.nightcode.milter.net.MilterPacket;
+import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.Hexs;
 import org.nightcode.milter.util.ProtocolSteps;
@@ -29,6 +29,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
+
+import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
 public class OptnegCommandHandlerTest {
 
@@ -41,7 +43,7 @@ public class OptnegCommandHandlerTest {
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
     byte[] payload = HEX.toByteArray("00000006000001ff001fffff");
-    MilterPacket packet = new MilterPacket((byte) 0x4f, payload);
+    MilterPacket packet = new MilterPacket(SMFIC_OPTNEG, payload);
     Actions actualActions = new Actions(payload, 4);
     ProtocolSteps actualProtocolSteps = new ProtocolSteps(payload, 8);
 
@@ -71,7 +73,7 @@ public class OptnegCommandHandlerTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x4f, HEX.toByteArray("00000001000001ff001fffff"));
+    MilterPacket packet = new MilterPacket(SMFIC_OPTNEG, HEX.toByteArray("00000001000001ff001fffff"));
 
     OptnegCommandProcessor processor = new OptnegCommandProcessor(milterHandlerMock);
 
@@ -93,7 +95,7 @@ public class OptnegCommandHandlerTest {
     MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
 
-    MilterPacket packet = new MilterPacket((byte) 0x4f, HEX.toByteArray("00000006000001ff001fff"));
+    MilterPacket packet = new MilterPacket(SMFIC_OPTNEG, HEX.toByteArray("00000006000001ff001fff"));
 
     OptnegCommandProcessor handler = new OptnegCommandProcessor(milterHandlerMock);
 
