@@ -25,6 +25,8 @@ public interface MilterContext {
 
   int PROTOCOL_VERSION = 6;
 
+  MilterHandler handler();
+
   void destroy();
 
   Map<String, String> getMacros(int type);

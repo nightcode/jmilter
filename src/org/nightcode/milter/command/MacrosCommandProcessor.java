@@ -20,29 +20,25 @@ import java.util.Map;
 
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterHandler;
+import org.nightcode.milter.MilterException;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.MilterPacketUtil;
 
 import static org.nightcode.milter.CommandCode.SMFIC_MACRO;
 
-class MacrosCommandProcessor extends AbstractCommandHandler {
-
-  MacrosCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
+class MacrosCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
     return SMFIC_MACRO;
   }
 
-  @Override public void submit(MilterContext context, MilterPacket packet) {
+  @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     int type = packet.payload()[0];
     List<String> list = MilterPacketUtil.splitByZeroTerm(packet.payload(), 1);
     Map<String, String> macros = new HashMap<>();
     for (int i = 0; i < list.size(); i += 2) {
       macros.put(list.get(i), list.get(i + 1));
     }
-    context.setMacros(type, macros);
+    context.handler().macro(context, type, macros);
   }
 }

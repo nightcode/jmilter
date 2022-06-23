@@ -14,66 +14,35 @@
 
 package org.nightcode.milter.command;
 
-import java.util.UUID;
-
-import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
-import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
 
 import static org.nightcode.milter.CommandCode.SMFIC_HELO;
 
-public class HeloCommandProcessorTest {
-
-  private static final Hexs HEX = Hexs.hex();
-
-  private final UUID contextId = UUID.randomUUID();
+public class HeloCommandProcessorTest extends AbstractCommandProcessorTest {
 
   @Test public void testSubmit() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
-
     MilterPacket packet = new MilterPacket(SMFIC_HELO, HEX.toByteArray("6d61696c2e6578616d706c652e6f726700"));
 
-    HeloCommandProcessor processor = new HeloCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.HELO);
-    EasyMock.expectLastCall().once();
-
-    milterHandlerMock.helo(milterContextMock, "mail.example.org");
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    execute(packet, new HeloCommandProcessor(), ctx -> {
+      try {
+        ctx.handler().helo(ctx, "mail.example.org");
+        EasyMock.expectLastCall().once();
+      } catch (MilterException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   @Test public void testCheckLastZeroTerm() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
-
     MilterPacket packet = new MilterPacket(SMFIC_HELO, HEX.toByteArray("6d61696c2e6578616d706c652e6f7267"));
 
-    HeloCommandProcessor processor = new HeloCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.HELO);
-    EasyMock.expectLastCall().once();
-    EasyMock.expect(milterContextMock.id()).andReturn(contextId).once();
-
-    milterHandlerMock.abortSession(milterContextMock, packet);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    execute(packet, new HeloCommandProcessor(), ctx -> {
+      ctx.handler().abortSession(ctx, packet);
+      EasyMock.expectLastCall().once();
+    });
   }
 }

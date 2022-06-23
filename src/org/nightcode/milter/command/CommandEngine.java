@@ -15,7 +15,6 @@
 package org.nightcode.milter.command;
 
 import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.IntMap;
@@ -25,34 +24,38 @@ import static java.lang.String.format;
 
 public final class CommandEngine {
 
+  private static final CommandEngine INSTANCE = new CommandEngine();
+
+  public static CommandEngine instance() {
+    return INSTANCE;
+  }
+  
   private final IntMap<CommandProcessor> processors = new IntMap<>();
 
   private static void addProcessor(IntMap<CommandProcessor> processors, CommandProcessor commandHandler) {
     processors.put(commandHandler.command().code(), commandHandler);
   }
 
-  private final MilterHandler milterHandler;
   private final CommandProcessor unknownCommandProcessor;
 
-  public CommandEngine(MilterHandler milterHandler) {
-    this.milterHandler = milterHandler;
-
-    unknownCommandProcessor = new UnknownCommandProcessor(milterHandler);
+  private CommandEngine() {
+    unknownCommandProcessor = new UnknownCommandProcessor();
 
     synchronized (processors) {
-      addProcessor(processors, new OptnegCommandProcessor(milterHandler));
-      addProcessor(processors, new ConnectCommandProcessor(milterHandler));
-      addProcessor(processors, new HeloCommandProcessor(milterHandler));
-      addProcessor(processors, new MacrosCommandProcessor(milterHandler));
-      addProcessor(processors, new EnvfromCommandProcessor(milterHandler));
-      addProcessor(processors, new EnvrcptCommandProcessor(milterHandler));
-      addProcessor(processors, new HeaderCommandProcessor(milterHandler));
-      addProcessor(processors, new EndOfHeadersCommandProcessor(milterHandler));
-      addProcessor(processors, new BodyCommandProcessor(milterHandler));
-      addProcessor(processors, new EndOfBodyCommandProcessor(milterHandler));
-      addProcessor(processors, new AbortCommandProcessor(milterHandler));
-      addProcessor(processors, new DataCommandProcessor(milterHandler));
-      addProcessor(processors, new QuitCommandProcessor(milterHandler));
+      addProcessor(processors, new AbortCommandProcessor());
+      addProcessor(processors, new BodyCommandProcessor());
+      addProcessor(processors, new ConnectCommandProcessor());
+      addProcessor(processors, new MacrosCommandProcessor());
+      addProcessor(processors, new EndOfBodyCommandProcessor());
+      addProcessor(processors, new HeloCommandProcessor());
+      addProcessor(processors, new QuitNcCommandProcessor());
+      addProcessor(processors, new HeaderCommandProcessor());
+      addProcessor(processors, new EnvfromCommandProcessor());
+      addProcessor(processors, new EndOfHeadersCommandProcessor());
+      addProcessor(processors, new OptnegCommandProcessor());
+      addProcessor(processors, new QuitCommandProcessor());
+      addProcessor(processors, new EnvrcptCommandProcessor());
+      addProcessor(processors, new DataCommandProcessor());
       addProcessor(processors, unknownCommandProcessor);
     }
   }
@@ -67,7 +70,7 @@ public final class CommandEngine {
     } catch (Exception ex) {
       Log.warn().log(getClass(), format("[%s] unable to process milter packet: %s", context.id(), milterPacket), ex);
       context.setSessionState(MilterState.ABORT);
-      milterHandler.abortSession(context, milterPacket);
+      context.handler().abortSession(context, milterPacket);
     }
   }
 }

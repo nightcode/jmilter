@@ -16,38 +16,28 @@ package org.nightcode.milter.command;
 
 import java.nio.charset.StandardCharsets;
 
-import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 
 import org.junit.Test;
+
 import org.easymock.EasyMock;
 
 import static org.nightcode.milter.CommandCode.SMFIC_BODY;
 
-public class BodyCommandProcessorTest {
+public class BodyCommandProcessorTest extends AbstractCommandProcessorTest {
 
   @Test public void testSubmit() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    String       bodyText = "test data\r\n";
+    MilterPacket packet   = new MilterPacket(SMFIC_BODY, bodyText.getBytes(StandardCharsets.UTF_8));
 
-    String bodyText = "test data\r\n";
-    MilterPacket packet = new MilterPacket(SMFIC_BODY, bodyText.getBytes(StandardCharsets.UTF_8));
-
-    BodyCommandProcessor processor = new BodyCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.BODY);
-    EasyMock.expectLastCall().once();
-
-    milterHandlerMock.body(milterContextMock, bodyText);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    execute(packet, new BodyCommandProcessor(), ctx -> {
+      try {
+        ctx.handler().body(ctx, bodyText);
+        EasyMock.expectLastCall().once();
+      } catch (MilterException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 }

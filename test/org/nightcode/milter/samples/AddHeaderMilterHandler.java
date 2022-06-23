@@ -14,7 +14,7 @@
 
 package org.nightcode.milter.samples;
 
-import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -37,9 +37,10 @@ public class AddHeaderMilterHandler extends AbstractMilterHandler {
     super(milterActions, milterProtocolSteps);
   }
 
-  @Override public void connect(MilterContext context, String hostname, @Nullable InetAddress address) throws MilterException {
-    Log.debug().log(getClass(), format("<CONNECT> hostname: %s, address: %s", hostname, address));
-    super.connect(context, hostname, address);
+  @Override public void connect(MilterContext context, String hostname, int family, int port, @Nullable SocketAddress address)
+      throws MilterException {
+    Log.debug().log(getClass(), format("<CONNECT> hostname: %s, family: %s, port: %s, address: %s", hostname, family, port, address));
+    super.connect(context, hostname, family, port, address);
   }
 
   @Override public void helo(MilterContext context, String helohost) throws MilterException {
@@ -85,8 +86,12 @@ public class AddHeaderMilterHandler extends AbstractMilterHandler {
     super.abort(context, packet);
   }
 
-  @Override public void close(MilterContext context) {
-    Log.debug().log(getClass(), "<CLOSE>");
+  @Override public void quit(MilterContext context) {
+    Log.debug().log(getClass(), "<QUIT>");
+  }
+
+  @Override public void quitNc(MilterContext context) {
+    Log.debug().log(getClass(), "<QUIT_NC>");
   }
 
   @Override public void data(MilterContext context, byte[] payload) throws MilterException {
@@ -94,10 +99,10 @@ public class AddHeaderMilterHandler extends AbstractMilterHandler {
     super.data(context, payload);
   }
 
-  @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
-      ProtocolSteps mtaProtocolSteps) throws MilterException {
+  @Override public void optneg(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
+                               ProtocolSteps mtaProtocolSteps) throws MilterException {
     Log.debug().log(getClass(), format("<NEGOTIATE> %s, %s, %s", mtaProtocolVersion, mtaActions, mtaProtocolSteps));
-    super.negotiate(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
+    super.optneg(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
   }
 
   @Override public void unknown(MilterContext context, byte[] payload) throws MilterException {

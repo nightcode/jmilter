@@ -38,7 +38,6 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.codec.Int32LenFrameEncoder;
 import org.nightcode.milter.codec.MilterPacketEncoder;
-import org.nightcode.milter.command.CommandProcessor;
 import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ProtocolSteps;
 
@@ -74,13 +73,13 @@ public class MilterChannelHandlerTest {
       serverBootstrap.group(new NioEventLoopGroup(2))
           .channel(NioServerSocketChannel.class)
           .childHandler(new SessionInitializer((new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-            @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
-                ProtocolSteps mtaProtocolSteps) throws MilterException {
-              super.negotiate(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
+            @Override public void optneg(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
+                                         ProtocolSteps mtaProtocolSteps) throws MilterException {
+              super.optneg(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
               negotiateLatch.countDown();
             }
 
-            @Override public void close(MilterContext context) {
+            @Override public void quit(MilterContext context) {
               // do nothing
             }
           })));

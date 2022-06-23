@@ -17,7 +17,6 @@ package org.nightcode.milter.command;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Actions;
@@ -27,13 +26,9 @@ import org.nightcode.milter.util.ProtocolSteps;
 import static java.lang.String.format;
 import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
-class OptnegCommandProcessor extends AbstractCommandHandler {
+class OptnegCommandProcessor implements CommandProcessor {
 
   private static final int PROTOCOL_MIN_VERSION = 2;
-
-  OptnegCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
 
   @Override public Code command() {
     return SMFIC_OPTNEG;
@@ -45,7 +40,7 @@ class OptnegCommandProcessor extends AbstractCommandHandler {
     int payloadLength = packet.payload().length;
     if (payloadLength != 12) {
       Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
-      handler.abortSession(context, packet);
+      context.handler().abortSession(context, packet);
       return;
     }
 
@@ -53,11 +48,11 @@ class OptnegCommandProcessor extends AbstractCommandHandler {
     if (mtaProtocolVersion < PROTOCOL_MIN_VERSION) {
       Log.info().log(getClass()
           , format("[%s] MTA protocol version too old %s < %s", context.id(), mtaProtocolVersion, PROTOCOL_MIN_VERSION));
-      handler.abortSession(context, packet);
+      context.handler().abortSession(context, packet);
       return;
     }
 
-    handler.negotiate(context, mtaProtocolVersion, new Actions(packet.payload(), 4)
+    context.handler().optneg(context, mtaProtocolVersion, new Actions(packet.payload(), 4)
         , new ProtocolSteps(packet.payload(), 8));
   }
 }

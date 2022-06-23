@@ -17,17 +17,12 @@ package org.nightcode.milter.command;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 
 import static org.nightcode.milter.CommandCode.SMFIC_EOH;
 
-class EndOfHeadersCommandProcessor extends AbstractCommandHandler {
-
-  EndOfHeadersCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
+class EndOfHeadersCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
     return SMFIC_EOH;
@@ -35,6 +30,6 @@ class EndOfHeadersCommandProcessor extends AbstractCommandHandler {
 
   @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     context.setSessionState(MilterState.EOH);
-    handler.eoh(context);
+    context.handler().eoh(context);
   }
 }

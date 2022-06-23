@@ -19,17 +19,12 @@ import java.nio.charset.StandardCharsets;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 
 import static org.nightcode.milter.CommandCode.SMFIC_BODY;
 
-class BodyCommandProcessor extends AbstractCommandHandler {
-
-  BodyCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
+class BodyCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
     return SMFIC_BODY;
@@ -39,6 +34,6 @@ class BodyCommandProcessor extends AbstractCommandHandler {
     context.setSessionState(MilterState.BODY);
 
     String bodyChunk = new String(packet.payload(), StandardCharsets.UTF_8);
-    handler.body(context, bodyChunk);
+    context.handler().body(context, bodyChunk);
   }
 }

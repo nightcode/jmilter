@@ -15,22 +15,25 @@
 package org.nightcode.milter.command;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
+import io.netty.channel.unix.DomainSocketAddress;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
 
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
 
-class ConnectCommandProcessor extends AbstractCommandHandler {
+class ConnectCommandProcessor implements CommandProcessor {
 
   public static final int SMFIA_UNKNOWN = 'U'; // Unknown (NOTE: Omits "port" and "host" fields entirely)
   public static final int SMFIA_UNIX    = 'L'; // Unix (AF_UNIX/AF_LOCAL) socket ("port" is 0)
@@ -40,19 +43,16 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
   private static final int LAST_ZERO_TERM_LENGTH = 1;
   private static final int PORT_OFFSET           = 2;
 
-  ConnectCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
-
   @Override public Code command() {
     return SMFIC_CONNECT;
   }
 
   @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     context.setSessionState(MilterState.CONNECT);
+
     if (!MilterPacketUtil.isLastZeroTerm(packet.payload())) {
       Log.info().log(getClass(), format("[%s] received invalid packet: %s", context.id(), packet));
-      handler.abortSession(context, packet);
+      context.handler().abortSession(context, packet);
       return;
     }
 
@@ -61,35 +61,45 @@ class ConnectCommandProcessor extends AbstractCommandHandler {
 
     if ((i + LAST_ZERO_TERM_LENGTH) >= payloadLength) {
       Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
-      handler.abortSession(context, packet);
+      context.handler().abortSession(context, packet);
       return;
     }
 
     int offset = 0;
-    String hostname = new String(packet.payload(), offset, i, StandardCharsets.UTF_8);
+    String hostname = new String(packet.payload(), offset, i, UTF_8);
     i++;
 
-    InetAddress address = null;
     int family = packet.payload()[i++];
+    int port = 0;
+    SocketAddress address = null;
+
     if (family == SMFIA_INET) {
       if (i + PORT_OFFSET >= payloadLength) {
         Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
-        handler.abortSession(context, packet);
+        context.handler().abortSession(context, packet);
         return;
       }
-      i += PORT_OFFSET;
+      port = ((packet.payload()[i++] & 0xFF) << 8) | (packet.payload()[i++] & 0xFF);
       offset = i;
-      String stringAddress = new String(packet.payload(), offset, payloadLength - offset - LAST_ZERO_TERM_LENGTH
-          , StandardCharsets.UTF_8);
+      String stringAddress = new String(packet.payload(), offset, payloadLength - offset - LAST_ZERO_TERM_LENGTH, UTF_8);
       try {
-        address = InetAddress.getByName(stringAddress);
+        address = new InetSocketAddress(InetAddress.getByName(stringAddress), port);
       } catch (UnknownHostException ex) {
         Log.info().log(getClass(), format("[%s] invalid address value: %s", context.id(), stringAddress));
-        handler.abortSession(context, packet);
+        context.handler().abortSession(context, packet);
         return;
       }
+    } else if (family == SMFIA_UNIX) {
+      if (i + PORT_OFFSET >= payloadLength) {
+        Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
+        context.handler().abortSession(context, packet);
+        return;
+      }
+      offset = i + PORT_OFFSET;
+      String socketPath = new String(packet.payload(), offset, payloadLength - offset - LAST_ZERO_TERM_LENGTH, UTF_8);
+      address = new DomainSocketAddress(socketPath);
     }
 
-    handler.connect(context, hostname, address);
+    context.handler().connect(context, hostname, family, port, address);
   }
 }

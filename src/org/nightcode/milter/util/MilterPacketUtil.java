@@ -74,7 +74,7 @@ public enum MilterPacketUtil {
    */
   public static final MilterPacket SMFIS_SKIP = MilterPacket.builder().command(SMFIR_SKIP).build();
 
-  private static final byte ZERO_TERM = (byte) 0;
+  private static final byte ZERO_TERM = (byte) 0x00;
 
   private static final EnumSet<MilterState> MESSAGE_STATES = EnumSet.of(
         MilterState.MAIL_FROM

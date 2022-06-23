@@ -14,27 +14,21 @@
 
 package org.nightcode.milter.command;
 
-import java.util.List;
-
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
-import org.nightcode.milter.util.MilterPacketUtil;
 
-import static org.nightcode.milter.CommandCode.SMFIC_RCPT;
+import static org.nightcode.milter.CommandCode.SMFIC_QUIT_NC;
 
-class EnvrcptCommandProcessor implements CommandProcessor {
+class QuitNcCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
-    return SMFIC_RCPT;
+    return SMFIC_QUIT_NC;
   }
 
-  @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
-    context.setSessionState(MilterState.RECIPIENTS);
-
-    List<String> recipients = MilterPacketUtil.splitByZeroTerm(packet.payload());
-    context.handler().envrcpt(context, recipients);
+  @Override public void submit(MilterContext context, MilterPacket packet) {
+    context.setSessionState(MilterState.QUIT_NEW_CONNECTION);
+    context.handler().quitNc(context);
   }
 }

@@ -34,7 +34,7 @@ public class TempFailMilterHandler extends AbstractMilterHandler {
     context.sendPacket(SMFIS_TEMPFAIL);
   }
 
-  @Override public void close(MilterContext context) {
+  @Override public void quit(MilterContext context) {
     Log.debug().log(getClass(), "<CLOSE>");
   }
 }

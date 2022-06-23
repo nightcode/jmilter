@@ -56,7 +56,7 @@ public class MilterChannelHandler extends SimpleChannelInboundHandler<MilterPack
 
   public MilterChannelHandler(MilterHandler milterHandler) {
     this.milterHandler = milterHandler;
-    this.commandManager = new CommandEngine(milterHandler);
+    this.commandManager = CommandEngine.instance();
   }
 
   @Override protected void channelRead0(ChannelHandlerContext ctx, MilterPacket milterPacket) {

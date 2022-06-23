@@ -19,18 +19,13 @@ import java.util.List;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.MilterPacketUtil;
 
 import static org.nightcode.milter.CommandCode.SMFIC_MAIL;
 
-class EnvfromCommandProcessor extends AbstractCommandHandler {
-
-  EnvfromCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
+class EnvfromCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
     return SMFIC_MAIL;
@@ -40,6 +35,6 @@ class EnvfromCommandProcessor extends AbstractCommandHandler {
     context.setSessionState(MilterState.MAIL_FROM);
 
     List<String> from = MilterPacketUtil.splitByZeroTerm(packet.payload());
-    handler.envfrom(context, from);
+    context.handler().envfrom(context, from);
   }
 }

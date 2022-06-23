@@ -15,38 +15,42 @@
 package org.nightcode.milter.command;
 
 import org.nightcode.milter.MilterContext;
+import org.nightcode.milter.MilterContextImpl;
+import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
+import org.nightcode.milter.net.MilterPacketSender;
+import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.util.ProtocolSteps;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.easymock.EasyMock;
 
 import static org.nightcode.milter.CommandCode.SMFIC_QUIT;
 
-public class QuitCommandProcessorTest {
+public class QuitCommandProcessorTest extends AbstractCommandProcessorTest {
 
-  @Test public void testSubmit() {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+  @Test public void testSubmit() throws MilterException {
+    MilterHandler      handlerMock      = EasyMock.createMock(MilterHandler.class);
+    MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
+    MilterContext      context          = new MilterContextImpl(handlerMock, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
+
+    CommandProcessor processor = new QuitCommandProcessor();
 
     MilterPacket packet = new MilterPacket(SMFIC_QUIT);
 
-    QuitCommandProcessor processor = new QuitCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.QUIT);
+    handlerMock.quit(context);
+    EasyMock.expectLastCall().once();
+    packetSenderMock.close();
     EasyMock.expectLastCall().once();
 
-    milterContextMock.destroy();
-    EasyMock.expectLastCall().once();
-    
-    milterHandlerMock.close(milterContextMock);
-    EasyMock.expectLastCall().once();
+    EasyMock.replay(handlerMock, packetSenderMock);
 
-    EasyMock.replay(milterHandlerMock, milterContextMock);
+    processor.submit(context, packet);
+    Assert.assertEquals(MilterState.QUIT, context.getSessionState());
 
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    EasyMock.verify(handlerMock, packetSenderMock);
   }
 }

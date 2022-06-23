@@ -40,7 +40,7 @@ public class MilterGatewayManagerTest {
     InetSocketAddress address = new InetSocketAddress("localhost", port);
 
     MilterHandler milterHandler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };

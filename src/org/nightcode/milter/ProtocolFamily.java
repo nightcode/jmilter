@@ -12,22 +12,22 @@
  * the License.
  */
 
-package org.nightcode.milter.command;
+package org.nightcode.milter;
 
-import org.nightcode.milter.Code;
-import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterException;
-import org.nightcode.milter.codec.MilterPacket;
+public enum ProtocolFamily implements Code {
 
-import static org.nightcode.milter.CommandCode.SMFIC_ABORT;
+  SMFIA_UNKNOWN('U'), // Unknown (NOTE: Omits "port" and "host" fields entirely)
+  SMFIA_UNIX   ('L'), // Unix (AF_UNIX/AF_LOCAL) socket ("port" is 0)
+  SMFIA_INET   ('4'), // TCPv4 connection
+  SMFIA_INET6  ('6'); // TCPv6 connection
 
-class AbortCommandProcessor implements CommandProcessor {
+  private final int code;
 
-  @Override public Code command() {
-    return SMFIC_ABORT;
+  ProtocolFamily(int code) {
+    this.code = code;
   }
 
-  @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
-    context.handler().abort(context, packet);
+  @Override public int code() {
+    return code;
   }
 }

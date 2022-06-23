@@ -14,142 +14,91 @@
 
 package org.nightcode.milter.command;
 
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.UUID;
 
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.MilterState;
+import org.nightcode.milter.ProtocolFamily;
 import org.nightcode.milter.codec.MilterPacket;
-import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
 
 import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
 
-public class ConnectCommandProcessorTest {
-
-  private static final Hexs HEX = Hexs.hex();
-
-  private final UUID contextId = UUID.randomUUID();
+public class ConnectCommandProcessorTest extends AbstractCommandProcessorTest {
 
   @Test public void testSubmit() throws UnknownHostException, MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
-
-    InetAddress actualAddress = InetAddress.getByName("144.229.210.94");
+    InetSocketAddress actualAddress = new InetSocketAddress("144.229.210.94", 62293);
     MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3232392e3231302e393400"));
 
-    ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.CONNECT);
-    EasyMock.expectLastCall().once();
-
-    milterHandlerMock.connect(milterContextMock, "[144.229.210.94]", actualAddress);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    execute(packet, new ConnectCommandProcessor(), ctx -> {
+      try {
+        ctx.handler().connect(ctx, "[144.229.210.94]", ProtocolFamily.SMFIA_INET.code(), 62293, actualAddress);
+        EasyMock.expectLastCall().once();
+      } catch (MilterException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   @Test public void testSubmitNullAddress() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
-
     MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0036f3553134342e3232392e3231302e393400"));
 
-    ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.CONNECT);
-    EasyMock.expectLastCall().once();
-
-    milterHandlerMock.connect(milterContextMock, "[144.229.210.94]", null);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    execute(packet, new ConnectCommandProcessor(), ctx -> {
+      try {
+        ctx.handler().connect(ctx, "[144.229.210.94]", ProtocolFamily.SMFIA_INET6.code(), 0, null);
+        EasyMock.expectLastCall().once();
+      } catch (MilterException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   @Test public void testCheckInvalidAddressValue() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
-
     MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3239392e3231302e393400"));
 
-    ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.CONNECT);
-    EasyMock.expectLastCall().once();
-    EasyMock.expect(milterContextMock.id()).andReturn(contextId).once();
-
-    milterHandlerMock.abortSession(milterContextMock, packet);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    execute(packet, new ConnectCommandProcessor(), ctx -> {
+      ctx.handler().abortSession(ctx, packet);
+      EasyMock.expectLastCall().once();
+    });
   }
 
   @Test public void testCheckLastZeroTerm() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
-
     MilterPacket packet = new MilterPacket(SMFIC_CONNECT
         , HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3232392e3231302e3934"));
 
-    ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.CONNECT);
-    EasyMock.expectLastCall().once();
-    EasyMock.expect(milterContextMock.id()).andReturn(contextId).once();
-
-    milterHandlerMock.abortSession(milterContextMock, packet);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    execute(packet, new ConnectCommandProcessor(), ctx -> {
+      ctx.handler().abortSession(ctx, packet);
+      EasyMock.expectLastCall().once();
+    });
   }
 
   @Test public void testCheckWrongPacketLength() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
     MilterPacket packet1 = new MilterPacket(SMFIC_CONNECT, HEX.toByteArray("5b3134342e3232392e3231302e39345d00"));
     MilterPacket packet2 = new MilterPacket(SMFIC_CONNECT, HEX.toByteArray("5b3134342e3232392e3231302e39345d003400"));
 
-    ConnectCommandProcessor processor = new ConnectCommandProcessor(milterHandlerMock);
+    CommandProcessor processor = new ConnectCommandProcessor();
 
-    milterContextMock.setSessionState(MilterState.CONNECT);
-    EasyMock.expectLastCall().times(2);
-    EasyMock.expect(milterContextMock.id()).andReturn(contextId).times(2);
-
-    milterHandlerMock.abortSession(milterContextMock, packet1);
-    EasyMock.expectLastCall().once();
-    milterHandlerMock.abortSession(milterContextMock, packet2);
+    handlerMock.abortSession(context, packet1);
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock, milterContextMock);
+    handlerMock.abortSession(context, packet2);
+    EasyMock.expectLastCall().once();
 
-    processor.submit(milterContextMock, packet1);
-    processor.submit(milterContextMock, packet2);
+    EasyMock.replay(handlerMock);
 
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    processor.submit(context, packet1);
+    processor.submit(context, packet2);
+
+    EasyMock.verify(handlerMock);
   }
 }

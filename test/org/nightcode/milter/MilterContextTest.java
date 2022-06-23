@@ -30,10 +30,11 @@ import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
 public class MilterContextTest {
 
   @Test public void testSendPacket() throws MilterException, IOException {
+    MilterHandler milterHandlerMock = EasyMock.mock(MilterHandler.class);
     MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
 
-    MilterContext context
-        = new MilterContextImpl(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
+    MilterContext context = new MilterContextImpl(milterHandlerMock, Actions.DEF_ACTIONS
+        , ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
 
     MilterPacket packet = MilterPacket.builder()
         .command(SMFIC_CONNECT)
@@ -53,9 +54,10 @@ public class MilterContextTest {
   }
 
   @Test public void testSendPacketNr() throws MilterException, IOException {
+    MilterHandler milterHandlerMock = EasyMock.mock(MilterHandler.class);
     MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
 
-    MilterContext context = new MilterContextImpl(Actions.DEF_ACTIONS
+    MilterContext context = new MilterContextImpl(milterHandlerMock, Actions.DEF_ACTIONS
         , ProtocolSteps.builder().noReplyForConnect().build(), packetSenderMock);
 
     MilterPacket packet = MilterPacket.builder()
@@ -81,10 +83,11 @@ public class MilterContextTest {
   }
 
   @Test public void testSendContinue() throws MilterException, IOException {
+    MilterHandler milterHandlerMock = EasyMock.mock(MilterHandler.class);
     MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
 
     MilterContext context
-        = new MilterContextImpl(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
+        = new MilterContextImpl(milterHandlerMock, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
 
     packetSenderMock.send(MilterPacketUtil.SMFIS_CONTINUE);
     EasyMock.expectLastCall().once();
@@ -100,9 +103,10 @@ public class MilterContextTest {
   }
 
   @Test public void testDestroy() {
+    MilterHandler milterHandlerMock = EasyMock.mock(MilterHandler.class);
     MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
 
-    MilterContext context = new MilterContextImpl(Actions.DEF_ACTIONS
+    MilterContext context = new MilterContextImpl(milterHandlerMock, Actions.DEF_ACTIONS
         , ProtocolSteps.builder().noReplyForConnect().build(), packetSenderMock);
 
     packetSenderMock.close();

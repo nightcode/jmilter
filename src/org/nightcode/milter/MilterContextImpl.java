@@ -20,6 +20,8 @@ public class MilterContextImpl implements MilterContext {
 
   private final UUID id;
 
+  private final MilterHandler handler;
+  
   private final Actions milterActions;
   private final ProtocolSteps milterProtocolSteps;
   private final MilterPacketSender milterPacketSender;
@@ -34,12 +36,17 @@ public class MilterContextImpl implements MilterContext {
 
   private final IntMap<Map<String, String>> macros = new IntMap<>();
 
-  public MilterContextImpl(Actions milterActions, ProtocolSteps milterProtocolSteps, MilterPacketSender milterPacketSender) {
-    this.milterActions = milterActions;
+  public MilterContextImpl(MilterHandler handler, Actions milterActions, ProtocolSteps milterProtocolSteps, MilterPacketSender milterPacketSender) {
+    this.handler             = handler;
+    this.milterActions       = milterActions;
     this.milterProtocolSteps = milterProtocolSteps;
-    this.milterPacketSender = milterPacketSender;
+    this.milterPacketSender  = milterPacketSender;
 
     this.id = UUID.randomUUID();
+  }
+
+  @Override public MilterHandler handler() {
+    return handler;
   }
 
   @Override public void destroy() {

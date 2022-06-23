@@ -45,16 +45,15 @@ public class SessionInitializer extends ChannelInitializer<SocketChannel> {
     ChannelPipeline pipeline = channel.pipeline();
 
     if (loggingEnabled) {
-      pipeline.addLast("MilterLogger"
-          , new LoggingHandler(MilterGatewayManager.class.getName(), LogLevel.valueOf(logLevel)));
+      pipeline.addLast("logger", new LoggingHandler(MilterGatewayManager.class.getName(), LogLevel.valueOf(logLevel)));
     }
 
-    pipeline.addLast("FrameEncoder", new Int32LenFrameEncoder());
-    pipeline.addLast("MilterPacketEncoder", new MilterPacketEncoder());
+    pipeline.addLast("frameDecoder", new Int32LenFrameDecoder());
+    pipeline.addLast("frameEncoder", new Int32LenFrameEncoder());
 
-    pipeline.addLast("FrameDecoder", new Int32LenFrameDecoder());
-    pipeline.addLast("MilterPacketDecoder", new MilterPacketDecoder());
+    pipeline.addLast("milterPacketDecoder", new MilterPacketDecoder());
+    pipeline.addLast("milterPacketEncoder", new MilterPacketEncoder());
 
-    pipeline.addLast("MilterChannelHandler", new MilterChannelHandler(milterHandler));
+    pipeline.addLast("milterChannelHandler", new MilterChannelHandler(milterHandler));
   }
 }

@@ -15,6 +15,7 @@
 package org.nightcode.milter;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 
 import org.nightcode.milter.codec.MilterPacket;
@@ -52,7 +53,7 @@ public class AbstractMilterHandlerTest {
     ProtocolSteps milterProtocolSteps = ProtocolSteps.DEF_PROTOCOL_STEPS;
 
     MilterHandler handler = new AbstractMilterHandler(milterActions, milterProtocolSteps) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -69,7 +70,7 @@ public class AbstractMilterHandlerTest {
     EasyMock.replay(packetSenderMock);
 
     context.setSessionState(MilterState.OPTION_NEGOTIATION);
-    handler.negotiate(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
+    handler.optneg(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
 
     Assert.assertEquals(MilterContext.PROTOCOL_VERSION, context.milterProtocolVersion());
     Assert.assertEquals(milterActions, context.milterActions());
@@ -109,7 +110,7 @@ public class AbstractMilterHandlerTest {
     ProtocolSteps milterProtocolSteps = ProtocolSteps.DEF_PROTOCOL_STEPS;
 
     MilterHandler handler = new AbstractMilterHandler(milterActions, milterProtocolSteps) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -124,7 +125,7 @@ public class AbstractMilterHandlerTest {
     EasyMock.replay(packetSenderMock);
 
     context.setSessionState(MilterState.OPTION_NEGOTIATION);
-    handler.negotiate(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
+    handler.optneg(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
 
     Assert.assertEquals(MilterContext.PROTOCOL_VERSION, context.milterProtocolVersion());
     Assert.assertEquals(milterActions, context.milterActions());
@@ -144,7 +145,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -171,7 +172,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -181,7 +182,7 @@ public class AbstractMilterHandlerTest {
 
     EasyMock.replay(contextMock);
 
-    handler.connect(contextMock, "localhost", null);
+    handler.connect(contextMock, "localhost", ProtocolFamily.SMFIA_INET.code(), 23442, new InetSocketAddress("127.0.0.1", 23442));
 
     EasyMock.verify(contextMock);
   }
@@ -190,7 +191,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -209,7 +210,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -228,7 +229,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -247,7 +248,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -266,7 +267,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -285,7 +286,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -304,7 +305,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -323,7 +324,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -339,7 +340,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
@@ -357,7 +358,7 @@ public class AbstractMilterHandlerTest {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-      @Override public void close(MilterContext context) {
+      @Override public void quit(MilterContext context) {
         // do nothing
       }
     };

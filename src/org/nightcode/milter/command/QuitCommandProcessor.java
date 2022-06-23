@@ -16,17 +16,12 @@ package org.nightcode.milter.command;
 
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 
 import static org.nightcode.milter.CommandCode.SMFIC_QUIT;
 
-class QuitCommandProcessor extends AbstractCommandHandler {
-
-  QuitCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
+class QuitCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
     return SMFIC_QUIT;
@@ -35,7 +30,7 @@ class QuitCommandProcessor extends AbstractCommandHandler {
   @Override public void submit(MilterContext context, MilterPacket packet) {
     context.setSessionState(MilterState.QUIT);
     try {
-      handler.close(context);
+      context.handler().quit(context);
     } finally {
       context.destroy();
     }

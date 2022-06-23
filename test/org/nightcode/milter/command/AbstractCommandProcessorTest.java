@@ -14,42 +14,34 @@
 
 package org.nightcode.milter.command;
 
-import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 import org.nightcode.milter.MilterContext;
+import org.nightcode.milter.MilterContextImpl;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.codec.MilterPacket;
+import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.util.Hexs;
+import org.nightcode.milter.util.ProtocolSteps;
 
-import org.junit.Test;
 import org.easymock.EasyMock;
 
-import static org.nightcode.milter.CommandCode.SMFIC_BODYEOB;
+class AbstractCommandProcessorTest {
 
-public class EndOfBodyCommandProcessorTest extends AbstractCommandProcessorTest {
+  protected static final Hexs HEX = Hexs.hex();
 
-  @Test public void testSubmit() throws MilterException {
+  protected MilterContext context(MilterHandler handler) {
+    return new MilterContextImpl(handler, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, null);
+  }
+
+  protected void execute(MilterPacket packet, CommandProcessor processor, Consumer<MilterContext> consumer) throws MilterException {
     MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext context     = context(handlerMock);
 
-    String bodyText = "test data\r\n";
-
-    MilterPacket packet1 = new MilterPacket(SMFIC_BODYEOB);
-    MilterPacket packet2 = new MilterPacket(SMFIC_BODYEOB, bodyText.getBytes(StandardCharsets.UTF_8));
-
-    CommandProcessor processor = new EndOfBodyCommandProcessor();
-
-    handlerMock.eom(context, null);
-    EasyMock.expectLastCall().once();
-
-    handlerMock.eom(context, bodyText);
-    EasyMock.expectLastCall().once();
-
+    consumer.accept(context);
     EasyMock.replay(handlerMock);
-
-    processor.submit(context, packet1);
-    processor.submit(context, packet2);
-
+    processor.submit(context, packet);
     EasyMock.verify(handlerMock);
   }
 }

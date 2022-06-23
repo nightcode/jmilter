@@ -15,15 +15,20 @@
 package org.nightcode.milter.command;
 
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import org.nightcode.milter.MilterContext;
+import org.nightcode.milter.MilterContextImpl;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
+import org.nightcode.milter.ProtocolFamily;
 import org.nightcode.milter.codec.MilterPacket;
+import org.nightcode.milter.net.MilterPacketSender;
+import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.Hexs;
+import org.nightcode.milter.util.ProtocolSteps;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.easymock.EasyMock;
 
@@ -39,6 +44,7 @@ import static org.nightcode.milter.CommandCode.SMFIC_MACRO;
 import static org.nightcode.milter.CommandCode.SMFIC_MAIL;
 import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 import static org.nightcode.milter.CommandCode.SMFIC_QUIT;
+import static org.nightcode.milter.CommandCode.SMFIC_QUIT_NC;
 import static org.nightcode.milter.CommandCode.SMFIC_RCPT;
 import static org.nightcode.milter.CommandCode.SMFIC_UNKNOWN;
 
@@ -46,322 +52,336 @@ public class CommandEngineTest {
 
   private static final Hexs HEX = Hexs.hex();
 
-  private final UUID contextId = UUID.randomUUID();
-
-  @Test public void testSubmit() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
-
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
-
-    MilterPacket packet = MilterPacket.builder()
-        .command((byte) 0x00)
-        .build();
-
-    milterContextMock.setSessionState(MilterState.UNKNOWN);
-    EasyMock.expectLastCall().once();
-    
-    milterHandlerMock.unknown(milterContextMock, packet.payload());
-    EasyMock.expectLastCall().once();
-    
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    engine.submit(milterContextMock, packet);
-    
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+  private MilterContext context(MilterHandler handler) {
+    return new MilterContextImpl(handler, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, null);
   }
 
-  @Test public void testSubmitWithException() {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+  @Test public void testSubmit() throws MilterException {
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = MilterPacket.builder()
-        .command((byte) 0x00)
-        .build();
+    MilterPacket packet = MilterPacket.builder().command((byte) 0x00).build();
 
-    milterContextMock.setSessionState(MilterState.UNKNOWN);
+    handlerMock.unknown(context, packet.payload());
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(handlerMock);
+
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.UNKNOWN, context.getSessionState());
+
+    EasyMock.verify(handlerMock);
+  }
+
+  @Test public void testSubmitWithException() throws MilterException {
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
+
+    CommandEngine engine = CommandEngine.instance();
+
+    MilterPacket packet = MilterPacket.builder().command((byte) 0x00).build();
+
+    handlerMock.unknown(context, packet.payload());
     EasyMock.expectLastCall().andThrow(new IllegalStateException());
-
-    EasyMock.expect(milterContextMock.id()).andReturn(contextId).once();
-    milterContextMock.setSessionState(MilterState.ABORT);
+    handlerMock.abortSession(context, packet);
     EasyMock.expectLastCall().once();
 
-    milterHandlerMock.abortSession(milterContextMock, packet);
-    EasyMock.expectLastCall().once();
+    EasyMock.replay(handlerMock);
 
-    EasyMock.replay(milterHandlerMock, milterContextMock);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.ABORT, context.getSessionState());
 
-    engine.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitAbort() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
     MilterPacket packet = new MilterPacket(SMFIC_ABORT);
 
-    milterHandlerMock.abort(EasyMock.eq(milterContextMock), EasyMock.anyObject());
+    handlerMock.abort(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitBody() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    String bodyText = "test data\r\n";
-    MilterPacket packet = new MilterPacket(SMFIC_BODY, bodyText.getBytes(StandardCharsets.UTF_8));
+    String       bodyText = "test data\r\n";
+    MilterPacket packet   = new MilterPacket(SMFIC_BODY, bodyText.getBytes(StandardCharsets.UTF_8));
 
-    milterHandlerMock.body(EasyMock.eq(milterContextMock), EasyMock.anyObject());
+    handlerMock.body(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.BODY, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitConnect() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = new MilterPacket(SMFIC_CONNECT
-        , HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3232392e3231302e393400"));
+    MilterPacket packet = new MilterPacket(SMFIC_CONNECT, HEX.toByteArray("5b3134342e3232392e3231302e39345d0034f3553134342e3232392e3231302e393400"));
 
-    milterHandlerMock.connect(EasyMock.eq(milterContextMock), EasyMock.anyObject(), EasyMock.anyObject());
+    handlerMock.connect(EasyMock.eq(context), EasyMock.anyObject(), EasyMock.eq(ProtocolFamily.SMFIA_INET.code()), EasyMock.eq(62293), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.CONNECT, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitData() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    byte[] payload = HEX.toByteArray("54690031313331413641424542000000000154");
-    MilterPacket packet = new MilterPacket(SMFIC_DATA, payload);
+    byte[]       payload = HEX.toByteArray("54690031313331413641424542000000000154");
+    MilterPacket packet  = new MilterPacket(SMFIC_DATA, payload);
 
-    milterHandlerMock.data(EasyMock.eq(milterContextMock), EasyMock.anyObject());
+    handlerMock.data(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.DATA, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitEndOfBody() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
     MilterPacket packet = new MilterPacket(SMFIC_BODYEOB);
 
-    milterHandlerMock.eom(EasyMock.eq(milterContextMock), EasyMock.anyObject());
+    handlerMock.eom(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.EOM, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitEndOfHeader() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
     MilterPacket packet = new MilterPacket(SMFIC_EOH);
 
-    milterHandlerMock.eoh(EasyMock.eq(milterContextMock));
+    handlerMock.eoh(context);
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.EOH, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitEnvfrom() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = new MilterPacket(SMFIC_MAIL
-        , HEX.toByteArray("3c737570706f7274406578616d706c652e6f72673e"
-        + "0053495a453d3135353200424f44593d384249544d494d4500"));
+    MilterPacket packet = new MilterPacket(SMFIC_MAIL, HEX.toByteArray("3c737570706f7274406578616d706c652e6f72673e" + "0053495a453d3135353200424f44593d384249544d494d4500"));
 
-    milterHandlerMock.envfrom(EasyMock.eq(milterContextMock), EasyMock.anyObject());
+    handlerMock.envfrom(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.MAIL_FROM, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitEnvrcpt() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = new MilterPacket(SMFIC_RCPT
-        , HEX.toByteArray("3c636c69656e74406578616d706c652e6f72673e"
-        + "004f524350543d7266633832323b636c69656e74406578616d706c652e6f726700"));
+    MilterPacket packet = new MilterPacket(SMFIC_RCPT, HEX.toByteArray("3c636c69656e74406578616d706c652e6f72673e" + "004f524350543d7266633832323b636c69656e74406578616d706c652e6f726700"));
 
-    milterHandlerMock.envrcpt(EasyMock.eq(milterContextMock), EasyMock.anyObject());
+    handlerMock.envrcpt(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.RECIPIENTS, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitHeader() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = new MilterPacket(SMFIC_HEADER
-        , HEX.toByteArray("46726f6d0020737570706f7274203c737570706f7274406578616d706c652e6f72673e00"));
+    MilterPacket packet = new MilterPacket(SMFIC_HEADER, HEX.toByteArray("46726f6d0020737570706f7274203c737570706f7274406578616d706c652e6f72673e00"));
 
-    milterHandlerMock.header(EasyMock.eq(milterContextMock), EasyMock.anyObject(), EasyMock.anyObject());
+    handlerMock.header(EasyMock.eq(context), EasyMock.anyObject(), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.HEADERS, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitHelo() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = new MilterPacket(SMFIC_HELO
-        , HEX.toByteArray("6d61696c2e6578616d706c652e6f726700"));
+    MilterPacket packet = new MilterPacket(SMFIC_HELO, HEX.toByteArray("6d61696c2e6578616d706c652e6f726700"));
 
-    milterHandlerMock.helo(EasyMock.eq(milterContextMock), EasyMock.anyObject());
+    handlerMock.helo(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.HELO, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
-  @Test public void testSubmitMacros() {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+  @Test public void testSubmitMacros() throws MilterException {
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = MilterPacket.builder()
-        .command(SMFIC_MACRO)
-        .payload(HEX.toByteArray("436a006d782e6578616d706c652e6f7267007b6461656d6f6e5f6e616d657d00"
-            + "6d782e6578616d706c652e6f7267007600506f737466697820322e31302e3100"))
-        .build();
+    MilterPacket packet = MilterPacket.builder().command(SMFIC_MACRO).payload(HEX.toByteArray("436a006d782e6578616d706c652e6f7267007b6461656d6f6e5f6e616d657d00" + "6d782e6578616d706c652e6f7267007600506f737466697820322e31302e3100")).build();
 
-    milterContextMock.setMacros(EasyMock.eq(SMFIC_CONNECT.code()), EasyMock.anyObject());
+    handlerMock.macro(EasyMock.eq(context), EasyMock.eq(SMFIC_CONNECT.code()), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitOptneg() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = new MilterPacket(SMFIC_OPTNEG
-        , HEX.toByteArray("00000006000001ff001fffff"));
+    MilterPacket packet = new MilterPacket(SMFIC_OPTNEG, HEX.toByteArray("00000006000001ff001fffff"));
 
-    milterHandlerMock.negotiate(EasyMock.eq(milterContextMock)
-        , EasyMock.eq(6), EasyMock.anyObject(), EasyMock.anyObject());
+    handlerMock.optneg(EasyMock.eq(context), EasyMock.eq(6), EasyMock.anyObject(), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.OPTION_NEGOTIATION, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 
   @Test public void testSubmitQuit() {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler      handlerMock      = EasyMock.createMock(MilterHandler.class);
+    MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
+    MilterContext      context          = new MilterContextImpl(handlerMock, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
     MilterPacket packet = new MilterPacket(SMFIC_QUIT);
 
-    milterHandlerMock.close(EasyMock.eq(milterContextMock));
+    handlerMock.quit(context);
+    EasyMock.expectLastCall().once();
+    packetSenderMock.close();
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock, packetSenderMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.QUIT, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock, packetSenderMock);
+  }
+
+  @Test public void testSubmitQuitNc() {
+    MilterHandler      handlerMock      = EasyMock.createMock(MilterHandler.class);
+    MilterPacketSender packetSenderMock = EasyMock.mock(MilterPacketSender.class);
+    MilterContext      context          = new MilterContextImpl(handlerMock, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
+
+    CommandEngine engine = CommandEngine.instance();
+
+    MilterPacket packet = new MilterPacket(SMFIC_QUIT_NC);
+
+    handlerMock.quitNc(EasyMock.eq(context));
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(handlerMock, packetSenderMock);
+
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.QUIT_NEW_CONNECTION, context.getSessionState());
+
+    EasyMock.verify(handlerMock, packetSenderMock);
   }
 
   @Test public void testSubmitUnknown() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
+    MilterContext context     = context(handlerMock);
 
-    CommandEngine engine = new CommandEngine(milterHandlerMock);
+    CommandEngine engine = CommandEngine.instance();
 
     MilterPacket packet = new MilterPacket(SMFIC_UNKNOWN, HEX.toByteArray("c0febebe"));
 
-    milterHandlerMock.unknown(EasyMock.eq(milterContextMock), EasyMock.anyObject());
+    handlerMock.unknown(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
-    EasyMock.replay(milterHandlerMock);
+    EasyMock.replay(handlerMock);
 
-    engine.submit(milterContextMock, packet);
+    engine.submit(context, packet);
+    Assert.assertEquals(MilterState.UNKNOWN, context.getSessionState());
 
-    EasyMock.verify(milterHandlerMock);
+    EasyMock.verify(handlerMock);
   }
 }

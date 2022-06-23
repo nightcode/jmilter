@@ -17,17 +17,12 @@ package org.nightcode.milter.command;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 
 import static org.nightcode.milter.CommandCode.SMFIC_DATA;
 
-class DataCommandProcessor extends AbstractCommandHandler {
-
-  DataCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
+class DataCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
     return SMFIC_DATA;
@@ -35,6 +30,6 @@ class DataCommandProcessor extends AbstractCommandHandler {
 
   @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     context.setSessionState(MilterState.DATA);
-    handler.data(context, packet.payload());
+    context.handler().data(context, packet.payload());
   }
 }

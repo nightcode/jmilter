@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Log;
@@ -28,11 +27,7 @@ import org.nightcode.milter.util.MilterPacketUtil;
 import static java.lang.String.format;
 import static org.nightcode.milter.CommandCode.SMFIC_HELO;
 
-class HeloCommandProcessor extends AbstractCommandHandler {
-
-  HeloCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
+class HeloCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
     return SMFIC_HELO;
@@ -44,11 +39,11 @@ class HeloCommandProcessor extends AbstractCommandHandler {
     int i = MilterPacketUtil.indexOfZeroTerm(packet.payload());
     if (i < 0) {
       Log.info().log(getClass(), format("[%s] received invalid packet: %s", context.id(), packet));
-      handler.abortSession(context, packet);
+      context.handler().abortSession(context, packet);
       return;
     }
 
     String helohost = new String(packet.payload(), 0, i, StandardCharsets.UTF_8);
-    handler.helo(context, helohost);
+    context.handler().helo(context, helohost);
   }
 }

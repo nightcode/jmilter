@@ -19,17 +19,12 @@ import java.nio.charset.StandardCharsets;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 
 import static org.nightcode.milter.CommandCode.SMFIC_BODYEOB;
 
-class EndOfBodyCommandProcessor extends AbstractCommandHandler {
-
-  EndOfBodyCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
+class EndOfBodyCommandProcessor implements CommandProcessor {
 
   @Override public Code command() {
     return SMFIC_BODYEOB;
@@ -42,6 +37,6 @@ class EndOfBodyCommandProcessor extends AbstractCommandHandler {
     if (packet.payload().length > 0) {
       bodyChunk = new String(packet.payload(), StandardCharsets.UTF_8);
     }
-    handler.eom(context, bodyChunk);
+    context.handler().eom(context, bodyChunk);
   }
 }

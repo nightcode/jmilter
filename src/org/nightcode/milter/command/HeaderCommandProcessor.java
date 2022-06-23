@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Log;
@@ -28,13 +27,9 @@ import org.nightcode.milter.util.MilterPacketUtil;
 import static java.lang.String.format;
 import static org.nightcode.milter.CommandCode.SMFIC_HEADER;
 
-class HeaderCommandProcessor extends AbstractCommandHandler {
+class HeaderCommandProcessor implements CommandProcessor {
 
   private static final int LAST_ZERO_TERM_LENGTH = 1;
-
-  HeaderCommandProcessor(MilterHandler handler) {
-    super(handler);
-  }
 
   @Override public Code command() {
     return SMFIC_HEADER;
@@ -45,7 +40,7 @@ class HeaderCommandProcessor extends AbstractCommandHandler {
 
     if (!MilterPacketUtil.isLastZeroTerm(packet.payload())) {
       Log.info().log(getClass(), format("[%s] received invalid packet: %s", context.id(), packet));
-      handler.abortSession(context, packet);
+      context.handler().abortSession(context, packet);
       return;
     }
 
@@ -54,7 +49,7 @@ class HeaderCommandProcessor extends AbstractCommandHandler {
 
     if ((i + LAST_ZERO_TERM_LENGTH) >= payloadLength) {
       Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));
-      handler.abortSession(context, packet);
+      context.handler().abortSession(context, packet);
       return;
     }
 
@@ -66,6 +61,6 @@ class HeaderCommandProcessor extends AbstractCommandHandler {
     String headerValue
         = new String(packet.payload(), offset, payloadLength - offset - LAST_ZERO_TERM_LENGTH, StandardCharsets.UTF_8);
 
-    handler.header(context, headerName, headerValue);
+    context.handler().header(context, headerName, headerValue);
   }
 }

@@ -14,41 +14,27 @@
 
 package org.nightcode.milter.command;
 
-import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
-import org.nightcode.milter.util.Hexs;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
 
 import static org.nightcode.milter.CommandCode.SMFIC_DATA;
 
-public class DataCommandProcessorTest {
-
-  private static final Hexs HEX = Hexs.hex();
+public class DataCommandProcessorTest extends AbstractCommandProcessorTest {
 
   @Test public void testSubmit() throws MilterException {
-    MilterHandler milterHandlerMock = EasyMock.createMock(MilterHandler.class);
-    MilterContext milterContextMock = EasyMock.createMock(MilterContext.class);
+    byte[]       payload = HEX.toByteArray("54690031313331413641424542000000000154");
+    MilterPacket packet  = new MilterPacket(SMFIC_DATA, payload);
 
-    byte[] payload = HEX.toByteArray("54690031313331413641424542000000000154");
-    MilterPacket packet = new MilterPacket(SMFIC_DATA, payload);
-
-    DataCommandProcessor processor = new DataCommandProcessor(milterHandlerMock);
-
-    milterContextMock.setSessionState(MilterState.DATA);
-    EasyMock.expectLastCall().once();
-
-    milterHandlerMock.data(milterContextMock, payload);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(milterHandlerMock, milterContextMock);
-
-    processor.submit(milterContextMock, packet);
-
-    EasyMock.verify(milterHandlerMock, milterContextMock);
+    execute(packet, new DataCommandProcessor(), ctx -> {
+      try {
+        ctx.handler().data(ctx, payload);
+        EasyMock.expectLastCall().once();
+      } catch (MilterException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 }

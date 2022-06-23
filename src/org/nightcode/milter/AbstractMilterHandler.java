@@ -14,8 +14,9 @@
 
 package org.nightcode.milter;
 
-import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 import org.nightcode.milter.codec.MilterPacket;
@@ -47,8 +48,24 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     this.messageModificationService = messageModificationService;
   }
 
-  @Override public void connect(MilterContext context, String hostname, @Nullable InetAddress address)
+  @Override public void abort(MilterContext context, @Nullable MilterPacket packet) throws MilterException {
+    // do nothing
+  }
+
+  @Override public void body(MilterContext context, String bodyChunk) throws MilterException {
+    context.sendContinue();
+  }
+
+  @Override public void connect(MilterContext context, String hostname, int family, int port, @Nullable SocketAddress address)
       throws MilterException {
+    context.sendContinue();
+  }
+
+  @Override public void macro(MilterContext context, int type, Map<String, String> macros) {
+    context.setMacros(type, macros);
+  }
+
+  @Override public void eom(MilterContext context, @Nullable String bodyChunk) throws MilterException {
     context.sendContinue();
   }
 
@@ -56,15 +73,15 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.sendContinue();
   }
 
-  @Override public void envfrom(MilterContext context, List<String> from) throws MilterException {
-    context.sendContinue();
-  }
-
-  @Override public void envrcpt(MilterContext context, List<String> recipients) throws MilterException {
-    context.sendContinue();
+  @Override public void quitNc(MilterContext context) {
+    // do nothing
   }
 
   @Override public void header(MilterContext context, String headerName, String headerValue) throws MilterException {
+    context.sendContinue();
+  }
+
+  @Override public void envfrom(MilterContext context, List<String> from) throws MilterException {
     context.sendContinue();
   }
 
@@ -72,33 +89,17 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.sendContinue();
   }
 
-  @Override public void body(MilterContext context, String bodyChunk) throws MilterException {
-    context.sendContinue();
-  }
-
-  @Override public void eom(MilterContext context, @Nullable String bodyChunk) throws MilterException {
-    context.sendContinue();
-  }
-
-  @Override public void abort(MilterContext context, @Nullable MilterPacket packet) throws MilterException {
-    // do nothing
-  }
-
-  @Override public void data(MilterContext context, byte[] payload) throws MilterException {
-    context.sendContinue();
-  }
-
-  @Override public void negotiate(MilterContext context, int mtaProtocolVersion, Actions mtaActions, ProtocolSteps mtaProtocolSteps)
+  @Override public void optneg(MilterContext context, int mtaProtocolVersion, Actions mtaActions, ProtocolSteps mtaProtocolSteps)
       throws MilterException {
     Log.debug().log(getClass(), format("protocol negotiation\n"
             + "\tMTA    { Version: %s %s %s}\n"
             + "\tMilter { Version: %s %s %s}"
-            , mtaProtocolVersion
-            , mtaActions
-            , mtaProtocolSteps
-            , context.milterProtocolVersion()
-            , context.milterActions()
-            , context.milterProtocolSteps()
+        , mtaProtocolVersion
+        , mtaActions
+        , mtaProtocolSteps
+        , context.milterProtocolVersion()
+        , context.milterActions()
+        , context.milterProtocolSteps()
     ));
 
     context.setMtaProtocolVersion(mtaProtocolVersion);
@@ -145,6 +146,14 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.sendPacket(response);
   }
 
+  @Override public void envrcpt(MilterContext context, List<String> recipients) throws MilterException {
+    context.sendContinue();
+  }
+
+  @Override public void data(MilterContext context, byte[] payload) throws MilterException {
+    context.sendContinue();
+  }
+
   @Override public void unknown(MilterContext context, byte[] payload) throws MilterException {
     context.sendContinue();
   }
@@ -162,13 +171,13 @@ public abstract class AbstractMilterHandler implements MilterHandler {
 
   @Override public void closeSession(MilterContext context) {
     try {
-      close(context);
+      quit(context);
     } finally {
       context.destroy();
     }
   }
 
   @Override public MilterContext createSession(MilterPacketSender sender) {
-    return new MilterContextImpl(milterActions, milterProtocolSteps, sender);
+    return new MilterContextImpl(this, milterActions, milterProtocolSteps, sender);
   }
 }
