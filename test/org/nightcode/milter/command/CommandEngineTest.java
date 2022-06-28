@@ -1,32 +1,31 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter.command;
 
 import java.nio.charset.StandardCharsets;
 
-import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterContextImpl;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.MilterState;
+import org.nightcode.milter.MilterContext;
+import org.nightcode.milter.MilterContextImpl;
 import org.nightcode.milter.ProtocolFamily;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
-import org.nightcode.milter.util.Actions;
+import org.nightcode.milter.Actions;
 import org.nightcode.milter.util.Hexs;
-import org.nightcode.milter.util.ProtocolSteps;
+import org.nightcode.milter.ProtocolSteps;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,9 +33,9 @@ import org.easymock.EasyMock;
 
 import static org.nightcode.milter.CommandCode.SMFIC_ABORT;
 import static org.nightcode.milter.CommandCode.SMFIC_BODY;
-import static org.nightcode.milter.CommandCode.SMFIC_BODYEOB;
 import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
 import static org.nightcode.milter.CommandCode.SMFIC_DATA;
+import static org.nightcode.milter.CommandCode.SMFIC_EOB;
 import static org.nightcode.milter.CommandCode.SMFIC_EOH;
 import static org.nightcode.milter.CommandCode.SMFIC_HEADER;
 import static org.nightcode.milter.CommandCode.SMFIC_HELO;
@@ -70,7 +69,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.UNKNOWN, context.getSessionState());
+    Assert.assertEquals(SMFIC_UNKNOWN, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -91,7 +90,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.ABORT, context.getSessionState());
+    Assert.assertEquals(SMFIC_ABORT, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -129,7 +128,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.BODY, context.getSessionState());
+    Assert.assertEquals(SMFIC_BODY, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -148,7 +147,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.CONNECT, context.getSessionState());
+    Assert.assertEquals(SMFIC_CONNECT, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -168,26 +167,26 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.DATA, context.getSessionState());
+    Assert.assertEquals(SMFIC_DATA, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
 
-  @Test public void testSubmitEndOfBody() throws MilterException {
+  @Test public void testSubmitEob() throws MilterException {
     MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext context     = context(handlerMock);
 
     CommandEngine engine = CommandEngine.instance();
 
-    MilterPacket packet = new MilterPacket(SMFIC_BODYEOB);
+    MilterPacket packet = new MilterPacket(SMFIC_EOB);
 
-    handlerMock.eom(EasyMock.eq(context), EasyMock.anyObject());
+    handlerMock.eob(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.EOM, context.getSessionState());
+    Assert.assertEquals(SMFIC_EOB, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -206,7 +205,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.EOH, context.getSessionState());
+    Assert.assertEquals(SMFIC_EOH, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -225,7 +224,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.MAIL_FROM, context.getSessionState());
+    Assert.assertEquals(SMFIC_MAIL, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -244,7 +243,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.RECIPIENTS, context.getSessionState());
+    Assert.assertEquals(SMFIC_RCPT, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -263,7 +262,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.HEADERS, context.getSessionState());
+    Assert.assertEquals(SMFIC_HEADER, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -282,7 +281,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.HELO, context.getSessionState());
+    Assert.assertEquals(SMFIC_HELO, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -319,7 +318,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.OPTION_NEGOTIATION, context.getSessionState());
+    Assert.assertEquals(SMFIC_OPTNEG, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }
@@ -341,7 +340,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock, packetSenderMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.QUIT, context.getSessionState());
+    Assert.assertEquals(SMFIC_QUIT, context.getSessionStep());
 
     EasyMock.verify(handlerMock, packetSenderMock);
   }
@@ -361,7 +360,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock, packetSenderMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.QUIT_NEW_CONNECTION, context.getSessionState());
+    Assert.assertEquals(SMFIC_QUIT_NC, context.getSessionStep());
 
     EasyMock.verify(handlerMock, packetSenderMock);
   }
@@ -380,7 +379,7 @@ public class CommandEngineTest {
     EasyMock.replay(handlerMock);
 
     engine.submit(context, packet);
-    Assert.assertEquals(MilterState.UNKNOWN, context.getSessionState());
+    Assert.assertEquals(SMFIC_UNKNOWN, context.getSessionStep());
 
     EasyMock.verify(handlerMock);
   }

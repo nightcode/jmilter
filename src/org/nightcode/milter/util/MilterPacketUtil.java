@@ -1,15 +1,15 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter.util;
@@ -19,9 +19,16 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.nightcode.milter.MilterState;
+import org.jetbrains.annotations.Nullable;
+import org.nightcode.milter.CommandCode;
 import org.nightcode.milter.codec.MilterPacket;
 
+import static org.nightcode.milter.CommandCode.SMFIC_BODY;
+import static org.nightcode.milter.CommandCode.SMFIC_DATA;
+import static org.nightcode.milter.CommandCode.SMFIC_EOH;
+import static org.nightcode.milter.CommandCode.SMFIC_HEADER;
+import static org.nightcode.milter.CommandCode.SMFIC_MAIL;
+import static org.nightcode.milter.CommandCode.SMFIC_RCPT;
 import static org.nightcode.milter.ResponseCode.SMFIR_ACCEPT;
 import static org.nightcode.milter.ResponseCode.SMFIR_CONTINUE;
 import static org.nightcode.milter.ResponseCode.SMFIR_DISCARD;
@@ -65,24 +72,28 @@ public enum MilterPacketUtil {
   public static final MilterPacket SMFIS_TEMPFAIL = MilterPacket.builder().command(SMFIR_TEMPFAIL).build();
 
   /**
-   * Skip further callbacks of the same type in this transaction. Currently this return value
+   * Skip further callbacks of the same type in this transaction. Currently, this return value
    * is only allowed in body(). It can be used if a milter has received sufficiently many
    * body chunks to make a decision, but still wants to invoke message modification functions
-   * that are only allowed to be called from eom(). Note: the milter must negotiate this
+   * that are only allowed to be called from eob(). Note: the milter must negotiate this
    * behavior with the MTA, i.e., it must check whether the protocol action SMFIP_SKIP is available
    * and if so, the milter must request it.
    */
   public static final MilterPacket SMFIS_SKIP = MilterPacket.builder().command(SMFIR_SKIP).build();
 
-  private static final byte ZERO_TERM = (byte) 0x00;
+  public static final int MILTER_CHUNK_SIZE = 65535;
 
-  private static final EnumSet<MilterState> MESSAGE_STATES = EnumSet.of(
-        MilterState.MAIL_FROM
-      , MilterState.RECIPIENTS
-      , MilterState.DATA
-      , MilterState.HEADERS
-      , MilterState.EOH
-      , MilterState.BODY
+  public static final byte ZERO_TERM = (byte) 0x00;
+
+  public static final int  ZERO_TERM_LENGTH = 1;
+
+  private static final EnumSet<CommandCode> MESSAGE_STATES = EnumSet.of(
+        SMFIC_MAIL
+      , SMFIC_RCPT
+      , SMFIC_DATA
+      , SMFIC_HEADER
+      , SMFIC_EOH
+      , SMFIC_BODY
   );
 
   /**
@@ -130,8 +141,8 @@ public enum MilterPacketUtil {
     return buffer[buffer.length - 1] == ZERO_TERM;
   }
 
-  public static boolean isMessageState(MilterState state) {
-    return MESSAGE_STATES.contains(state);
+  public static boolean isMessageState(CommandCode command) {
+    return MESSAGE_STATES.contains(command);
   }
 
   /**
@@ -156,5 +167,41 @@ public enum MilterPacketUtil {
       offset = ++i;
     }
     return result;
+  }
+
+  public static byte[] createZeroTerm(List<String> args) {
+    byte[] buffer = new byte[zeroTermLength(args)];
+    int offset = 0;
+    for (String str : args) {
+      offset = safeCopy(str, buffer, offset);
+    }
+    return buffer;
+  }
+
+  public static int zeroTermLength(List<String> args) {
+    int length = 0;
+    for (String str : args) {
+      length += getLengthSafe(str);
+      length += ZERO_TERM_LENGTH;
+    }
+    return length;
+  }
+
+  public static int getLengthSafe(@Nullable String arg) {
+    if (arg == null) {
+      return 0;
+    }
+    return arg.length();
+  }
+
+  public static int safeCopy(@Nullable String arg, byte[] dst, int offset) {
+    if (arg == null || arg.isEmpty()) {
+      return offset;
+    }
+    byte[] buffer = arg.getBytes(StandardCharsets.UTF_8);
+    System.arraycopy(buffer, 0, dst, offset, buffer.length);
+    offset += buffer.length;
+    dst[offset++] = ZERO_TERM;
+    return offset;
   }
 }

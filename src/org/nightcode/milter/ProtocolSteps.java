@@ -1,18 +1,20 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package org.nightcode.milter.util;
+package org.nightcode.milter;
+
+import org.nightcode.milter.util.Hexs;
 
 /**
  * Protocol steps.
@@ -241,6 +243,7 @@ public final class ProtocolSteps {
     }
   }
 
+  public static final int ZERO                       = 0x00000000;
   public static final int NO_CONNECT                 = 0x00000001;
   public static final int NO_HELO                    = 0x00000002;
   public static final int NO_MAIL_FROM               = 0x00000004;
@@ -262,6 +265,7 @@ public final class ProtocolSteps {
   public static final int NO_REPLY_FOR_EOH           = 0x00040000;
   public static final int NO_REPLY_FOR_BODY          = 0x00080000;
   public static final int HEADER_VALUE_LEADING_SPACE = 0x00100000;
+  public static final int NO_REPLY                   = 0xFFFFFFFF;
 
   // The protocol steps of V1 filter
   public static final ProtocolSteps DEF_PROTOCOL_STEPS = ProtocolSteps.builder()
@@ -312,6 +316,14 @@ public final class ProtocolSteps {
 
   public int bitmap() {
     return bitmap;
+  }
+
+  public void writeTo(byte[] dst, int offset) {
+    if (offset + 4 > dst.length) {
+      throw new IllegalArgumentException("invalid supplied buffer length " + dst.length
+          + " for offset " + offset + " and data length 4 bytes");
+    }
+    System.arraycopy(buffer, 0, dst, offset, buffer.length);
   }
 
   /**

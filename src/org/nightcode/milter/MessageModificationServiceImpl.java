@@ -1,15 +1,15 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter;
@@ -20,7 +20,6 @@ import java.util.Objects;
 import org.jetbrains.annotations.Nullable;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.ByteArrays;
-import org.nightcode.milter.util.ProtocolSteps;
 
 import static org.nightcode.milter.ResponseCode.SMFIR_ADDHEADER;
 import static org.nightcode.milter.ResponseCode.SMFIR_ADDRCPT;
@@ -32,6 +31,7 @@ import static org.nightcode.milter.ResponseCode.SMFIR_INSHEADER;
 import static org.nightcode.milter.ResponseCode.SMFIR_PROGRESS;
 import static org.nightcode.milter.ResponseCode.SMFIR_QUARANTINE;
 import static org.nightcode.milter.ResponseCode.SMFIR_REPLBODY;
+import static org.nightcode.milter.util.MilterPacketUtil.MILTER_CHUNK_SIZE;
 
 class MessageModificationServiceImpl implements MessageModificationService {
 

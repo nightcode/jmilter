@@ -1,15 +1,15 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter;
@@ -21,11 +21,9 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
-import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.ByteArrays;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
-import org.nightcode.milter.util.ProtocolSteps;
 
 import static java.lang.String.format;
 import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
@@ -42,9 +40,9 @@ public abstract class AbstractMilterHandler implements MilterHandler {
   }
 
   protected AbstractMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps,
-      MessageModificationService messageModificationService) {
-    this.milterActions = milterActions;
-    this.milterProtocolSteps = milterProtocolSteps;
+                                  MessageModificationService messageModificationService) {
+    this.milterActions              = milterActions;
+    this.milterProtocolSteps        = milterProtocolSteps;
     this.messageModificationService = messageModificationService;
   }
 
@@ -65,7 +63,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.setMacros(type, macros);
   }
 
-  @Override public void eom(MilterContext context, @Nullable String bodyChunk) throws MilterException {
+  @Override public void eob(MilterContext context, @Nullable String bodyChunk) throws MilterException {
     context.sendContinue();
   }
 
@@ -129,8 +127,8 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     }
     context.setSessionProtocolSteps(new ProtocolSteps(buffer, 0));
 
-    byte[] version = ByteArrays.intToByteArray(context.getSessionProtocolVersion());
-    byte[] actions = context.milterActions().array();
+    byte[] version       = ByteArrays.intToByteArray(context.getSessionProtocolVersion());
+    byte[] actions       = context.milterActions().array();
     byte[] protocolSteps = context.getSessionProtocolSteps().array();
 
     byte[] payload = new byte[version.length + actions.length + protocolSteps.length];
@@ -159,7 +157,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
   }
 
   @Override public void abortSession(MilterContext context, MilterPacket packet) {
-    if (MilterPacketUtil.isMessageState(context.getSessionState())) {
+    if (MilterPacketUtil.isMessageState(context.getSessionStep())) {
       try {
         abort(context, packet);
       } catch (MilterException ex) {
@@ -177,7 +175,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     }
   }
 
-  @Override public MilterContext createSession(MilterPacketSender sender) {
+  @Override public MilterContext createContext(MilterPacketSender sender) {
     return new MilterContextImpl(this, milterActions, milterProtocolSteps, sender);
   }
 }

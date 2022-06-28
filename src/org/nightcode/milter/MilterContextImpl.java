@@ -6,11 +6,9 @@ import java.util.UUID;
 
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
-import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.IntMap;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPacketUtil;
-import org.nightcode.milter.util.ProtocolSteps;
 
 import static java.lang.String.format;
 
@@ -21,22 +19,23 @@ public class MilterContextImpl implements MilterContext {
   private final UUID id;
 
   private final MilterHandler handler;
-  
-  private final Actions milterActions;
-  private final ProtocolSteps milterProtocolSteps;
+
+  private final Actions            milterActions;
+  private final ProtocolSteps      milterProtocolSteps;
   private final MilterPacketSender milterPacketSender;
 
-  private volatile int mtaProtocolVersion;
-  private volatile Actions mtaActions;
+  private volatile int           mtaProtocolVersion;
+  private volatile Actions       mtaActions;
   private volatile ProtocolSteps mtaProtocolSteps;
 
-  private volatile int sessionProtocolVersion;
+  private volatile int           sessionProtocolVersion;
   private volatile ProtocolSteps sessionProtocolSteps;
-  private volatile MilterState sessionState;
+  private volatile CommandCode   sessionStep;
 
   private final IntMap<Map<String, String>> macros = new IntMap<>();
 
-  public MilterContextImpl(MilterHandler handler, Actions milterActions, ProtocolSteps milterProtocolSteps, MilterPacketSender milterPacketSender) {
+  public MilterContextImpl(MilterHandler handler, Actions milterActions, ProtocolSteps milterProtocolSteps,
+                           MilterPacketSender milterPacketSender) {
     this.handler             = handler;
     this.milterActions       = milterActions;
     this.milterProtocolSteps = milterProtocolSteps;
@@ -77,8 +76,8 @@ public class MilterContextImpl implements MilterContext {
     return sessionProtocolVersion;
   }
 
-  @Override public MilterState getSessionState() {
-    return sessionState;
+  @Override public CommandCode getSessionStep() {
+    return sessionStep;
   }
 
   @Override public UUID id() {
@@ -102,13 +101,13 @@ public class MilterContextImpl implements MilterContext {
   }
 
   @Override public void sendPacket(MilterPacket packet) throws MilterException {
-    int noReplyBit = getSessionState().noReplyBit();
+    int noReplyBit = getSessionStep().noReplyBit();
     if (noReplyBit != 0 && ((getSessionProtocolSteps().bitmap() & noReplyBit) != 0)) {
       Log.debug().log(getClass()
-          , () -> format("NR bit has non-zero value for state %s but attempt to send packet has been caught", sessionState));
+          , () -> format("NR bit has non-zero value for state %s but attempt to send packet has been caught", sessionStep));
       if ((milterProtocolSteps().bitmap() & noReplyBit) != 0
           && (getMtaProtocolSteps().bitmap() & noReplyBit) == 0) {
-        Log.debug().log(getClass(), () -> format("MTA doesn't support NR for state %s, trying to send SMFIR_CONTINUE", sessionState));
+        Log.debug().log(getClass(), () -> format("MTA doesn't support NR for state %s, trying to send SMFIR_CONTINUE", sessionStep));
         sendPacket0(MilterPacketUtil.SMFIS_CONTINUE);
       }
       return;
@@ -143,8 +142,8 @@ public class MilterContextImpl implements MilterContext {
     this.sessionProtocolVersion = sessionProtocolVersion;
   }
 
-  @Override public void setSessionState(MilterState sessionState) {
-    this.sessionState = sessionState;
+  @Override public void setSessionStep(CommandCode sessionStep) {
+    this.sessionStep = sessionStep;
   }
 
   private void sendPacket0(MilterPacket packet) throws MilterException {

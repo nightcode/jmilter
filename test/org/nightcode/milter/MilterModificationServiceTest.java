@@ -1,15 +1,15 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter;
@@ -20,14 +20,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Hexs;
-import org.nightcode.milter.util.ProtocolSteps;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 
-import static org.nightcode.milter.MessageModificationService.MILTER_CHUNK_SIZE;
 import static org.nightcode.milter.ResponseCode.SMFIR_ADDHEADER;
 import static org.nightcode.milter.ResponseCode.SMFIR_ADDRCPT;
 import static org.nightcode.milter.ResponseCode.SMFIR_ADDRCPT_PAR;
@@ -38,6 +36,7 @@ import static org.nightcode.milter.ResponseCode.SMFIR_INSHEADER;
 import static org.nightcode.milter.ResponseCode.SMFIR_PROGRESS;
 import static org.nightcode.milter.ResponseCode.SMFIR_QUARANTINE;
 import static org.nightcode.milter.ResponseCode.SMFIR_REPLBODY;
+import static org.nightcode.milter.util.MilterPacketUtil.MILTER_CHUNK_SIZE;
 
 public class MilterModificationServiceTest {
 
@@ -227,14 +226,11 @@ public class MilterModificationServiceTest {
     EasyMock.verify(contextMock);
 
     Assert.assertEquals('b', packet1.getValue().command());
-    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, 0, MILTER_CHUNK_SIZE)
-        , packet1.getValue().payload());
+    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, 0, MILTER_CHUNK_SIZE), packet1.getValue().payload());
     Assert.assertEquals('b', packet2.getValue().command());
-    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, MILTER_CHUNK_SIZE, MILTER_CHUNK_SIZE * 2)
-        , packet2.getValue().payload());
+    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, MILTER_CHUNK_SIZE, MILTER_CHUNK_SIZE * 2), packet2.getValue().payload());
     Assert.assertEquals('b', packet3.getValue().command());
-    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, MILTER_CHUNK_SIZE * 2, newBody.length)
-        , packet3.getValue().payload());
+    Assert.assertArrayEquals(Arrays.copyOfRange(newBody, MILTER_CHUNK_SIZE * 2, newBody.length), packet3.getValue().payload());
   }
 
   @Test public void testProgress() throws MilterException {

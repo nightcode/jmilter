@@ -1,15 +1,15 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter;
@@ -39,7 +39,7 @@ public enum ResponseCode implements Code {
   SMFIR_TEMPFAIL   ('t', true),  // Reject command/recipient with a 4xx (accept/reject action)
   SMFIR_REPLYCODE  ('y', true);  // Send specific Nxx reply message (accept/reject action)
 
-  private static final ResponseCode[] CODES = new ResponseCode[122];
+  private static final ResponseCode[] CODES = new ResponseCode['y' + 1];
 
   static {
     for (ResponseCode code : ResponseCode.values()) {
@@ -48,7 +48,7 @@ public enum ResponseCode implements Code {
   }
 
   public static ResponseCode valueOf(int code) {
-    if (code < 43 || code > 122) {
+    if (code < '+' || code > 'y') {
       throw new IllegalArgumentException("invalid code value: " + code);
     }
     ResponseCode responseCode = CODES[code];
@@ -57,7 +57,7 @@ public enum ResponseCode implements Code {
     }
     return responseCode;
   }
-  
+
   private final int code;
   private final boolean acceptReject;
 

@@ -12,9 +12,16 @@
  * limitations under the License.
  */
 
-package org.nightcode.milter;
+package org.nightcode.milter.util;
 
-public interface Code {
+import java.util.concurrent.CompletableFuture;
 
-  int code();
+public enum Futures {
+  ;
+
+  public static <T> CompletableFuture<T> failedFuture(Throwable throwable) {
+    CompletableFuture<T> cf = new CompletableFuture<>();
+    cf.completeExceptionally(throwable);
+    return cf;
+  }
 }

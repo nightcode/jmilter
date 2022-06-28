@@ -36,10 +36,11 @@ import io.netty.util.NetUtil;
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
+import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.codec.Int32LenFrameEncoder;
 import org.nightcode.milter.codec.MilterPacketEncoder;
-import org.nightcode.milter.util.Actions;
-import org.nightcode.milter.util.ProtocolSteps;
+import org.nightcode.milter.Actions;
+import org.nightcode.milter.ProtocolSteps;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -70,33 +71,29 @@ public class MilterChannelHandlerTest {
     final CountDownLatch negotiateLatch = new CountDownLatch(1);
 
     try {
+      MilterHandler milterHandler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+        @Override public void optneg(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
+                                     ProtocolSteps mtaProtocolSteps) throws MilterException {
+          super.optneg(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
+          negotiateLatch.countDown();
+        }
+
+        @Override public void quit(MilterContext context) {
+          // do nothing
+        }
+      };
+
       serverBootstrap.group(new NioEventLoopGroup(2))
           .channel(NioServerSocketChannel.class)
-          .childHandler(new SessionInitializer((new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
-            @Override public void optneg(MilterContext context, int mtaProtocolVersion, Actions mtaActions,
-                                         ProtocolSteps mtaProtocolSteps) throws MilterException {
-              super.optneg(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
-              negotiateLatch.countDown();
-            }
-
-            @Override public void quit(MilterContext context) {
-              // do nothing
-            }
-          })));
+          .childHandler(new SessionInitializer(new MilterChannelHandler(milterHandler)));
 
       clientBootstrap.group(new NioEventLoopGroup(1))
           .channel(NioSocketChannel.class)
-          .handler(new ChannelInitializer<Channel>() {
-            @Override protected void initChannel(Channel ch) {
-              ch.pipeline().addLast(new Int32LenFrameEncoder());
-              ch.pipeline().addLast(new MilterPacketEncoder());
-              ch.pipeline().addLast(new SimpleChannelInboundHandler<ByteBuf>() {
-                @Override protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-                  // do nothing
-                }
-              });
+          .handler(new SessionInitializer(new SimpleChannelInboundHandler<ByteBuf>() {
+            @Override protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
+              // do nothing
             }
-          });
+          }));
 
       Channel serverChannel = serverBootstrap.bind(new InetSocketAddress(0)).sync().channel();
       int port = ((InetSocketAddress) serverChannel.localAddress()).getPort();

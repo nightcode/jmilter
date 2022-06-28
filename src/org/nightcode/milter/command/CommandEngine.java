@@ -1,26 +1,26 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter.command;
 
 import org.nightcode.milter.MilterContext;
-import org.nightcode.milter.MilterState;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.IntMap;
 import org.nightcode.milter.util.Log;
 
 import static java.lang.String.format;
+import static org.nightcode.milter.CommandCode.SMFIC_ABORT;
 
 public final class CommandEngine {
 
@@ -29,7 +29,7 @@ public final class CommandEngine {
   public static CommandEngine instance() {
     return INSTANCE;
   }
-  
+
   private final IntMap<CommandProcessor> processors = new IntMap<>();
 
   private static void addProcessor(IntMap<CommandProcessor> processors, CommandProcessor commandHandler) {
@@ -69,7 +69,7 @@ public final class CommandEngine {
       processor.submit(context, milterPacket);
     } catch (Exception ex) {
       Log.warn().log(getClass(), format("[%s] unable to process milter packet: %s", context.id(), milterPacket), ex);
-      context.setSessionState(MilterState.ABORT);
+      context.setSessionStep(SMFIC_ABORT);
       context.handler().abortSession(context, milterPacket);
     }
   }

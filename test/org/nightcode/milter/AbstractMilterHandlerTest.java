@@ -1,15 +1,15 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter;
@@ -20,9 +20,7 @@ import java.util.Collections;
 
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
-import org.nightcode.milter.util.Actions;
 import org.nightcode.milter.util.Hexs;
-import org.nightcode.milter.util.ProtocolSteps;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,6 +28,8 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 
 import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
+import static org.nightcode.milter.CommandCode.SMFIC_EOB;
+import static org.nightcode.milter.CommandCode.SMFIC_HEADER;
 import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
 public class AbstractMilterHandlerTest {
@@ -58,7 +58,7 @@ public class AbstractMilterHandlerTest {
       }
     };
 
-    MilterContext context = handler.createSession(packetSenderMock);
+    MilterContext context = handler.createContext(packetSenderMock);
 
     Assert.assertNotNull(context.id());
 
@@ -69,7 +69,7 @@ public class AbstractMilterHandlerTest {
 
     EasyMock.replay(packetSenderMock);
 
-    context.setSessionState(MilterState.OPTION_NEGOTIATION);
+    context.setSessionStep(SMFIC_OPTNEG);
     handler.optneg(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
 
     Assert.assertEquals(MilterContext.PROTOCOL_VERSION, context.milterProtocolVersion());
@@ -115,7 +115,7 @@ public class AbstractMilterHandlerTest {
       }
     };
 
-    MilterContext context = handler.createSession(packetSenderMock);
+    MilterContext context = handler.createContext(packetSenderMock);
 
     Assert.assertNotNull(context.id());
 
@@ -124,7 +124,7 @@ public class AbstractMilterHandlerTest {
 
     EasyMock.replay(packetSenderMock);
 
-    context.setSessionState(MilterState.OPTION_NEGOTIATION);
+    context.setSessionStep(SMFIC_OPTNEG);
     handler.optneg(context, mtaProtocolVersion, mtaActions, mtaProtocolSteps);
 
     Assert.assertEquals(MilterContext.PROTOCOL_VERSION, context.milterProtocolVersion());
@@ -152,9 +152,9 @@ public class AbstractMilterHandlerTest {
 
     MilterPacket packet = MilterPacket.builder().command(SMFIC_CONNECT).build();
 
-    EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.HEADERS).once();
-    EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.EOM).once();
-    EasyMock.expect(contextMock.getSessionState()).andReturn(MilterState.HEADERS).once();
+    EasyMock.expect(contextMock.getSessionStep()).andReturn(SMFIC_HEADER).once();
+    EasyMock.expect(contextMock.getSessionStep()).andReturn(SMFIC_EOB).once();
+    EasyMock.expect(contextMock.getSessionStep()).andReturn(SMFIC_HEADER).once();
 
     contextMock.destroy();
     EasyMock.expectLastCall().times(3);
@@ -301,7 +301,7 @@ public class AbstractMilterHandlerTest {
     EasyMock.verify(contextMock);
   }
 
-  @Test public void testEom() throws MilterException {
+  @Test public void testEob() throws MilterException {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MilterHandler handler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
@@ -315,7 +315,7 @@ public class AbstractMilterHandlerTest {
 
     EasyMock.replay(contextMock);
 
-    handler.eom(contextMock, null);
+    handler.eob(contextMock, null);
 
     EasyMock.verify(contextMock);
   }

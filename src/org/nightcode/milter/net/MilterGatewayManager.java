@@ -1,15 +1,15 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.nightcode.milter.net;
@@ -31,8 +31,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.kqueue.KQueueEventLoopGroup;
-import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -44,9 +42,12 @@ import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.nightcode.milter.util.ExecutorUtils.namedThreadFactory;
+import static org.nightcode.milter.util.Properties.getBoolean;
+import static org.nightcode.milter.util.Properties.getInt;
+import static org.nightcode.milter.util.Properties.getLong;
 
 /**
- *
+ * MilterGatewayManager.
  */
 public class MilterGatewayManager implements ChannelFutureListener, Closeable {
 
@@ -66,10 +67,8 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
 
   private final ServerBootstrap serverBootstrap;
 
-  private final MilterHandler milterHandler;
-
-  private final ScheduledExecutorService executor
-      = new ScheduledThreadPoolExecutor(1, namedThreadFactory("MilterGatewayManager.executor"));
+  private final MilterHandler            milterHandler;
+  private final ScheduledExecutorService executor;
 
   private final AtomicInteger           state      = new AtomicInteger(NEW);
   private final CompletableFuture<Void> bindFuture = new CompletableFuture<>();
@@ -91,48 +90,40 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
     this.address = address;
     this.milterHandler = milterHandler;
 
-    reconnectTimeoutNs = MILLISECONDS.toNanos(Long.getLong("jmilter.netty.reconnectTimeoutMs", RECONNECT_TIMEOUT_MS));
+    executor = new ScheduledThreadPoolExecutor(1, namedThreadFactory(name + "-executor"));
 
-    String nettyTransport = System.getProperty("jmilter.netty.transport", "NIO");
+    String prefix = "jmilter.netty.";
+
+    reconnectTimeoutNs = MILLISECONDS.toNanos(getLong(prefix + "reconnectTimeoutMs", RECONNECT_TIMEOUT_MS));
+
+    int nThreads = getInt(prefix + "nThreads", 0);
 
     EventLoopGroup acceptorGroup = null;
-    EventLoopGroup workerGroup = null;
+    EventLoopGroup workerGroup   = null;
     Class<? extends ServerChannel> serverChannelClass = null;
-    if ("EPOL".equalsIgnoreCase(nettyTransport)) {
-      try {
-        acceptorGroup = new EpollEventLoopGroup(1, namedThreadFactory(name + ".nettyEpollAcceptor"));
-        workerGroup = new EpollEventLoopGroup(0, namedThreadFactory(name + ".nettyEpollWorker"));
-        serverChannelClass = EpollServerSocketChannel.class;
-      } catch (Throwable ex) {
-        Log.info().log(getClass(), "unabled to initialize netty EPOLL transport, switch to NIO");
-      }
-    } else if ("KQUEUE".equalsIgnoreCase(nettyTransport)) {
-      try {
-        acceptorGroup = new KQueueEventLoopGroup(1, namedThreadFactory(name + ".nettyKQueueAcceptor"));
-        workerGroup = new KQueueEventLoopGroup(0, namedThreadFactory(name + ".nettyKQueueWorker"));
-        serverChannelClass = KQueueServerSocketChannel.class;
-      } catch (Throwable ex) {
-        Log.info().log(getClass(), "unabled to initialize netty KQUEUE transport, switch to NIO");
-      }
+    try {
+      acceptorGroup = new EpollEventLoopGroup(1, namedThreadFactory(name + "-epoll-acceptor"));
+      workerGroup = new EpollEventLoopGroup(nThreads, namedThreadFactory(name + "-epoll-worker"));
+      serverChannelClass = EpollServerSocketChannel.class;
+    } catch (Throwable ex) {
+      Log.info().log(getClass(), "unable to initialize netty EPOLL transport, switch to NIO");
     }
-
     if (serverChannelClass == null) {
-      acceptorGroup = new NioEventLoopGroup(1, namedThreadFactory(name + ".nettyNioAcceptor"));
-      workerGroup = new NioEventLoopGroup(0, namedThreadFactory(name + ".nettyNioWorker"));
+      acceptorGroup = new NioEventLoopGroup(1, namedThreadFactory(name + "-nio-acceptor"));
+      workerGroup = new NioEventLoopGroup(nThreads, namedThreadFactory(name + "-nio-worker"));
       serverChannelClass = NioServerSocketChannel.class;
     }
 
     serverBootstrap = new ServerBootstrap()
-        .localAddress(address)
         .group(acceptorGroup, workerGroup)
         .channel(serverChannelClass)
-        .option(ChannelOption.SO_BACKLOG, 128)
-        .option(ChannelOption.SO_REUSEADDR, true)
-        .childOption(ChannelOption.SO_KEEPALIVE, true)
-        .childOption(ChannelOption.TCP_NODELAY, true)
-        .childOption(ChannelOption.SO_REUSEADDR, true)
-        .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-    ;
+        .option(ChannelOption.SO_BACKLOG,   getInt(prefix + "soBacklog", 128))
+        .option(ChannelOption.SO_REUSEADDR, getBoolean(prefix + "reuseAddress", true))
+        .childOption(ChannelOption.SO_KEEPALIVE, getBoolean(prefix + "keepAlive", true))
+        .childOption(ChannelOption.SO_REUSEADDR, getBoolean(prefix + "reuseAddress", true))
+        .childOption(ChannelOption.TCP_NODELAY,  getBoolean(prefix + "tcpNoDelay", true))
+        .childOption(ChannelOption.ALLOCATOR,    PooledByteBufAllocator.DEFAULT)
+        .localAddress(address);
   }
 
   @Override public void operationComplete(ChannelFuture future) {
@@ -176,7 +167,7 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
     final CompletableFuture<Void> cf = new CompletableFuture<>();
     cf.thenAccept(v -> {
       try {
-        ChannelInitializer<SocketChannel> initializer = new SessionInitializer(milterHandler);
+        ChannelInitializer<SocketChannel> initializer = new SessionInitializer(new MilterChannelHandler(milterHandler));
         channelFuture = serverBootstrap.childHandler(initializer).bind().sync()
             .addListener((ChannelFutureListener) future -> {
               if (future.cause() == null && state.compareAndSet(STARTING, RUNNING)) {
