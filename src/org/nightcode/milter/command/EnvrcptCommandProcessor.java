@@ -20,7 +20,7 @@ import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.codec.MilterPacket;
-import org.nightcode.milter.util.MilterPacketUtil;
+import org.nightcode.milter.util.MilterPackets;
 
 import static org.nightcode.milter.CommandCode.SMFIC_RCPT;
 
@@ -33,7 +33,7 @@ class EnvrcptCommandProcessor implements CommandProcessor {
   @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     context.setSessionStep(SMFIC_RCPT);
 
-    List<String> recipients = MilterPacketUtil.splitByZeroTerm(packet.payload());
+    List<String> recipients = MilterPackets.splitByZeroTerm(packet.payload());
     context.handler().envrcpt(context, recipients);
   }
 }

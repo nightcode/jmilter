@@ -36,7 +36,7 @@ import static org.nightcode.milter.ResponseCode.SMFIR_INSHEADER;
 import static org.nightcode.milter.ResponseCode.SMFIR_PROGRESS;
 import static org.nightcode.milter.ResponseCode.SMFIR_QUARANTINE;
 import static org.nightcode.milter.ResponseCode.SMFIR_REPLBODY;
-import static org.nightcode.milter.util.MilterPacketUtil.MILTER_CHUNK_SIZE;
+import static org.nightcode.milter.util.MilterPackets.MILTER_CHUNK_SIZE;
 
 public class MilterModificationServiceTest {
 

@@ -14,7 +14,6 @@
 
 package org.nightcode.milter.net;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 
 import io.netty.bootstrap.Bootstrap;
@@ -24,22 +23,18 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalChannel;
+import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.NetUtil;
 import org.nightcode.milter.AbstractMilterHandler;
+import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.codec.Int32LenFrameEncoder;
-import org.nightcode.milter.codec.MilterPacketEncoder;
-import org.nightcode.milter.Actions;
 import org.nightcode.milter.ProtocolSteps;
 
 import org.junit.AfterClass;
@@ -84,21 +79,20 @@ public class MilterChannelHandlerTest {
       };
 
       serverBootstrap.group(new NioEventLoopGroup(2))
-          .channel(NioServerSocketChannel.class)
+          .channel(LocalServerChannel.class)
           .childHandler(new SessionInitializer(new MilterChannelHandler(milterHandler)));
 
       clientBootstrap.group(new NioEventLoopGroup(1))
-          .channel(NioSocketChannel.class)
+          .channel(LocalChannel.class)
           .handler(new SessionInitializer(new SimpleChannelInboundHandler<ByteBuf>() {
             @Override protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
               // do nothing
             }
           }));
 
-      Channel serverChannel = serverBootstrap.bind(new InetSocketAddress(0)).sync().channel();
-      int port = ((InetSocketAddress) serverChannel.localAddress()).getPort();
+      serverBootstrap.bind(TEST_ADDRESS).sync();
 
-      ChannelFuture channelFuture = clientBootstrap.connect(new InetSocketAddress(NetUtil.LOCALHOST, port));
+      ChannelFuture channelFuture = clientBootstrap.connect(TEST_ADDRESS);
       Assert.assertTrue(channelFuture.awaitUninterruptibly().isSuccess());
 
       Channel clientChannel = channelFuture.channel();

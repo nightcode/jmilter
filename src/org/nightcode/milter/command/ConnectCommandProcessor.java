@@ -25,14 +25,14 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Log;
-import org.nightcode.milter.util.MilterPacketUtil;
+import org.nightcode.milter.util.MilterPackets;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.nightcode.milter.CommandCode.SMFIC_CONNECT;
 import static org.nightcode.milter.ProtocolFamily.SMFIA_INET;
 import static org.nightcode.milter.ProtocolFamily.SMFIA_UNIX;
-import static org.nightcode.milter.util.MilterPacketUtil.ZERO_TERM_LENGTH;
+import static org.nightcode.milter.util.MilterPackets.ZERO_TERM_LENGTH;
 
 class ConnectCommandProcessor implements CommandProcessor {
 
@@ -45,14 +45,14 @@ class ConnectCommandProcessor implements CommandProcessor {
   @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     context.setSessionStep(SMFIC_CONNECT);
 
-    if (!MilterPacketUtil.isLastZeroTerm(packet.payload())) {
+    if (!MilterPackets.isLastZeroTerm(packet.payload())) {
       Log.info().log(getClass(), format("[%s] received invalid packet: %s", context.id(), packet));
       context.handler().abortSession(context, packet);
       return;
     }
 
     final int payloadLength = packet.payload().length;
-    int i = MilterPacketUtil.indexOfZeroTerm(packet.payload());
+    int i = MilterPackets.indexOfZeroTerm(packet.payload());
 
     if ((i + ZERO_TERM_LENGTH) >= payloadLength) {
       Log.info().log(getClass(), format("[%s] wrong packet length=%s %s", context.id(), payloadLength, packet));

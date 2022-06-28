@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
@@ -32,7 +33,6 @@ import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.util.ExecutorUtils;
@@ -167,7 +167,7 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
     final CompletableFuture<Void> cf = new CompletableFuture<>();
     cf.thenAccept(v -> {
       try {
-        ChannelInitializer<SocketChannel> initializer = new SessionInitializer(new MilterChannelHandler(milterHandler));
+        ChannelInitializer<Channel> initializer = new SessionInitializer(new MilterChannelHandler(milterHandler));
         channelFuture = serverBootstrap.childHandler(initializer).bind().sync()
             .addListener((ChannelFutureListener) future -> {
               if (future.cause() == null && state.compareAndSet(STARTING, RUNNING)) {

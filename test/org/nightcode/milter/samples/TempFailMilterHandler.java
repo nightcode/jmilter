@@ -21,7 +21,7 @@ import org.nightcode.milter.Actions;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.ProtocolSteps;
 
-import static org.nightcode.milter.util.MilterPacketUtil.SMFIS_TEMPFAIL;
+import static org.nightcode.milter.util.MilterPackets.SMFIS_TEMPFAIL;
 
 public class TempFailMilterHandler extends AbstractMilterHandler {
 

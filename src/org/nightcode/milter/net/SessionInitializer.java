@@ -14,10 +14,10 @@
 
 package org.nightcode.milter.net;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.nightcode.milter.codec.Int32LenFrameDecoder;
@@ -31,7 +31,7 @@ import static org.nightcode.milter.util.Properties.getString;
 /**
  * Implementation of ChannelInitializer.
  */
-public class SessionInitializer extends ChannelInitializer<SocketChannel> {
+public class SessionInitializer extends ChannelInitializer<Channel> {
 
   private final boolean loggingEnabled;
   private final String  logLevel;
@@ -45,7 +45,7 @@ public class SessionInitializer extends ChannelInitializer<SocketChannel> {
     logLevel       = getString("jmilter.netty.logLevel", "INFO");
   }
 
-  @Override protected void initChannel(SocketChannel channel) {
+  @Override protected void initChannel(Channel channel) {
     ChannelPipeline pipeline = channel.pipeline();
 
     if (loggingEnabled) {

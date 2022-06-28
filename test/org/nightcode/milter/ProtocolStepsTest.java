@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-package org.nightcode.milter.util;
+package org.nightcode.milter;
 
-import org.nightcode.milter.ProtocolSteps;
+import org.nightcode.milter.util.Hexs;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,5 +35,15 @@ public class ProtocolStepsTest {
     protocolSteps = new ProtocolSteps(payload, 8);
     Assert.assertEquals(0x001FFFFF, protocolSteps.bitmap());
     Assert.assertArrayEquals(HEX.toByteArray("001fffff"), protocolSteps.array());
+  }
+
+  @Test public void testOffset() {
+    Assert.assertThrows(IllegalArgumentException.class, () -> new ProtocolSteps(new byte[4], -1));
+    Assert.assertThrows(IllegalArgumentException.class, () -> new ProtocolSteps(new byte[4], 2));
+  }
+
+  @Test public void testWriteTo() {
+    Assert.assertThrows(IllegalArgumentException.class, () -> new ProtocolSteps(new byte[4], 0).writeTo(new byte[4], -1));
+    Assert.assertThrows(IllegalArgumentException.class, () -> new ProtocolSteps(new byte[4], 0).writeTo(new byte[4], 2));
   }
 }

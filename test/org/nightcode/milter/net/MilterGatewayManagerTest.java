@@ -14,17 +14,14 @@
 
 package org.nightcode.milter.net;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.nightcode.milter.AbstractMilterHandler;
+import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.Actions;
 import org.nightcode.milter.ProtocolSteps;
 
 import org.junit.Assert;
@@ -32,7 +29,7 @@ import org.junit.Test;
 
 public class MilterGatewayManagerTest {
 
-  @Test public void testStartStop() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+  @Test public void testStartStop() throws Exception {
     int port;
     try (ServerSocket socket = new ServerSocket(0)) {
       port = socket.getLocalPort();

@@ -149,7 +149,7 @@ public final class Actions {
   private final byte[] buffer = new byte[4];
 
   public Actions(byte[] src, int offset) {
-    if (offset + 4 > src.length) {
+    if (offset < 0 || offset + 4 > src.length) {
       throw new IllegalArgumentException("invalid supplied buffer length " + src.length
           + " for offset " + offset + " and data length 4 bytes");
     }
@@ -185,7 +185,7 @@ public final class Actions {
   }
 
   public void writeTo(byte[] dst, int offset) {
-    if (offset + 4 > dst.length) {
+    if (offset < 0 || offset + 4 > dst.length) {
       throw new IllegalArgumentException("invalid supplied buffer length " + dst.length
           + " for offset " + offset + " and data length 4 bytes");
     }

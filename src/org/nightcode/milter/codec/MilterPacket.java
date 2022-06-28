@@ -216,7 +216,7 @@ public final class MilterPacket {
 
   @Override public String toString() {
     return "MilterPacket{"
-        + "command=" + (char) command
+        + "command=0x" + Integer.toHexString(command) + " '" + (char) command + '\''
         + ", payload=" + (payload.length > 0 ? HEX.fromByteArray(payload) : "EMPTY")
         + '}';
   }

@@ -21,7 +21,7 @@ import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.util.Log;
-import org.nightcode.milter.util.MilterPacketUtil;
+import org.nightcode.milter.util.MilterPackets;
 
 import static java.lang.String.format;
 import static org.nightcode.milter.CommandCode.SMFIC_HELO;
@@ -35,7 +35,7 @@ class HeloCommandProcessor implements CommandProcessor {
   @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     context.setSessionStep(SMFIC_HELO);
 
-    int i = MilterPacketUtil.indexOfZeroTerm(packet.payload());
+    int i = MilterPackets.indexOfZeroTerm(packet.payload());
     if (i < 0) {
       Log.info().log(getClass(), format("[%s] received invalid packet: %s", context.id(), packet));
       context.handler().abortSession(context, packet);

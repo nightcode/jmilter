@@ -8,7 +8,7 @@ import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.IntMap;
 import org.nightcode.milter.util.Log;
-import org.nightcode.milter.util.MilterPacketUtil;
+import org.nightcode.milter.util.MilterPackets;
 
 import static java.lang.String.format;
 
@@ -97,7 +97,7 @@ public class MilterContextImpl implements MilterContext {
   }
 
   @Override public void sendContinue() throws MilterException {
-    sendPacket(MilterPacketUtil.SMFIS_CONTINUE);
+    sendPacket(MilterPackets.SMFIS_CONTINUE);
   }
 
   @Override public void sendPacket(MilterPacket packet) throws MilterException {
@@ -108,7 +108,7 @@ public class MilterContextImpl implements MilterContext {
       if ((milterProtocolSteps().bitmap() & noReplyBit) != 0
           && (getMtaProtocolSteps().bitmap() & noReplyBit) == 0) {
         Log.debug().log(getClass(), () -> format("MTA doesn't support NR for state %s, trying to send SMFIR_CONTINUE", sessionStep));
-        sendPacket0(MilterPacketUtil.SMFIS_CONTINUE);
+        sendPacket0(MilterPackets.SMFIS_CONTINUE);
       }
       return;
     }

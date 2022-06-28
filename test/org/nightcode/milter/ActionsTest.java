@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-package org.nightcode.milter.util;
+package org.nightcode.milter;
 
-import org.nightcode.milter.Actions;
+import org.nightcode.milter.util.Hexs;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,5 +35,15 @@ public class ActionsTest {
     actions = new Actions(payload, 4);
     Assert.assertEquals(0x000001FF, actions.bitmap());
     Assert.assertArrayEquals(HEX.toByteArray("000001ff"), actions.array());
+  }
+
+  @Test public void testOffset() {
+    Assert.assertThrows(IllegalArgumentException.class, () -> new Actions(new byte[4], -1));
+    Assert.assertThrows(IllegalArgumentException.class, () -> new Actions(new byte[4], 2));
+  }
+
+  @Test public void testWriteTo() {
+    Assert.assertThrows(IllegalArgumentException.class, () -> new Actions(new byte[4], 0).writeTo(new byte[4], -1));
+    Assert.assertThrows(IllegalArgumentException.class, () -> new Actions(new byte[4], 0).writeTo(new byte[4], 2));
   }
 }

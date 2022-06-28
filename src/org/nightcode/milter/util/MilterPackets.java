@@ -36,7 +36,7 @@ import static org.nightcode.milter.ResponseCode.SMFIR_REJECT;
 import static org.nightcode.milter.ResponseCode.SMFIR_SKIP;
 import static org.nightcode.milter.ResponseCode.SMFIR_TEMPFAIL;
 
-public enum MilterPacketUtil {
+public enum MilterPackets {
   ;
 
   /**

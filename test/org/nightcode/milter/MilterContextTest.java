@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
-import org.nightcode.milter.util.MilterPacketUtil;
+import org.nightcode.milter.util.MilterPackets;
 
 import org.junit.Test;
 import org.easymock.EasyMock;
@@ -62,7 +62,7 @@ public class MilterContextTest {
         .command(SMFIC_CONNECT)
         .build();
 
-    packetSenderMock.send(MilterPacketUtil.SMFIS_CONTINUE);
+    packetSenderMock.send(MilterPackets.SMFIS_CONTINUE);
     EasyMock.expectLastCall().once();
 
     context.setMtaProtocolSteps(ProtocolSteps.DEF_PROTOCOL_STEPS);
@@ -87,7 +87,7 @@ public class MilterContextTest {
     MilterContext context
         = new MilterContextImpl(milterHandlerMock, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS, packetSenderMock);
 
-    packetSenderMock.send(MilterPacketUtil.SMFIS_CONTINUE);
+    packetSenderMock.send(MilterPackets.SMFIS_CONTINUE);
     EasyMock.expectLastCall().once();
 
     context.setSessionProtocolSteps(ProtocolSteps.DEF_PROTOCOL_STEPS);

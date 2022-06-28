@@ -27,17 +27,11 @@ public enum ByteArrays {
   }
 
   public static void intToByteArray(int src, byte[] dst) {
-    if (dst.length < 4) {
-      throw new IllegalArgumentException("invalid supplied buffer length " + dst.length + " for data length 4 bytes");
-    }
-    dst[0] = (byte) (src >>> 24);
-    dst[1] = (byte) (src >>> 16);
-    dst[2] = (byte) (src >>>  8);
-    dst[3] = (byte) (src >>>  0);
+    intToByteArray(src, dst, 0);
   }
 
   public static void intToByteArray(int src, byte[] dst, int offset) {
-    if (offset + 4 > dst.length) {
+    if (offset < 0 || offset + 4 > dst.length) {
       throw new IllegalArgumentException("invalid supplied buffer length " + dst.length
           + " for offset " + offset + " and data length 4 bytes");
     }

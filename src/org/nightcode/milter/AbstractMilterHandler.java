@@ -23,7 +23,7 @@ import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
 import org.nightcode.milter.util.ByteArrays;
 import org.nightcode.milter.util.Log;
-import org.nightcode.milter.util.MilterPacketUtil;
+import org.nightcode.milter.util.MilterPackets;
 
 import static java.lang.String.format;
 import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
@@ -157,7 +157,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
   }
 
   @Override public void abortSession(MilterContext context, MilterPacket packet) {
-    if (MilterPacketUtil.isMessageState(context.getSessionStep())) {
+    if (MilterPackets.isMessageState(context.getSessionStep())) {
       try {
         abort(context, packet);
       } catch (MilterException ex) {
