@@ -98,6 +98,6 @@ public enum CommandCode implements Code {
   }
 
   public long responseTimeoutMs() {
-    return getLong("jmilter." + this.name() + ".responseTimeoutMs", 5_000);
+    return getLong(() -> "jmilter." + CommandCode.this.name() + ".responseTimeoutMs", 5_000);
   }
 }

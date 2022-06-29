@@ -15,11 +15,11 @@
 package org.nightcode.milter.samples;
 
 import org.nightcode.milter.AbstractMilterHandler;
+import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
-import org.nightcode.milter.Actions;
-import org.nightcode.milter.util.Log;
 import org.nightcode.milter.ProtocolSteps;
+import org.nightcode.milter.util.Log;
 
 import static org.nightcode.milter.util.MilterPackets.SMFIS_TEMPFAIL;
 

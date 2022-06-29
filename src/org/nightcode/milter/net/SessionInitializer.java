@@ -25,6 +25,8 @@ import org.nightcode.milter.codec.Int32LenFrameEncoder;
 import org.nightcode.milter.codec.MilterPacketDecoder;
 import org.nightcode.milter.codec.MilterPacketEncoder;
 
+import static org.nightcode.milter.MilterOptions.NETTY_LOGGING_ENABLED;
+import static org.nightcode.milter.MilterOptions.NETTY_LOG_LEVEL;
 import static org.nightcode.milter.util.Properties.getBoolean;
 import static org.nightcode.milter.util.Properties.getString;
 
@@ -41,8 +43,8 @@ public class SessionInitializer extends ChannelInitializer<Channel> {
   public SessionInitializer(ChannelHandler responseHandler) {
     this.responseHandler = responseHandler;
 
-    loggingEnabled = getBoolean("jmilter.netty.loggingEnabled", false);
-    logLevel       = getString("jmilter.netty.logLevel", "INFO");
+    loggingEnabled = getBoolean(NETTY_LOGGING_ENABLED, false);
+    logLevel       = getString(NETTY_LOG_LEVEL, "INFO");
   }
 
   @Override protected void initChannel(Channel channel) {

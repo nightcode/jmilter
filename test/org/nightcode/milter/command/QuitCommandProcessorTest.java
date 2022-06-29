@@ -14,14 +14,14 @@
 
 package org.nightcode.milter.command;
 
-import org.nightcode.milter.MilterException;
-import org.nightcode.milter.MilterHandler;
+import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterContextImpl;
+import org.nightcode.milter.MilterException;
+import org.nightcode.milter.MilterHandler;
+import org.nightcode.milter.ProtocolSteps;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
-import org.nightcode.milter.Actions;
-import org.nightcode.milter.ProtocolSteps;
 
 import org.junit.Assert;
 import org.junit.Test;

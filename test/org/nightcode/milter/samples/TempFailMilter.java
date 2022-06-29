@@ -19,11 +19,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.nightcode.milter.MilterHandler;
-import org.nightcode.milter.net.MilterGatewayManager;
 import org.nightcode.milter.Actions;
-import org.nightcode.milter.util.NetUtils;
+import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.ProtocolSteps;
+import org.nightcode.milter.net.MilterGatewayManager;
+import org.nightcode.milter.util.NetUtils;
 
 public final class TempFailMilter {
 

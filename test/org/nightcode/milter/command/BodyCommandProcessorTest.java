@@ -20,7 +20,6 @@ import org.nightcode.milter.MilterException;
 import org.nightcode.milter.codec.MilterPacket;
 
 import org.junit.Test;
-
 import org.easymock.EasyMock;
 
 import static org.nightcode.milter.CommandCode.SMFIC_BODY;

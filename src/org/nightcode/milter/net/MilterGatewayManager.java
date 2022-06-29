@@ -41,6 +41,12 @@ import org.nightcode.milter.util.Log;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static org.nightcode.milter.MilterOptions.NETTY_KEEP_ALIVE;
+import static org.nightcode.milter.MilterOptions.NETTY_NUMBER_OF_THREADS;
+import static org.nightcode.milter.MilterOptions.NETTY_RECONNECT_TIMEOUT_MS;
+import static org.nightcode.milter.MilterOptions.NETTY_REUSE_ADDRESS;
+import static org.nightcode.milter.MilterOptions.NETTY_SO_BACKLOG;
+import static org.nightcode.milter.MilterOptions.NETTY_TCP_NO_DELAY;
 import static org.nightcode.milter.util.ExecutorUtils.namedThreadFactory;
 import static org.nightcode.milter.util.Properties.getBoolean;
 import static org.nightcode.milter.util.Properties.getInt;
@@ -92,11 +98,9 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
 
     executor = new ScheduledThreadPoolExecutor(1, namedThreadFactory(name + "-executor"));
 
-    String prefix = "jmilter.netty.";
+    reconnectTimeoutNs = MILLISECONDS.toNanos(getLong(NETTY_RECONNECT_TIMEOUT_MS, RECONNECT_TIMEOUT_MS));
 
-    reconnectTimeoutNs = MILLISECONDS.toNanos(getLong(prefix + "reconnectTimeoutMs", RECONNECT_TIMEOUT_MS));
-
-    int nThreads = getInt(prefix + "nThreads", 0);
+    int nThreads = getInt(NETTY_NUMBER_OF_THREADS, 0);
 
     EventLoopGroup acceptorGroup = null;
     EventLoopGroup workerGroup   = null;
@@ -117,11 +121,11 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
     serverBootstrap = new ServerBootstrap()
         .group(acceptorGroup, workerGroup)
         .channel(serverChannelClass)
-        .option(ChannelOption.SO_BACKLOG,   getInt(prefix + "soBacklog", 128))
-        .option(ChannelOption.SO_REUSEADDR, getBoolean(prefix + "reuseAddress", true))
-        .childOption(ChannelOption.SO_KEEPALIVE, getBoolean(prefix + "keepAlive", true))
-        .childOption(ChannelOption.SO_REUSEADDR, getBoolean(prefix + "reuseAddress", true))
-        .childOption(ChannelOption.TCP_NODELAY,  getBoolean(prefix + "tcpNoDelay", true))
+        .option(ChannelOption.SO_BACKLOG,   getInt(NETTY_SO_BACKLOG, 128))
+        .option(ChannelOption.SO_REUSEADDR, getBoolean(NETTY_REUSE_ADDRESS, true))
+        .childOption(ChannelOption.SO_KEEPALIVE, getBoolean(NETTY_KEEP_ALIVE, true))
+        .childOption(ChannelOption.SO_REUSEADDR, getBoolean(NETTY_REUSE_ADDRESS, true))
+        .childOption(ChannelOption.TCP_NODELAY,  getBoolean(NETTY_TCP_NO_DELAY, true))
         .childOption(ChannelOption.ALLOCATOR,    PooledByteBufAllocator.DEFAULT)
         .localAddress(address);
   }
