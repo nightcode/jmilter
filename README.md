@@ -40,22 +40,28 @@ The test folder contains the complete example code.
 
 #### Available options
 
-| Name                            | Possible values                 |
-| ------------------------------- | ------------------------------- |
-| jmilter.netty.transport         | NIO, EPOL, KQUEUE               |
-| jmilter.netty.reconnectTimeoutMs| [0, Long.MAX_VALUE]             |
-| jmilter.netty.loggingEnabled    | true, false                     |
-| jmilter.netty.logLevel          | TRACE, DEBUG, INFO, WARN, ERROR |
+| Name                             | Possible values                 |
+|----------------------------------|---------------------------------|
+| jmilter.netty.loggingEnabled     | true, false                     |
+| jmilter.netty.logLevel           | TRACE, DEBUG, INFO, WARN, ERROR |
+| jmilter.netty.nThreads           | [0, 65535]                      |
+| jmilter.netty.connectTimeoutMs   | [0, Long.MAX_VALUE]             |
+| jmilter.netty.reconnectTimeoutMs | [0, Long.MAX_VALUE]             |
+| jmilter.netty.autoRead           | true, false                     |
+| jmilter.netty.keepAlive          | true, false                     |
+| jmilter.netty.tcpNoDelay         | true, false                     |
+| jmilter.netty.reuseAddress       | true, false                     |
+| jmilter.netty.soBacklog          | [0, 65535]                      |
 
 Download
 --------
 
-Download [the latest jar][3] via Maven:
+Download [the latest release][3] via Maven:
 ```xml
 <dependency>
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
-  <version>0.3.6</version>
+  <version>0.3.7</version>
 </dependency>
 ```
 
