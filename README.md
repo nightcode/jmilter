@@ -10,7 +10,7 @@ An introduction of using milter functionality with Postfix is available in the [
 How to use
 ----------
 
-code
+Milter side
 
 ```java
   // indicates what changes you intend to do with messages
@@ -34,6 +34,57 @@ code
   MilterGatewayManager gatewayManager = new MilterGatewayManager(address, milterHandler, ServiceManager.instance());
 
   gatewayManager.start();
+```
+
+MTA side
+
+```java
+CompletableFuture<Void> call(MilterSessionFactory factory) {
+  Macros connectionMacros = Macros.builder()
+      .add("j", "mx.example.org")
+      .add("{daemon_name}", "mx.example.org")
+      .add("v", "Postfix 2.10.1")
+      .build();
+
+  Macros fromMacros = Macros.builder()
+      .add("{mail_mailer}", "smtp")
+      .add("{mail_host}", "mx1.example.org")
+      .add("{mail_addr}", "sender@example.org")
+      .build();
+
+  Macros rcptMacros = Macros.builder()
+      .add("{rcpt_mailer}", "smtp")
+      .add("{rcpt_host}", "mx1.example.com")
+      .add("{rcpt_addr}", "sender@example.com")
+      .build()
+
+  Macros headerMacros = Macros.builder().add("i", "C1A7C20BAF").build();
+
+  List<String> envfrom = new ArrayList<>();
+  envfrom.add("<sender@example.org>");
+  envfrom.add("SIZE=1552");
+  envfrom.add("BODY=8BITMIME");
+
+  List<String> envrcpt = new ArrayList<>();
+  envrcpt.add("<recipient@example.com>");
+  envrcpt.add("ORCPT=rfc822;recipient@example.com");
+
+  return factory.createSession()
+      .thenCompose(s -> s.connect("[88.88.88.88]", SMFIA_INET, 4567, "88.88.88.88", connectionMacros))
+      .thenCompose(r -> r.session().helo("mail.example.org"))
+      .thenCompose(r -> r.session().envfrom(envfrom, fromMacros))
+      .thenCompose(r -> r.session().envrcpt(envrcpt, rcptMacros))
+      .thenCompose(r -> r.session().header("Subject", "Some subject", headerMacros))
+      .thenCompose(r -> r.session().header("From", "sender@example.org", headerMacros))
+      .thenCompose(r -> r.session().header("To", "recipient@example.com", headerMacros))
+      .thenCompose(r -> r.session().header("Message-Id", UUID.randomUUID() + "@example.org", headerMacros))
+      .thenCompose(r -> r.session().eoh())
+      .thenCompose(r -> r.session().body("Some text".getBytes(StandardCharsets.UTF_8)))
+      .thenCompose(r -> r.session().eob())
+      .thenCompose(r -> r.session().abort())
+      .thenCompose(r -> r.session().quit());
+}
+
 ```
 
 The test folder contains the complete example code.
