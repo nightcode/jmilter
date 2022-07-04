@@ -44,7 +44,7 @@ public class SessionInitializer extends ChannelInitializer<Channel> {
     this.responseHandler = responseHandler;
 
     loggingEnabled = getBoolean(NETTY_LOGGING_ENABLED, false);
-    logLevel       = getString(NETTY_LOG_LEVEL, "INFO");
+    logLevel       = getString(NETTY_LOG_LEVEL, "DEBUG");
   }
 
   @Override protected void initChannel(Channel channel) {
