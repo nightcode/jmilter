@@ -32,6 +32,8 @@ import org.nightcode.milter.MilterOptions;
 import org.nightcode.milter.ProtocolSteps;
 import org.nightcode.milter.net.MilterChannelHandler;
 import org.nightcode.milter.net.SessionInitializer;
+import org.nightcode.milter.util.JulLoggingHandler;
+import org.nightcode.milter.util.Log;
 
 import org.junit.Test;
 
@@ -41,6 +43,7 @@ import static org.nightcode.milter.ProtocolFamily.SMFIA_INET;
 public class ClientTest {
 
   @Test public void test() throws Exception {
+    Log.setLoggingHandler(JulLoggingHandler.DEBUG, JulLoggingHandler.INFO, JulLoggingHandler.WARN, JulLoggingHandler.ERROR, JulLoggingHandler.FATAL);
     System.setProperty(MilterOptions.NETTY_LOGGING_ENABLED.key(), "true");
 
     ConnectionFactory<LocalAddress> connectionFactory = new LocalConnectionFactory();
@@ -65,9 +68,13 @@ public class ClientTest {
 
       serverBootstrap.bind(connectionFactory.remoteAddress()).sync();
 
-      try (MilterSessionFactory factory = MilterSessionFactoryBuilder.<LocalAddress>builder()
+      MilterSessionFactoryBuilder<LocalAddress> builder = MilterSessionFactoryBuilder.<LocalAddress>builder()
           .factory(connectionFactory)
-          .create()) {
+          .protocolVersion(6)
+          .actions(Actions.DEF_ACTIONS)
+          .protocolSteps(protocolSteps);
+
+      try (MilterSessionFactory factory = builder.create()) {
 
         Macros connectionMacros = Macros.builder()
             .add("j", "mx.example.org")
@@ -106,7 +113,7 @@ public class ClientTest {
         envrcpt.add("<client@example.org>");
         envrcpt.add("ORCPT=rfc822;client@example.org");
 
-        factory.createSession(6, Actions.DEF_ACTIONS, protocolSteps)
+        factory.createSession()
             .thenCompose(s -> s.connect("[144.229.210.94]", SMFIA_INET, 62293, "144.229.210.94", connectionMacros))
             .thenCompose(r -> r.session().helo("mail.example.org", heloMacros))
             .thenCompose(r -> r.session().envfrom(envfrom, mailMacros))

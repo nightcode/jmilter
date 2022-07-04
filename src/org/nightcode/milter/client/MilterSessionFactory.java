@@ -24,7 +24,7 @@ public interface MilterSessionFactory extends Closeable {
 
   @Override void close();
 
-  CompletableFuture<MilterSession> createSession(int version, Actions actions, ProtocolSteps steps);
+  CompletableFuture<MilterSession> createSession();
 
   CompletableFuture<Void> shutdownGracefully();
 }

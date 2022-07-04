@@ -41,10 +41,13 @@ public class OptnegHandlerTest {
   @Test public void testConnection() {
     ConnectionFactory<LocalAddress> connectionFactory = new LocalConnectionFactory();
     MilterSessionFactoryBuilder<LocalAddress> builder = new MilterSessionFactoryBuilder<LocalAddress>()
-        .factory(connectionFactory);
+        .factory(connectionFactory)
+        .protocolVersion(6)
+        .actions(Actions.DEF_ACTIONS)
+        .protocolSteps(ProtocolSteps.DEF_PROTOCOL_STEPS);
 
     try (MilterSessionFactoryImpl<LocalAddress> factory = (MilterSessionFactoryImpl<LocalAddress>) builder.create()) {
-      OptnegHandler handler = factory.createOptnegHandler(6, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS);
+      OptnegHandler handler = factory.createOptnegHandler();
 
       EmbeddedChannel channel = new EmbeddedChannel(handler);
 
@@ -65,10 +68,13 @@ public class OptnegHandlerTest {
   @Test public void testChannelReadWrongPacket() {
     ConnectionFactory<LocalAddress> connectionFactory = new LocalConnectionFactory();
     MilterSessionFactoryBuilder<LocalAddress> builder = new MilterSessionFactoryBuilder<LocalAddress>()
-        .factory(connectionFactory);
+        .factory(connectionFactory)
+        .protocolVersion(6)
+        .actions(Actions.DEF_ACTIONS)
+        .protocolSteps(ProtocolSteps.DEF_PROTOCOL_STEPS);
 
     try (MilterSessionFactoryImpl<LocalAddress> factory = (MilterSessionFactoryImpl<LocalAddress>) builder.create()) {
-      OptnegHandler handler = factory.createOptnegHandler(6, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS);
+      OptnegHandler handler = factory.createOptnegHandler();
 
       EmbeddedChannel channel = new EmbeddedChannel(handler);
 
@@ -85,10 +91,13 @@ public class OptnegHandlerTest {
   @Test public void testChannelReadWrongCommand() {
     ConnectionFactory<LocalAddress> connectionFactory = new LocalConnectionFactory();
     MilterSessionFactoryBuilder<LocalAddress> builder = new MilterSessionFactoryBuilder<LocalAddress>()
-        .factory(connectionFactory);
+        .factory(connectionFactory)
+        .protocolVersion(6)
+        .actions(Actions.DEF_ACTIONS)
+        .protocolSteps(ProtocolSteps.DEF_PROTOCOL_STEPS);
 
     try (MilterSessionFactoryImpl<LocalAddress> factory = (MilterSessionFactoryImpl<LocalAddress>) builder.create()) {
-      OptnegHandler handler = factory.createOptnegHandler(6, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS);
+      OptnegHandler handler = factory.createOptnegHandler();
 
       EmbeddedChannel channel = new EmbeddedChannel(handler);
 
@@ -105,10 +114,13 @@ public class OptnegHandlerTest {
   @Test public void testExceptionCaught() {
     ConnectionFactory<LocalAddress> connectionFactory = new LocalConnectionFactory();
     MilterSessionFactoryBuilder<LocalAddress> builder = new MilterSessionFactoryBuilder<LocalAddress>()
-        .factory(connectionFactory);
+        .factory(connectionFactory)
+        .protocolVersion(6)
+        .actions(Actions.DEF_ACTIONS)
+        .protocolSteps(ProtocolSteps.DEF_PROTOCOL_STEPS);
 
     try (MilterSessionFactoryImpl<LocalAddress> factory = (MilterSessionFactoryImpl<LocalAddress>) builder.create()) {
-      OptnegHandler handler = factory.createOptnegHandler(6, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS);
+      OptnegHandler handler = factory.createOptnegHandler();
 
       EmbeddedChannel channel = new EmbeddedChannel(handler);
 
@@ -125,10 +137,13 @@ public class OptnegHandlerTest {
   @Test public void testReadTimeout() {
     ConnectionFactory<LocalAddress> connectionFactory = new LocalConnectionFactory();
     MilterSessionFactoryBuilder<LocalAddress> builder = new MilterSessionFactoryBuilder<LocalAddress>()
-        .factory(connectionFactory);
+        .factory(connectionFactory)
+        .protocolVersion(6)
+        .actions(Actions.DEF_ACTIONS)
+        .protocolSteps(ProtocolSteps.DEF_PROTOCOL_STEPS);
 
     try (MilterSessionFactoryImpl<LocalAddress> factory = (MilterSessionFactoryImpl<LocalAddress>) builder.create()) {
-      OptnegHandler handler = factory.createOptnegHandler(6, Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS);
+      OptnegHandler handler = factory.createOptnegHandler();
 
       EmbeddedChannel channel = new EmbeddedChannel(handler);
 

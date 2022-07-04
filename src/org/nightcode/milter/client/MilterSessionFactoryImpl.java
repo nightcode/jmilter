@@ -48,21 +48,11 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
   final class OptnegHandler extends ChannelDuplexHandler {
     private static final int PROTOCOL_MIN_VERSION = 2;
 
-    private final int           version;
-    private final Actions       actions;
-    private final ProtocolSteps steps;
-
     private ChannelHandlerContext ctx;
     private ChannelPromise        connectPromise;
     private ScheduledFuture<?>    timeoutFuture;
 
     private final CommandCode command = SMFIC_OPTNEG;
-
-    OptnegHandler(int version, Actions actions, ProtocolSteps steps) {
-      this.version = version;
-      this.actions = actions;
-      this.steps   = steps;
-    }
 
     @Override public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress,
                                   ChannelPromise connectPromise) throws Exception {
@@ -156,6 +146,9 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
   }
 
   private final ConnectionFactory<A> factory;
+  private final int                  version;
+  private final Actions              actions;
+  private final ProtocolSteps        steps;
 
   private final Set<Channel>            channels       = new ConcurrentSkipListSet<>();
   private final AtomicBoolean           shutdown       = new AtomicBoolean(false);
@@ -163,6 +156,9 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
 
   MilterSessionFactoryImpl(MilterSessionFactoryBuilder<A> builder) {
     factory = builder.factory;
+    version = builder.protocolVersion;
+    actions = builder.actions;
+    steps   = builder.protocolSteps;
   }
 
   @Override public void close() {
@@ -180,11 +176,11 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
     }
   }
 
-  @Override public CompletableFuture<MilterSession> createSession(int version, Actions actions, ProtocolSteps steps) {
+  @Override public CompletableFuture<MilterSession> createSession() {
     CompletableFuture<MilterSession> resultFuture = new CompletableFuture<>();
 
     Bootstrap bootstrap = factory.newConnection();
-    bootstrap.handler(new SessionInitializer(createOptnegHandler(version, actions, steps)));
+    bootstrap.handler(new SessionInitializer(createOptnegHandler()));
 
     ChannelFuture connectFuture = bootstrap.connect(factory.remoteAddress());
     connectFuture.addListener((ChannelFutureListener) future -> connectCallback(future, resultFuture));
@@ -197,8 +193,8 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
     return shutdownFuture;
   }
 
-  OptnegHandler createOptnegHandler(int version, Actions actions, ProtocolSteps steps) {
-    return new OptnegHandler(version, actions, steps);
+  OptnegHandler createOptnegHandler() {
+    return new OptnegHandler();
   }
 
   private void connectCallback(ChannelFuture future, CompletableFuture<MilterSession> resultFuture) {
@@ -215,7 +211,7 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
 
     channel.pipeline().addLast("milterResponseHandler", new ResponseHandler());
 
-    Log.info().log(getClass(), () -> format("[%s] connection %s established", channel.id().asLongText(), channel));
+    Log.debug().log(getClass(), () -> format("[%s] connection %s established", channel.id().asLongText(), channel));
     resultFuture.complete(session);
   }
 }

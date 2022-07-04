@@ -15,6 +15,10 @@
 package org.nightcode.milter.client;
 
 import java.net.SocketAddress;
+import java.util.Objects;
+
+import org.nightcode.milter.Actions;
+import org.nightcode.milter.ProtocolSteps;
 
 public class MilterSessionFactoryBuilder<A extends SocketAddress> {
 
@@ -23,13 +27,50 @@ public class MilterSessionFactoryBuilder<A extends SocketAddress> {
   }
 
   ConnectionFactory<A> factory;
+  int                  protocolVersion;
+  Actions              actions;
+  ProtocolSteps        protocolSteps;
+
+  private int bitMask = 0x00;
 
   public MilterSessionFactory create() {
+    requireValue(0x01, "ConnectionFactory");
+    requireValue(0x01 << 1, "ProtocolVersion");
+    requireValue(0x01 << 2, "Actions");
+    requireValue(0x01 << 3, "ProtocolSteps");
     return new MilterSessionFactoryImpl<>(this);
   }
 
+  MilterSessionFactoryBuilder<A> actions(Actions val) {
+    Objects.requireNonNull(val, "actions");
+    bitMask |= (0x01 << 2);
+    this.actions = val;
+    return this;
+  }
+
   MilterSessionFactoryBuilder<A> factory(ConnectionFactory<A> val) {
+    Objects.requireNonNull(val, "connection factory");
+    bitMask |= 0x01;
     factory = val;
     return this;
+  }
+
+  MilterSessionFactoryBuilder<A> protocolSteps(ProtocolSteps val) {
+    Objects.requireNonNull(val, "protocol steps");
+    bitMask |= (0x01 << 3);
+    this.protocolSteps = val;
+    return this;
+  }
+
+  MilterSessionFactoryBuilder<A> protocolVersion(int val) {
+    bitMask |= (0x01 << 1);
+    this.protocolVersion = val;
+    return this;
+  }
+ 
+  private void requireValue(int bitField, String object) {
+    if ((bitMask & bitField) != bitField) {
+      throw new IllegalStateException(object + " should be initialized");
+    }
   }
 }
