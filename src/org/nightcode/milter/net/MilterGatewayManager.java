@@ -15,25 +15,17 @@
 package org.nightcode.milter.net;
 
 import java.io.Closeable;
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.ServerChannel;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.util.ExecutorUtils;
 import org.nightcode.milter.util.Log;
@@ -41,21 +33,14 @@ import org.nightcode.milter.util.Log;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.nightcode.milter.MilterOptions.NETTY_KEEP_ALIVE;
-import static org.nightcode.milter.MilterOptions.NETTY_NUMBER_OF_THREADS;
 import static org.nightcode.milter.MilterOptions.NETTY_RECONNECT_TIMEOUT_MS;
-import static org.nightcode.milter.MilterOptions.NETTY_REUSE_ADDRESS;
-import static org.nightcode.milter.MilterOptions.NETTY_SO_BACKLOG;
-import static org.nightcode.milter.MilterOptions.NETTY_TCP_NO_DELAY;
 import static org.nightcode.milter.util.ExecutorUtils.namedThreadFactory;
-import static org.nightcode.milter.util.Properties.getBoolean;
-import static org.nightcode.milter.util.Properties.getInt;
 import static org.nightcode.milter.util.Properties.getLong;
 
 /**
  * MilterGatewayManager.
  */
-public class MilterGatewayManager implements ChannelFutureListener, Closeable {
+public class MilterGatewayManager<A extends SocketAddress> implements ChannelFutureListener, Closeable {
 
   public static final int NEW      = 0x00000000;
   public static final int STARTING = 0x00000001;
@@ -67,12 +52,11 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
 
   private volatile ChannelFuture channelFuture;
 
-  private final InetSocketAddress address;
-
   private final long reconnectTimeoutNs;
 
   private final ServerBootstrap serverBootstrap;
 
+  private final ServerFactory<A>         serverFactory;
   private final MilterHandler            milterHandler;
   private final ScheduledExecutorService executor;
 
@@ -80,54 +64,18 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
   private final CompletableFuture<Void> bindFuture = new CompletableFuture<>();
 
   /**
-   * @param address gateway address
+   * @param serverFactory server factory
    * @param milterHandler milter handler
    */
-  public MilterGatewayManager(InetSocketAddress address, MilterHandler milterHandler) {
-    this(MilterGatewayManager.class.getSimpleName(), address, milterHandler);
-  }
-
-  /**
-   * @param name gateway name
-   * @param address gateway address
-   * @param milterHandler milter handler
-   */
-  public MilterGatewayManager(String name, InetSocketAddress address, MilterHandler milterHandler) {
-    this.address = address;
+  public MilterGatewayManager(ServerFactory<A> serverFactory, MilterHandler milterHandler) {
+    this.serverFactory = serverFactory;
     this.milterHandler = milterHandler;
 
-    executor = new ScheduledThreadPoolExecutor(1, namedThreadFactory(name + "-executor"));
+    executor = new ScheduledThreadPoolExecutor(1, namedThreadFactory("jmilter-" + serverFactory.localAddress() + "-executor"));
 
     reconnectTimeoutNs = MILLISECONDS.toNanos(getLong(NETTY_RECONNECT_TIMEOUT_MS, RECONNECT_TIMEOUT_MS));
 
-    int nThreads = getInt(NETTY_NUMBER_OF_THREADS, 0);
-
-    EventLoopGroup acceptorGroup = null;
-    EventLoopGroup workerGroup   = null;
-    Class<? extends ServerChannel> serverChannelClass = null;
-    try {
-      acceptorGroup = new EpollEventLoopGroup(1, namedThreadFactory(name + "-epoll-acceptor"));
-      workerGroup = new EpollEventLoopGroup(nThreads, namedThreadFactory(name + "-epoll-worker"));
-      serverChannelClass = EpollServerSocketChannel.class;
-    } catch (Throwable ex) {
-      Log.info().log(getClass(), "unable to initialize netty EPOLL transport, switch to NIO");
-    }
-    if (serverChannelClass == null) {
-      acceptorGroup = new NioEventLoopGroup(1, namedThreadFactory(name + "-nio-acceptor"));
-      workerGroup = new NioEventLoopGroup(nThreads, namedThreadFactory(name + "-nio-worker"));
-      serverChannelClass = NioServerSocketChannel.class;
-    }
-
-    serverBootstrap = new ServerBootstrap()
-        .group(acceptorGroup, workerGroup)
-        .channel(serverChannelClass)
-        .option(ChannelOption.SO_BACKLOG,   getInt(NETTY_SO_BACKLOG, 128))
-        .option(ChannelOption.SO_REUSEADDR, getBoolean(NETTY_REUSE_ADDRESS, true))
-        .childOption(ChannelOption.SO_KEEPALIVE, getBoolean(NETTY_KEEP_ALIVE, true))
-        .childOption(ChannelOption.SO_REUSEADDR, getBoolean(NETTY_REUSE_ADDRESS, true))
-        .childOption(ChannelOption.TCP_NODELAY,  getBoolean(NETTY_TCP_NO_DELAY, true))
-        .childOption(ChannelOption.ALLOCATOR,    PooledByteBufAllocator.DEFAULT)
-        .localAddress(address);
+    serverBootstrap = serverFactory.create();
   }
 
   @Override public void operationComplete(ChannelFuture future) {
@@ -180,8 +128,8 @@ public class MilterGatewayManager implements ChannelFutureListener, Closeable {
             });
         channelFuture.channel().closeFuture().addListener(this);
       } catch (Exception ex) {
-        Log.warn().log(getClass()
-            , format("unable to bind to %s, will try again after %s ms.", address, NANOSECONDS.toMillis(reconnectTimeoutNs)), ex);
+        Log.warn().log(getClass(), format("unable bind to %s, will try again after %s ms.", serverFactory.localAddress()
+                , NANOSECONDS.toMillis(reconnectTimeoutNs)), ex);
         executor.schedule(this::connect, reconnectTimeoutNs, NANOSECONDS);
       }
     });

@@ -23,6 +23,7 @@ import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.ProtocolSteps;
 import org.nightcode.milter.net.MilterGatewayManager;
+import org.nightcode.milter.net.ServerFactory;
 import org.nightcode.milter.util.NetUtils;
 
 public final class AddHeaderMilter {
@@ -42,10 +43,12 @@ public final class AddHeaderMilter {
         .noBody()
         .build();
 
+    ServerFactory<InetSocketAddress> serverFactory = ServerFactory.tcpIpFactory(address);
+    
     // a simple milter handler that only adds header "X-Received"
     MilterHandler milterHandler = new AddHeaderMilterHandler(milterActions, milterProtocolSteps);
 
-    try (MilterGatewayManager gatewayManager = new MilterGatewayManager(address, milterHandler)) {
+    try (MilterGatewayManager<InetSocketAddress> gatewayManager = new MilterGatewayManager<>(serverFactory, milterHandler)) {
       gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
     }
   }

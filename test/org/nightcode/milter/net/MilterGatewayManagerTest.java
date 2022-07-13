@@ -14,10 +14,9 @@
 
 package org.nightcode.milter.net;
 
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.channel.local.LocalAddress;
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterContext;
@@ -30,20 +29,14 @@ import org.junit.Test;
 public class MilterGatewayManagerTest {
 
   @Test public void testStartStop() throws Exception {
-    int port;
-    try (ServerSocket socket = new ServerSocket(0)) {
-      port = socket.getLocalPort();
-    }
-    InetSocketAddress address = new InetSocketAddress("localhost", port);
-
     MilterHandler milterHandler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
       @Override public void quit(MilterContext context) {
         // do nothing
       }
     };
 
-    MilterGatewayManager gatewayManager;
-    try (MilterGatewayManager manager = new MilterGatewayManager(address, milterHandler)) {
+    MilterGatewayManager<LocalAddress> gatewayManager;
+    try (MilterGatewayManager<LocalAddress> manager = new MilterGatewayManager<>(new LocalServerFactory(), milterHandler)) {
       gatewayManager = manager;
       gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
       Assert.assertEquals(MilterGatewayManager.RUNNING, gatewayManager.getState());
