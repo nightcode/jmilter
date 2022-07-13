@@ -67,7 +67,7 @@ public class MilterSessionFactoryBuilder<A extends SocketAddress> {
     this.protocolVersion = val;
     return this;
   }
- 
+
   private void requireValue(int bitField, String object) {
     if ((bitMask & bitField) != bitField) {
       throw new IllegalStateException(object + " should be initialized");

@@ -30,7 +30,7 @@ public enum JulLoggingHandler implements Log.LoggingHandler {
   },
   INFO() {
     @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      Logger.getLogger(clazz.getName()).log(Level.INFO, thrown, supplier); 
+      Logger.getLogger(clazz.getName()).log(Level.INFO, thrown, supplier);
     }
   },
   WARN() {

@@ -17,9 +17,6 @@ package org.nightcode.milter.client;
 import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 
-import org.nightcode.milter.Actions;
-import org.nightcode.milter.ProtocolSteps;
-
 public interface MilterSessionFactory extends Closeable {
 
   @Override void close();
