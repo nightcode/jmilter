@@ -94,7 +94,7 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
       Actions       actions       = new Actions(packet.payload(), 4);
       ProtocolSteps protocolSteps = new ProtocolSteps(packet.payload(), 8);
 
-      MilterSession session = new MilterSessionImpl(ctx, protocolVersion, actions, protocolSteps, channels);
+      MilterSession session = new MilterSessionImpl(ctx.channel(), protocolVersion, actions, protocolSteps, channels);
       ctx.channel().attr(SESSION_KEY).set(session);
       Log.debug().log(getClass(), () -> format("[%s] established new milter session", id(ctx)));
 
@@ -179,7 +179,7 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
   @Override public CompletableFuture<MilterSession> createSession() {
     CompletableFuture<MilterSession> resultFuture = new CompletableFuture<>();
 
-    Bootstrap bootstrap = factory.newConnection();
+    Bootstrap bootstrap = factory.create();
     bootstrap.handler(new SessionInitializer(createOptnegHandler()));
 
     ChannelFuture connectFuture = bootstrap.connect(factory.remoteAddress());

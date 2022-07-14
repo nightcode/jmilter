@@ -46,20 +46,20 @@ class TcpIpConnectionFactory implements ConnectionFactory<InetSocketAddress> {
     this.address = address;
   }
 
-  @Override public Bootstrap newConnection() {
+  @Override public Bootstrap create() {
     int nThreads = getInt(NETTY_NUMBER_OF_THREADS, 0);
 
     EventLoopGroup           workerGroup  = null;
     Class<? extends Channel> channelClass = null;
     try {
-      workerGroup  = new EpollEventLoopGroup(nThreads, namedThreadFactory("jmilter-TcpIpConnection-epoll"));
+      workerGroup  = new EpollEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-epoll"));
       channelClass = EpollSocketChannel.class;
     } catch (Throwable ex) {
       Log.info().log(getClass()
           , () -> "unable to initialize netty EPOLL transport, switch to NIO: " + Throwables.getRootCause(ex).getMessage());
     }
     if (channelClass == null) {
-      workerGroup  = new NioEventLoopGroup(nThreads, namedThreadFactory("jmilter-TcpIpConnection-nio"));
+      workerGroup  = new NioEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-nio"));
       channelClass = NioSocketChannel.class;
     }
 

@@ -61,24 +61,23 @@ class MilterSessionImpl implements MilterSession {
     }
   }
 
-  private final ChannelHandlerContext ctx;
-  private final int                   protocolVersion;
-  private final Actions               milterActions;
-  private final ProtocolSteps         milterProtocolSteps;
+  private final Channel       channel;
+  private final int           protocolVersion;
+  private final Actions       milterActions;
+  private final ProtocolSteps milterProtocolSteps;
 
   private final CompletableFuture<Void> closeFuture = new CompletableFuture<>();
 
-  MilterSessionImpl(ChannelHandlerContext ctx, int protocolVersion, Actions milterActions, ProtocolSteps milterProtocolSteps,
-                    Set<Channel> channels) {
-    this.ctx                 = ctx;
+  MilterSessionImpl(Channel channel, int protocolVersion, Actions milterActions, ProtocolSteps milterProtocolSteps, Set<Channel> channels) {
+    this.channel             = channel;
     this.protocolVersion     = protocolVersion;
     this.milterActions       = milterActions;
     this.milterProtocolSteps = milterProtocolSteps;
 
-    this.ctx.pipeline().addLast("exceptionHandler", new ExceptionHandler());
+    this.channel.pipeline().addLast("exceptionHandler", new ExceptionHandler());
     this.closeFuture.whenComplete((r, t) -> {
-      Log.debug().log(MilterSessionImpl.this.getClass(), format("[%s] channel has been unregistered", ctx.channel().id().asLongText()));
-      channels.remove(ctx.channel());
+      Log.debug().log(MilterSessionImpl.this.getClass(), format("[%s] channel has been unregistered", channel.id().asLongText()));
+      channels.remove(channel);
     });
   }
 
@@ -156,7 +155,7 @@ class MilterSessionImpl implements MilterSession {
   }
 
   @Override public CompletableFuture<Void> quit() {
-    send(MilterPacketFactory::createQuit).whenComplete((r, t) -> ctx.close());
+    send(MilterPacketFactory::createQuit).whenComplete((r, t) -> channel.close());
     return closeFuture;
   }
 
@@ -169,7 +168,7 @@ class MilterSessionImpl implements MilterSession {
   }
 
   @Override public String id() {
-    return ctx.channel().id().asLongText();
+    return channel.id().asLongText();
   }
 
   @Override public int protocolVersion() {
@@ -188,7 +187,7 @@ class MilterSessionImpl implements MilterSession {
     return id().compareTo(other.id());
   }
 
-  private CompletableFuture<MilterResponse> send(Supplier<MilterPacket> supplier) {
+  CompletableFuture<MilterResponse> send(Supplier<MilterPacket> supplier) {
     try {
       MilterPacket packet  = supplier.get();
       CommandCode  command = CommandCode.valueOf(packet.command());
@@ -200,7 +199,7 @@ class MilterSessionImpl implements MilterSession {
 
       CompletableFuture<MilterResponse> responseFuture = new CompletableFuture<>();
 
-      MilterRequest request = new MilterRequest(command, new MilterPacket[] {packet}, this, ctx.channel(), responseFuture);
+      MilterRequest request = new MilterRequest(command, new MilterPacket[] {packet}, this, channel, responseFuture);
       request.execute();
 
       return responseFuture;
@@ -209,7 +208,7 @@ class MilterSessionImpl implements MilterSession {
     }
   }
 
-  private CompletableFuture<MilterResponse> send(Macros macros, Supplier<MilterPacket> supplier) {
+  CompletableFuture<MilterResponse> send(Macros macros, Supplier<MilterPacket> supplier) {
     try {
       MilterPacket packet  = supplier.get();
       CommandCode  command = CommandCode.valueOf(packet.command());
@@ -223,7 +222,7 @@ class MilterSessionImpl implements MilterSession {
 
       CompletableFuture<MilterResponse> responseFuture = new CompletableFuture<>();
 
-      MilterRequest request = new MilterRequest(command, new MilterPacket[] {macro, packet}, this, ctx.channel(), responseFuture);
+      MilterRequest request = new MilterRequest(command, new MilterPacket[] {macro, packet}, this, channel, responseFuture);
       request.execute();
 
       return responseFuture;

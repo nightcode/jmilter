@@ -123,7 +123,7 @@ public class MilterRequestTest {
     EasyMock.verify(sessionMock);
   }
   
-  @Test public void testOnFailure() throws Exception {
+  @Test public void testOnFailure() {
     MilterSession   sessionMock = EasyMock.mock(MilterSession.class);
     EmbeddedChannel channel     = new EmbeddedChannel();
 

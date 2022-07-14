@@ -25,7 +25,7 @@ public interface ConnectionFactory<A extends SocketAddress> {
     return new TcpIpConnectionFactory(address);
   }
 
-  Bootstrap newConnection();
+  Bootstrap create();
 
   A remoteAddress();
 }

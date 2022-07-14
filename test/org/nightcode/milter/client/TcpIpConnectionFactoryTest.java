@@ -34,7 +34,7 @@ public class TcpIpConnectionFactoryTest {
     InetSocketAddress                    address = new InetSocketAddress("127.0.0.1", 0);
     ConnectionFactory<InetSocketAddress> factory = new TcpIpConnectionFactory(address);
 
-    Bootstrap target = factory.newConnection();
+    Bootstrap target = factory.create();
     Assert.assertNotNull(target);
   }
 }

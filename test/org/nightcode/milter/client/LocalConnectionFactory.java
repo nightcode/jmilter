@@ -30,9 +30,7 @@ public class LocalConnectionFactory implements ConnectionFactory<LocalAddress> {
 
   private static final LocalAddress TEST_ADDRESS = new LocalAddress("test.id");
 
-  @Override public Bootstrap newConnection() {
-    String prefix = "jmilter.test.netty.";
-
+  @Override public Bootstrap create() {
     Bootstrap bootstrap = new Bootstrap();
     bootstrap
         .group(new NioEventLoopGroup(1))
