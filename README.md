@@ -25,15 +25,16 @@ Milter side
       .noBody()
       .build();
 
+  // gateway address
+  String address = System.getProperty("jmilter.address", "0.0.0.0:4545");
+  ServerFactory<InetSocketAddress> serverFactory = ServerFactory.tcpIpFactory(address);
+
   // a simple milter handler that only adds header "X-Received"
   MilterHandler milterHandler = new AddHeaderMilterHandler(milterActions, milterProtocolSteps);
 
-  // gateway address
-  String address = System.getProperty("jmilter.address", "0.0.0.0:4545");
+  MilterGatewayManager<InetSocketAddress> gatewayManager = new MilterGatewayManager<>(serverFactory, milterHandler);
 
-  MilterGatewayManager gatewayManager = new MilterGatewayManager(address, milterHandler, ServiceManager.instance());
-
-  gatewayManager.start();
+  gatewayManager.bind();
 ```
 
 MTA side
