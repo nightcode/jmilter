@@ -33,6 +33,8 @@ public interface CommandProcessor {
    *
    * @param context session context
    * @param packet Milter packet
+   *
+   * @throws MilterException if exception occurred
    */
    void submit(MilterContext context, MilterPacket packet) throws MilterException;
 }

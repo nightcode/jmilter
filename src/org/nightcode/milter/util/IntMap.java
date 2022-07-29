@@ -16,7 +16,7 @@ package org.nightcode.milter.util;
 
 /**
  *
- * @param <E>
+ * @param <E> element type
  */
 public final class IntMap<E> {
 

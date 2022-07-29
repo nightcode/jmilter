@@ -65,6 +65,8 @@ public enum ExecutorUtils {
    * Trying gracefully shutdown Executor service.
    *
    * @param executorService ExecutorService
+   *
+   * @return {@code true} if all tasks have completed following shut down
    */
   public static boolean shutdown(ExecutorService executorService) {
     executorService.shutdown();

@@ -28,6 +28,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * 'A' SMFIC_ABORT
    * Abort current filter checks
    * Expected response: NONE
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> abort();
 
@@ -37,6 +39,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Accept/reject action
    *
    * @param buffer up to MILTER_CHUNK_SIZE (65535) bytes
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> body(byte[] buffer);
 
@@ -49,6 +53,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * @param family   protocol family
    * @param port     port number (SMFIA_INET or SMFIA_INET6 only)
    * @param address  IP address (ASCII) or unix socket path, NUL terminated
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> connect(String hostname, ProtocolFamily family, int port, String address);
 
@@ -62,6 +68,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * @param port     port number (SMFIA_INET or SMFIA_INET6 only)
    * @param address  IP address (ASCII) or unix socket path, NUL terminated
    * @param macros   CONNECT macros
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> connect(String hostname, ProtocolFamily family, int port, String address,
                                             Macros macros);
@@ -73,6 +81,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    *
    * @param code   command for which these macros apply
    * @param macros array of NUL-terminated strings, alternating between name of macro and value of macro.
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> macro(CommandCode code, Macros macros);
 
@@ -80,6 +90,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * 'E' SMFIC_BODYEOB
    * End of body marker
    * Expected response: Zero or more modification actions, then accept/reject action
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> eob();
 
@@ -89,6 +101,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Zero or more modification actions, then accept/reject action
    *
    * @param macros SMFIC_BODYEOB macros
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> eob(Macros macros);
 
@@ -98,6 +112,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Accept/reject action
    *
    * @param helo HELO string, NUL terminated
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> helo(String helo);
 
@@ -108,6 +124,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    *
    * @param helo   HELO string, NUL terminated
    * @param macros HELO macros
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> helo(String helo, Macros macros);
 
@@ -115,6 +133,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * 'K' SMFIC_QUIT_NC
    * Quit milter communication
    * Expected response: Keep milter connection
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> quitNc();
 
@@ -125,6 +145,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    *
    * @param name  name of header, NUL terminated
    * @param value value of header, NUL terminated
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> header(String name, String value);
 
@@ -136,6 +158,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * @param name   name of header, NUL terminated
    * @param value  value of header, NUL terminated
    * @param macros HEADER macros
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> header(String name, String value, Macros macros);
 
@@ -145,8 +169,10 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Accept/reject action
    *
    * @param args array of strings, NUL terminated (address at index 0).
-   *             args[0] is sender, with <> qualification.
+   *             args[0] is sender, with &lt;&gt; qualification.
    *             args[1] and beyond are ESMTP arguments, if any.
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> envfrom(List<String> args);
 
@@ -156,9 +182,11 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Accept/reject action
    *
    * @param args   array of strings, NUL terminated (address at index 0).
-   *               args[0] is sender, with <> qualification.
+   *               args[0] is sender, with &lt;&gt; qualification.
    *               args[1] and beyond are ESMTP arguments, if any.
    * @param macros MAIL macros
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> envfrom(List<String> args, Macros macros);
 
@@ -166,6 +194,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * N' SMFIC_EOH
    * End of headers marker
    * Expected response: Accept/reject action
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> eoh();
 
@@ -175,6 +205,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Accept/reject action
    *
    * @param macros EOH macros
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> eoh(Macros macros);
 
@@ -184,8 +216,10 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Accept/reject action
    *
    * @param args array of strings, NUL terminated (address at index 0).
-   *             args[0] is recipient, with <> qualification.
+   *             args[0] is recipient, with &lt;&gt; qualification.
    *             args[1] and beyond are ESMTP arguments, if any.
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> envrcpt(List<String> args);
 
@@ -195,9 +229,11 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Accept/reject action
    *
    * @param args   array of strings, NUL terminated (address at index 0).
-   *               args[0] is recipient, with <> qualification.
+   *               args[0] is recipient, with &lt;&gt; qualification.
    *               args[1] and beyond are ESMTP arguments, if any.
    * @param macros RCPT macros
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> envrcpt(List<String> args, Macros macros);
 
@@ -205,6 +241,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * 'Q' SMFIC_QUIT
    * Quit milter communication
    * Expected response: Close milter connection
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<Void> quit();
 
@@ -214,6 +252,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    * Expected response: Accept/reject action
    *
    * @param payload DATA content
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> data(byte[] payload);
 
@@ -224,6 +264,8 @@ public interface MilterSession extends Comparable<MilterSession> {
    *
    * @param payload DATA content
    * @param macros  DATA macros
+   *
+   * @return the CompletableFuture representing operation result
    */
   CompletableFuture<MilterResponse> data(byte[] payload, Macros macros);
 
