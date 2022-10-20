@@ -80,11 +80,11 @@ public class MilterChannelHandlerTest {
 
       serverBootstrap.group(new NioEventLoopGroup(2))
           .channel(LocalServerChannel.class)
-          .childHandler(new SessionInitializer(new MilterChannelHandler(milterHandler)));
+          .childHandler(new SessionInitializer(() -> new MilterChannelHandler(milterHandler)));
 
       clientBootstrap.group(new NioEventLoopGroup(1))
           .channel(LocalChannel.class)
-          .handler(new SessionInitializer(new SimpleChannelInboundHandler<ByteBuf>() {
+          .handler(new SessionInitializer(() -> new SimpleChannelInboundHandler<ByteBuf>() {
             @Override protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
               // do nothing
             }

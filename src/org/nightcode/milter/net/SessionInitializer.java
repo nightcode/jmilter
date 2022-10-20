@@ -14,6 +14,8 @@
 
 package org.nightcode.milter.net;
 
+import java.util.function.Supplier;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
@@ -38,9 +40,9 @@ public class SessionInitializer extends ChannelInitializer<Channel> {
   private final boolean loggingEnabled;
   private final String  logLevel;
 
-  private final ChannelHandler responseHandler;
+  private final Supplier<ChannelHandler> responseHandler;
 
-  public SessionInitializer(ChannelHandler responseHandler) {
+  public SessionInitializer(Supplier<ChannelHandler> responseHandler) {
     this.responseHandler = responseHandler;
 
     loggingEnabled = getBoolean(NETTY_LOGGING_ENABLED, false);
@@ -60,6 +62,6 @@ public class SessionInitializer extends ChannelInitializer<Channel> {
     pipeline.addLast("milterPacketDecoder", new MilterPacketDecoder());
     pipeline.addLast("milterPacketEncoder", new MilterPacketEncoder());
 
-    pipeline.addLast("milterResponseHandler", responseHandler);
+    pipeline.addLast("milterResponseHandler", responseHandler.get());
   }
 }

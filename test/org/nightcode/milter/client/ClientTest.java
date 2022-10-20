@@ -64,7 +64,7 @@ public class ClientTest {
       
       serverBootstrap.group(new NioEventLoopGroup(2))
           .channel(LocalServerChannel.class)
-          .childHandler(new SessionInitializer(new MilterChannelHandler(milterHandler)));
+          .childHandler(new SessionInitializer(() -> new MilterChannelHandler(milterHandler)));
 
       serverBootstrap.bind(connectionFactory.remoteAddress()).sync();
 

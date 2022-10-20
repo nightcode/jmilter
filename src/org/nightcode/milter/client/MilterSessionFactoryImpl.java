@@ -180,7 +180,7 @@ class MilterSessionFactoryImpl<A extends SocketAddress> implements MilterSession
     CompletableFuture<MilterSession> resultFuture = new CompletableFuture<>();
 
     Bootstrap bootstrap = factory.create();
-    bootstrap.handler(new SessionInitializer(createOptnegHandler()));
+    bootstrap.handler(new SessionInitializer(this::createOptnegHandler));
 
     ChannelFuture connectFuture = bootstrap.connect(factory.remoteAddress());
     connectFuture.addListener((ChannelFutureListener) future -> connectCallback(future, resultFuture));

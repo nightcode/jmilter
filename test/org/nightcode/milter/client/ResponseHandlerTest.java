@@ -74,11 +74,11 @@ public class ResponseHandlerTest {
 
       serverBootstrap.group(new NioEventLoopGroup(2))
           .channel(LocalServerChannel.class)
-          .childHandler(new SessionInitializer(new MilterChannelHandler(milterHandler)));
+          .childHandler(new SessionInitializer(() -> new MilterChannelHandler(milterHandler)));
 
       clientBootstrap.group(new NioEventLoopGroup(1))
           .channel(LocalChannel.class)
-          .handler(new SessionInitializer(new ResponseHandler()));
+          .handler(new SessionInitializer(ResponseHandler::new));
 
       serverBootstrap.bind(TEST_ADDRESS).sync();
 

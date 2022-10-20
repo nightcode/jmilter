@@ -41,28 +41,28 @@ public class MilterSessionFactoryBuilder<A extends SocketAddress> {
     return new MilterSessionFactoryImpl<>(this);
   }
 
-  MilterSessionFactoryBuilder<A> actions(Actions val) {
+  public MilterSessionFactoryBuilder<A> actions(Actions val) {
     Objects.requireNonNull(val, "actions");
     bitMask |= (0x01 << 2);
     this.actions = val;
     return this;
   }
 
-  MilterSessionFactoryBuilder<A> factory(ConnectionFactory<A> val) {
+  public MilterSessionFactoryBuilder<A> factory(ConnectionFactory<A> val) {
     Objects.requireNonNull(val, "connection factory");
     bitMask |= 0x01;
     factory = val;
     return this;
   }
 
-  MilterSessionFactoryBuilder<A> protocolSteps(ProtocolSteps val) {
+  public MilterSessionFactoryBuilder<A> protocolSteps(ProtocolSteps val) {
     Objects.requireNonNull(val, "protocol steps");
     bitMask |= (0x01 << 3);
     this.protocolSteps = val;
     return this;
   }
 
-  MilterSessionFactoryBuilder<A> protocolVersion(int val) {
+  public MilterSessionFactoryBuilder<A> protocolVersion(int val) {
     bitMask |= (0x01 << 1);
     this.protocolVersion = val;
     return this;

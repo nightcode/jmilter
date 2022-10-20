@@ -119,7 +119,7 @@ public class MilterGatewayManager<A extends SocketAddress> implements ChannelFut
     final CompletableFuture<Void> cf = new CompletableFuture<>();
     cf.thenAccept(v -> {
       try {
-        ChannelInitializer<Channel> initializer = new SessionInitializer(new MilterChannelHandler(milterHandler));
+        ChannelInitializer<Channel> initializer = new SessionInitializer(() -> new MilterChannelHandler(milterHandler));
         channelFuture = serverBootstrap.childHandler(initializer).bind().sync()
             .addListener((ChannelFutureListener) future -> {
               if (future.cause() == null && state.compareAndSet(STARTING, RUNNING)) {
