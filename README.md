@@ -26,7 +26,7 @@ Milter side
       .build();
 
   // gateway address
-  String address = System.getProperty("jmilter.address", "0.0.0.0:4545");
+  InetSocketAddress address = NetUtils.parseAddress(System.getProperty("jmilter.address", "0.0.0.0:4545"));
   ServerFactory<InetSocketAddress> serverFactory = ServerFactory.tcpIpFactory(address);
 
   // a simple milter handler that only adds header "X-Received"

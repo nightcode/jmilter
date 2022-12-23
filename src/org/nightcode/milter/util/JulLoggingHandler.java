@@ -25,27 +25,37 @@ public enum JulLoggingHandler implements Log.LoggingHandler {
 
   DEBUG() {
     @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      Logger.getLogger(clazz.getName()).log(Level.FINER, thrown, supplier);
+      getLogger(clazz).log(Level.FINER, thrown, supplier);
     }
   },
   INFO() {
     @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      Logger.getLogger(clazz.getName()).log(Level.INFO, thrown, supplier);
+      getLogger(clazz).log(Level.INFO, thrown, supplier);
     }
   },
   WARN() {
     @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      Logger.getLogger(clazz.getName()).log(Level.WARNING, thrown, supplier);
+      getLogger(clazz).log(Level.WARNING, thrown, supplier);
     }
   },
   ERROR() {
     @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      Logger.getLogger(clazz.getName()).log(Level.WARNING, thrown, supplier);
+      getLogger(clazz).log(Level.WARNING, thrown, supplier);
     }
   },
   FATAL() {
     @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      Logger.getLogger(clazz.getName()).log(Level.SEVERE, thrown, supplier);
+      getLogger(clazz).log(Level.SEVERE, thrown, supplier);
     }
+  };
+
+  static Logger getLogger(Class<?> clazz) {
+    return CLASS_LOGGER.get(clazz);
   }
+
+  static final ClassValue<Logger> CLASS_LOGGER = new ClassValue<Logger>() {
+    @Override protected Logger computeValue(Class<?> type) {
+      return Logger.getLogger(type.getName());
+    }
+  };
 }
