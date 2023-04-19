@@ -1,6 +1,6 @@
 # JMilter
 
-[![Build Status](https://travis-ci.org/nightcode/jmilter.svg?branch=master)](https://travis-ci.org/nightcode/jmilter)
+[![Build Status](https://github.com/nightcode/jmilter/actions/workflows/maven.yml/badge.svg)](https://github.com/nightcode/jmilter/actions/workflows/maven.yml)
 [![GitHub license](https://img.shields.io/github/license/nightcode/jmilter.svg)](https://github.com/nightcode/jmilter/blob/master/LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/org.nightcode/jmilter.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aorg.nightcode%20AND%20a%3Ajmilter)
 
