@@ -17,6 +17,7 @@ package org.nightcode.milter.client;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import io.netty.bootstrap.Bootstrap;
@@ -28,6 +29,8 @@ import io.netty.channel.local.LocalAddress;
 import io.netty.channel.local.LocalChannel;
 import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.Actions;
 import org.nightcode.milter.CommandCode;
@@ -150,9 +153,42 @@ public class ResponseHandlerTest {
     EmbeddedChannel channel = new EmbeddedChannel(handler);
 
     AtomicReference<String> logReference = new AtomicReference<>();
-    Log.LoggingHandler noopHandler = (clazz, supplier, thrown) -> {};
-    Log.LoggingHandler loggingHandler = (clazz, supplier, thrown) -> logReference.set(supplier.get());
-    
+
+    Log.LoggingHandler noopHandler = new Log.LoggingHandler() {
+      @Override public void log(@NotNull Class<?> clazz, String message) {
+        // do nothing
+      }
+
+      @Override public void log(@NotNull Class<?> clazz, String message, Object... params) {
+        // do nothing
+      }
+
+      @Override public void log(@NotNull Class<?> clazz, String message, @Nullable Throwable thrown) {
+        // do nothing
+      }
+
+      @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
+        // do nothing
+      }
+    };
+    Log.LoggingHandler loggingHandler = new Log.LoggingHandler() {
+      @Override public void log(@NotNull Class<?> clazz, String message) {
+        logReference.set(message);
+      }
+
+      @Override public void log(@NotNull Class<?> clazz, String message, Object... params) {
+        logReference.set(message);
+      }
+
+      @Override public void log(@NotNull Class<?> clazz, String message, @Nullable Throwable thrown) {
+        logReference.set(message);
+      }
+
+      @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
+        logReference.set(supplier.get());
+      }
+    };
+
     Log.setLoggingHandler(noopHandler, noopHandler, loggingHandler, noopHandler, noopHandler);
     
     MilterMessage message = new MilterMessage(CommandCode.SMFIC_EOH, new MilterPacket[] {createEoh()}, null);

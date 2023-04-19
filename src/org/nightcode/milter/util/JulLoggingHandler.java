@@ -23,31 +23,11 @@ import org.jetbrains.annotations.Nullable;
 
 public enum JulLoggingHandler implements Log.LoggingHandler {
 
-  DEBUG() {
-    @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      getLogger(clazz).log(Level.FINER, thrown, supplier);
-    }
-  },
-  INFO() {
-    @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      getLogger(clazz).log(Level.INFO, thrown, supplier);
-    }
-  },
-  WARN() {
-    @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      getLogger(clazz).log(Level.WARNING, thrown, supplier);
-    }
-  },
-  ERROR() {
-    @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      getLogger(clazz).log(Level.WARNING, thrown, supplier);
-    }
-  },
-  FATAL() {
-    @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
-      getLogger(clazz).log(Level.SEVERE, thrown, supplier);
-    }
-  };
+  DEBUG(Level.FINER),
+  INFO(Level.INFO),
+  WARN(Level.WARNING),
+  ERROR(Level.WARNING),
+  FATAL(Level.SEVERE);
 
   static Logger getLogger(Class<?> clazz) {
     return CLASS_LOGGER.get(clazz);
@@ -58,4 +38,26 @@ public enum JulLoggingHandler implements Log.LoggingHandler {
       return Logger.getLogger(type.getName());
     }
   };
+
+  private final Level level;
+
+  JulLoggingHandler(Level level) {
+    this.level = level;
+  }
+
+  @Override public void log(@NotNull Class<?> clazz, String message) {
+    getLogger(clazz).log(level, message);
+  }
+
+  @Override public void log(@NotNull Class<?> clazz, String message, @Nullable Throwable thrown) {
+    getLogger(clazz).log(level, message, thrown);
+  }
+
+  @Override public void log(@NotNull Class<?> clazz, String message, Object... params) {
+    getLogger(clazz).log(level, message.replaceAll("\\{}", "%s"), params);
+  }
+
+  @Override public void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown) {
+    getLogger(clazz).log(level, thrown, supplier);
+  }
 }

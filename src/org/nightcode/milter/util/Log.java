@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static java.lang.String.format;
 import static org.nightcode.milter.util.Log.PrintStreamLoggingHandler.ERR;
 import static org.nightcode.milter.util.Log.PrintStreamLoggingHandler.OUT;
 
@@ -30,23 +31,21 @@ public enum Log {
 
   public interface LoggingHandler {
 
-    default void log(@NotNull Class<?> clazz, String message) {
-      log(clazz, () -> message, null);
-    }
+    void log(@NotNull Class<?> clazz, String message);
+
+    void log(@NotNull Class<?> clazz, String message, Object... params);
+
+    void log(@NotNull Class<?> clazz, String message, @Nullable Throwable thrown);
+
+    void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown);
 
     default void log(@NotNull Class<?> clazz, Throwable thrown) {
-      log(clazz, () -> "", thrown);
+      log(clazz, "", thrown);
     }
 
     default void log(@NotNull Class<?> clazz, Supplier<String> supplier) {
       log(clazz, supplier, null);
     }
-
-    default void log(@NotNull Class<?> clazz, String message, @Nullable Throwable thrown) {
-      log(clazz, () -> message, thrown);
-    }
-
-    void log(@NotNull Class<?> clazz, Supplier<String> supplier, @Nullable Throwable thrown);
   }
 
   private static final AtomicReference<LoggingHandler> DEBUG = new AtomicReference<>(OUT);
@@ -88,18 +87,28 @@ public enum Log {
   }
 
   enum PrintStreamLoggingHandler implements LoggingHandler {
-    ERR() {
-      @Override public void log(@NotNull Class<?> clazz, Supplier<String> message, @Nullable Throwable thrown) {
-        log(System.err, clazz, message, thrown);
-      }
-    },
-    OUT() {
-      @Override public void log(@NotNull Class<?> clazz, Supplier<String> message, @Nullable Throwable thrown) {
-        log(System.out, clazz, message, thrown);
-      }
-    };
+    ERR(System.err),
+    OUT(System.out);
 
-    void log(@NotNull PrintStream stream, Class<?> clazz, Supplier<String> message, @Nullable Throwable thrown) {
+    private final PrintStream stream;
+
+    PrintStreamLoggingHandler(PrintStream stream) {
+      this.stream = stream;
+    }
+
+    @Override public void log(@NotNull Class<?> clazz, String message) {
+      log(clazz, () -> message, null);
+    }
+
+    @Override public void log(@NotNull Class<?> clazz, String message, @Nullable Throwable thrown) {
+      log(clazz, () -> message, thrown);
+    }
+
+    @Override public void log(@NotNull Class<?> clazz, String message, Object... params) {
+      log(clazz, () -> format(message.replaceAll("\\{}", "%s"), params), null);
+    }
+
+    @Override public void log(@NotNull Class<?> clazz, Supplier<String> message, @Nullable Throwable thrown) {
       synchronized (stream) {
         stream.printf("%s [%s/%s]: %s\n", LocalDateTime.now(), Thread.currentThread().getName(), clazz.getSimpleName(), message.get());
         if (thrown != null) {
