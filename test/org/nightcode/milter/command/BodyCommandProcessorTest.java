@@ -27,12 +27,13 @@ import static org.nightcode.milter.CommandCode.SMFIC_BODY;
 public class BodyCommandProcessorTest extends AbstractCommandProcessorTest {
 
   @Test public void testSubmit() throws MilterException {
-    String       bodyText = "test data\r\n";
-    MilterPacket packet   = new MilterPacket(SMFIC_BODY, bodyText.getBytes(StandardCharsets.UTF_8));
+    String       bodyText  = "test data\r\n";
+    byte[]       bodyChunk = bodyText.getBytes(StandardCharsets.UTF_8);
+    MilterPacket packet    = new MilterPacket(SMFIC_BODY, bodyChunk);
 
     execute(packet, new BodyCommandProcessor(), ctx -> {
       try {
-        ctx.handler().body(ctx, bodyText);
+        ctx.handler().body(ctx, bodyChunk);
         EasyMock.expectLastCall().once();
       } catch (MilterException e) {
         throw new RuntimeException(e);

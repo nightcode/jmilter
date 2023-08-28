@@ -14,8 +14,6 @@
 
 package org.nightcode.milter.command;
 
-import java.nio.charset.StandardCharsets;
-
 import org.nightcode.milter.Code;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
@@ -32,7 +30,6 @@ class BodyCommandProcessor implements CommandProcessor {
   @Override public void submit(MilterContext context, MilterPacket packet) throws MilterException {
     context.setSessionStep(SMFIC_BODY);
 
-    String bodyChunk = new String(packet.payload(), StandardCharsets.UTF_8);
-    context.handler().body(context, bodyChunk);
+    context.handler().body(context, packet.payload());
   }
 }

@@ -41,7 +41,7 @@ public interface MilterCommands {
    *
    * @throws MilterException if exception occurred
    */
-  void body(MilterContext context, String bodyChunk) throws MilterException;
+  void body(MilterContext context, byte[] bodyChunk) throws MilterException;
 
   /**
    * Open SMTP connection.
@@ -75,7 +75,7 @@ public interface MilterCommands {
    *
    * @throws MilterException if exception occurred
    */
-  void eob(MilterContext context, @Nullable String bodyChunk) throws MilterException;
+  void eob(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException;
 
   /**
    * HELO.

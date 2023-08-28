@@ -32,17 +32,18 @@ public class EndOfBodyCommandProcessorTest extends AbstractCommandProcessorTest 
     MilterHandler handlerMock = EasyMock.createMock(MilterHandler.class);
     MilterContext context     = context(handlerMock);
 
-    String bodyText = "test data\r\n";
+    String bodyText  = "test data\r\n";
+    byte[] bodyChunk = bodyText.getBytes(StandardCharsets.UTF_8);
 
     MilterPacket packet1 = new MilterPacket(SMFIC_EOB);
-    MilterPacket packet2 = new MilterPacket(SMFIC_EOB, bodyText.getBytes(StandardCharsets.UTF_8));
+    MilterPacket packet2 = new MilterPacket(SMFIC_EOB, bodyChunk);
 
     CommandProcessor processor = new EndOfBodyCommandProcessor();
 
     handlerMock.eob(context, null);
     EasyMock.expectLastCall().once();
 
-    handlerMock.eob(context, bodyText);
+    handlerMock.eob(context, bodyChunk);
     EasyMock.expectLastCall().once();
 
     EasyMock.replay(handlerMock);

@@ -50,7 +50,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     // do nothing
   }
 
-  @Override public void body(MilterContext context, String bodyChunk) throws MilterException {
+  @Override public void body(MilterContext context, byte[] bodyChunk) throws MilterException {
     context.sendContinue();
   }
 
@@ -63,7 +63,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.setMacros(type, macros);
   }
 
-  @Override public void eob(MilterContext context, @Nullable String bodyChunk) throws MilterException {
+  @Override public void eob(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException {
     context.sendContinue();
   }
 

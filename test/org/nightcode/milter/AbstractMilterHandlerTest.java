@@ -16,6 +16,7 @@ package org.nightcode.milter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import org.nightcode.milter.codec.MilterPacket;
@@ -296,7 +297,7 @@ public class AbstractMilterHandlerTest {
 
     EasyMock.replay(contextMock);
 
-    handler.body(contextMock, "bla-bla");
+    handler.body(contextMock, "bla-bla".getBytes(StandardCharsets.UTF_8));
 
     EasyMock.verify(contextMock);
   }
