@@ -23,6 +23,7 @@ public class MilterContextImpl implements MilterContext {
   private final Actions            milterActions;
   private final ProtocolSteps      milterProtocolSteps;
   private final MilterPacketSender milterPacketSender;
+  private final MilterMacros       milterMacros;
 
   private volatile int           mtaProtocolVersion;
   private volatile Actions       mtaActions;
@@ -36,9 +37,15 @@ public class MilterContextImpl implements MilterContext {
 
   public MilterContextImpl(MilterHandler handler, Actions milterActions, ProtocolSteps milterProtocolSteps,
                            MilterPacketSender milterPacketSender) {
+    this(handler, milterActions, milterProtocolSteps, MilterMacros.instance(), milterPacketSender);
+  }
+
+  public MilterContextImpl(MilterHandler handler, Actions milterActions, ProtocolSteps milterProtocolSteps,
+                           MilterMacros milterMacros, MilterPacketSender milterPacketSender) {
     this.handler             = handler;
     this.milterActions       = milterActions;
     this.milterProtocolSteps = milterProtocolSteps;
+    this.milterMacros        = milterMacros;
     this.milterPacketSender  = milterPacketSender;
 
     this.id = UUID.randomUUID();
@@ -86,6 +93,10 @@ public class MilterContextImpl implements MilterContext {
 
   @Override public Actions milterActions() {
     return milterActions;
+  }
+
+  @Override public MilterMacros milterMacros() {
+    return milterMacros;
   }
 
   @Override public ProtocolSteps milterProtocolSteps() {

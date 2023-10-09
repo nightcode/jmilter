@@ -30,8 +30,9 @@ import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
 public abstract class AbstractMilterHandler implements MilterHandler {
 
-  private final Actions milterActions;
+  private final Actions       milterActions;
   private final ProtocolSteps milterProtocolSteps;
+  private final MilterMacros  milterMacros;
 
   protected final MessageModificationService messageModificationService;
 
@@ -39,10 +40,20 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     this(milterActions, milterProtocolSteps, new MessageModificationServiceImpl());
   }
 
+  protected AbstractMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps, MilterMacros milterMacros) {
+    this(milterActions, milterProtocolSteps, milterMacros, new MessageModificationServiceImpl());
+  }
+
   protected AbstractMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps,
+                                  MessageModificationService messageModificationService) {
+    this(milterActions, milterProtocolSteps, MilterMacros.instance(), messageModificationService);
+  }
+
+  protected AbstractMilterHandler(Actions milterActions, ProtocolSteps milterProtocolSteps, MilterMacros milterMacros,
                                   MessageModificationService messageModificationService) {
     this.milterActions              = milterActions;
     this.milterProtocolSteps        = milterProtocolSteps;
+    this.milterMacros               = milterMacros;
     this.messageModificationService = messageModificationService;
   }
 
@@ -130,12 +141,16 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     byte[] version       = ByteArrays.intToByteArray(context.getSessionProtocolVersion());
     byte[] actions       = context.milterActions().array();
     byte[] protocolSteps = context.getSessionProtocolSteps().array();
+    byte[] milterMacros   = context.milterMacros().array();
 
-    byte[] payload = new byte[version.length + actions.length + protocolSteps.length];
+    byte[] payload = new byte[version.length + actions.length + protocolSteps.length + milterMacros.length];
 
     System.arraycopy(version, 0, payload, 0, version.length);
     System.arraycopy(actions, 0, payload, version.length, actions.length);
     System.arraycopy(protocolSteps, 0, payload, version.length + actions.length, protocolSteps.length);
+    if (milterMacros.length > 0) {
+      System.arraycopy(milterMacros, 0, payload, version.length + actions.length + protocolSteps.length, milterMacros.length);
+    }
 
     MilterPacket response = MilterPacket.builder()
         .command(SMFIC_OPTNEG)
@@ -176,6 +191,6 @@ public abstract class AbstractMilterHandler implements MilterHandler {
   }
 
   @Override public MilterContext createContext(MilterPacketSender sender) {
-    return new MilterContextImpl(this, milterActions, milterProtocolSteps, sender);
+    return new MilterContextImpl(this, milterActions, milterProtocolSteps, milterMacros, sender);
   }
 }

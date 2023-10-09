@@ -45,6 +45,8 @@ public interface MilterContext {
 
   Actions milterActions();
 
+  MilterMacros milterMacros();
+
   ProtocolSteps milterProtocolSteps();
 
   int milterProtocolVersion();
