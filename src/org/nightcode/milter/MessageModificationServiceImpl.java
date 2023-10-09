@@ -31,9 +31,14 @@ import static org.nightcode.milter.ResponseCode.SMFIR_INSHEADER;
 import static org.nightcode.milter.ResponseCode.SMFIR_PROGRESS;
 import static org.nightcode.milter.ResponseCode.SMFIR_QUARANTINE;
 import static org.nightcode.milter.ResponseCode.SMFIR_REPLBODY;
+import static org.nightcode.milter.ResponseCode.SMFIR_REPLYCODE;
 import static org.nightcode.milter.util.MilterPackets.MILTER_CHUNK_SIZE;
 
 class MessageModificationServiceImpl implements MessageModificationService {
+
+  private static final ThreadLocal<StringBuilder> STRING_BUILDER_TH = ThreadLocal.withInitial(() -> new StringBuilder(128));
+
+  private static final int MAX_REPLY_LEN = 980;
 
   MessageModificationServiceImpl() {
     // do nothing
@@ -41,6 +46,18 @@ class MessageModificationServiceImpl implements MessageModificationService {
 
   @Override public void addHeader(MilterContext context, String name, String value) throws MilterException {
     header(context, SMFIR_ADDHEADER, -1, name, value);
+  }
+
+  @Override public void addRecipient(MilterContext context, String recipient) throws MilterException {
+    send(SMFIR_ADDRCPT, context, recipient);
+  }
+
+  @Override public void addRecipientEsmtpPar(MilterContext context, String recipient, String args) throws MilterException {
+    send(SMFIR_ADDRCPT_PAR, context, recipient, args);
+  }
+
+  @Override public void changeFrom(MilterContext context, String from, @Nullable String args) throws MilterException {
+    send(SMFIR_CHGFROM, context, from, args);
   }
 
   @Override public void changeHeader(MilterContext context, int index, String name, @Nullable String value)
@@ -51,26 +68,24 @@ class MessageModificationServiceImpl implements MessageModificationService {
     header(context, SMFIR_CHGHEADER, index, name, value);
   }
 
-  @Override public void insertHeader(MilterContext context, int index, String name, String value)
-      throws MilterException {
+  @Override public void deleteRecipient(MilterContext context, String recipient) throws MilterException {
+    send(SMFIR_DELRCPT, context, recipient);
+  }
+
+  @Override public void insertHeader(MilterContext context, int index, String name, String value) throws MilterException {
     header(context, SMFIR_INSHEADER, index, name, value);
   }
 
-  @Override public void changeFrom(MilterContext context, String from, @Nullable String args) throws MilterException {
-    send(SMFIR_CHGFROM, context, from, args);
+  @Override public void progress(MilterContext context) throws MilterException {
+    MilterPacket packet = MilterPacket.builder()
+        .command(SMFIR_PROGRESS)
+        .build();
+
+    context.sendPacket(packet);
   }
 
-  @Override public void addRecipient(MilterContext context, String recipient) throws MilterException {
-    send(SMFIR_ADDRCPT, context, recipient);
-  }
-
-  @Override public void addRecipientEsmtpPar(MilterContext context, String recipient, String args)
-      throws MilterException {
-    send(SMFIR_ADDRCPT_PAR, context, recipient, args);
-  }
-
-  @Override public void deleteRecipient(MilterContext context, String recipient) throws MilterException {
-    send(SMFIR_DELRCPT, context, recipient);
+  @Override public void quarantine(MilterContext context, String reason) throws MilterException {
+    send(SMFIR_QUARANTINE, context, reason);
   }
 
   @Override public void replaceBody(MilterContext context, byte[] body) throws MilterException {
@@ -90,16 +105,38 @@ class MessageModificationServiceImpl implements MessageModificationService {
     }
   }
 
-  @Override public void progress(MilterContext context) throws MilterException {
-    MilterPacket packet = MilterPacket.builder()
-        .command(SMFIR_PROGRESS)
-        .build();
-
-    context.sendPacket(packet);
+  @Override public void sendReply(MilterContext context, int replyCode, @Nullable String message) throws MilterException {
+    sendReply(context, replyCode, null, message);
   }
 
-  @Override public void quarantine(MilterContext context, String reason) throws MilterException {
-    send(SMFIR_QUARANTINE, context, reason);
+  @Override public void sendReply(MilterContext context, int replyCode, @Nullable String extendedReplyCode, @Nullable String message)
+      throws MilterException {
+    if (replyCode < 400 || replyCode > 599) {
+      throw new IllegalArgumentException("Illegal reply code value '" + replyCode + '\'');
+    }
+    if (message != null && message.length() > MAX_REPLY_LEN) {
+      throw new IllegalArgumentException("Message length is more than 980 characters (" + message.length() + ")");
+    }
+
+    StringBuilder sb = STRING_BUILDER_TH.get();
+    sb.setLength(0);
+    sb.append(replyCode);
+
+    if (extendedReplyCode != null) {
+      sb.append(' ').append(extendedReplyCode);
+    }
+
+    if (message != null) {
+      sb.append(' ').append(message);
+    }
+
+    byte[] buf = sb.toString().getBytes(StandardCharsets.UTF_8);
+    byte[] payload = new byte[buf.length + 1];
+    System.arraycopy(buf, 0, payload, 0, buf.length);
+
+    MilterPacket packet = MilterPacket.builder().command(SMFIR_REPLYCODE).payload(payload).build();
+
+    context.sendPacket(packet);
   }
 
   private void header(MilterContext context, ResponseCode command, int index, String name, String value) throws MilterException {

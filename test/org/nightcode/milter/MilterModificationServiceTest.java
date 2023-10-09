@@ -36,6 +36,7 @@ import static org.nightcode.milter.ResponseCode.SMFIR_INSHEADER;
 import static org.nightcode.milter.ResponseCode.SMFIR_PROGRESS;
 import static org.nightcode.milter.ResponseCode.SMFIR_QUARANTINE;
 import static org.nightcode.milter.ResponseCode.SMFIR_REPLBODY;
+import static org.nightcode.milter.ResponseCode.SMFIR_REPLYCODE;
 import static org.nightcode.milter.util.MilterPackets.MILTER_CHUNK_SIZE;
 
 public class MilterModificationServiceTest {
@@ -60,68 +61,6 @@ public class MilterModificationServiceTest {
     EasyMock.replay(contextMock);
 
     service.addHeader(contextMock, "DKIM-Filter", "OpenDKIM Filter v2.11.0 mx.example.org B09BE58");
-
-    EasyMock.verify(contextMock);
-  }
-
-  @Test public void testChangeHeader() throws MilterException {
-    MilterContext contextMock = EasyMock.mock(MilterContext.class);
-
-    MessageModificationService service = new MessageModificationServiceImpl();
-
-    MilterPacket packet = new MilterPacket(SMFIR_CHGHEADER
-        , HEX.toByteArray("00000005444b494d2d46696c74657200204f70656e444b494d2046696c7465722076322e31312e"
-        + "30206d782e6578616d706c652e6f7267204230394245353800"));
-
-    EasyMock.expect(contextMock.getSessionProtocolSteps())
-        .andReturn(ProtocolSteps.builder().headerValueLeadingSpace().build());
-
-    contextMock.sendPacket(packet);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(contextMock);
-
-    service.changeHeader(contextMock, 5,"DKIM-Filter", "OpenDKIM Filter v2.11.0 mx.example.org B09BE58");
-
-    EasyMock.verify(contextMock);
-  }
-
-  @Test public void testInsertHeader() throws MilterException {
-    MilterContext contextMock = EasyMock.mock(MilterContext.class);
-
-    MessageModificationService service = new MessageModificationServiceImpl();
-
-    MilterPacket packet = new MilterPacket(SMFIR_INSHEADER
-        , HEX.toByteArray("00000001444b494d2d46696c74657200204f70656e444b494d2046696c7465722076322e31312e" 
-        + "30206d782e6578616d706c652e6f7267204230394245353800"));
-
-    EasyMock.expect(contextMock.getSessionProtocolSteps())
-        .andReturn(ProtocolSteps.builder().headerValueLeadingSpace().build());
-
-    contextMock.sendPacket(packet);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(contextMock);
-
-    service.insertHeader(contextMock, 1, "DKIM-Filter", "OpenDKIM Filter v2.11.0 mx.example.org B09BE58");
-
-    EasyMock.verify(contextMock);
-  }
-
-  @Test public void testChangeFrom() throws MilterException {
-    MilterContext contextMock = EasyMock.mock(MilterContext.class);
-
-    MessageModificationService service = new MessageModificationServiceImpl();
-
-    MilterPacket packet = new MilterPacket(SMFIR_CHGFROM
-        , HEX.toByteArray("737570706f7274406578616d706c652e6f7267006172677300"));
-
-    contextMock.sendPacket(packet);
-    EasyMock.expectLastCall().once();
-
-    EasyMock.replay(contextMock);
-
-    service.changeFrom(contextMock, "support@example.org", "args");
 
     EasyMock.verify(contextMock);
   }
@@ -162,6 +101,46 @@ public class MilterModificationServiceTest {
     EasyMock.verify(contextMock);
   }
 
+  @Test public void testChangeHeader() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    MilterPacket packet = new MilterPacket(SMFIR_CHGHEADER
+        , HEX.toByteArray("00000005444b494d2d46696c74657200204f70656e444b494d2046696c7465722076322e31312e"
+        + "30206d782e6578616d706c652e6f7267204230394245353800"));
+
+    EasyMock.expect(contextMock.getSessionProtocolSteps())
+        .andReturn(ProtocolSteps.builder().headerValueLeadingSpace().build());
+
+    contextMock.sendPacket(packet);
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    service.changeHeader(contextMock, 5,"DKIM-Filter", "OpenDKIM Filter v2.11.0 mx.example.org B09BE58");
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testChangeFrom() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    MilterPacket packet = new MilterPacket(SMFIR_CHGFROM
+        , HEX.toByteArray("737570706f7274406578616d706c652e6f7267006172677300"));
+
+    contextMock.sendPacket(packet);
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    service.changeFrom(contextMock, "support@example.org", "args");
+
+    EasyMock.verify(contextMock);
+  }
+
   @Test public void testDeleteRecipient() throws MilterException {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
@@ -176,6 +155,62 @@ public class MilterModificationServiceTest {
     EasyMock.replay(contextMock);
 
     service.deleteRecipient(contextMock, "support@example.org");
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testInsertHeader() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    MilterPacket packet = new MilterPacket(SMFIR_INSHEADER
+        , HEX.toByteArray("00000001444b494d2d46696c74657200204f70656e444b494d2046696c7465722076322e31312e" 
+        + "30206d782e6578616d706c652e6f7267204230394245353800"));
+
+    EasyMock.expect(contextMock.getSessionProtocolSteps())
+        .andReturn(ProtocolSteps.builder().headerValueLeadingSpace().build());
+
+    contextMock.sendPacket(packet);
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    service.insertHeader(contextMock, 1, "DKIM-Filter", "OpenDKIM Filter v2.11.0 mx.example.org B09BE58");
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testProgress() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    MilterPacket packet = new MilterPacket(SMFIR_PROGRESS);
+
+    contextMock.sendPacket(packet);
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    service.progress(contextMock);
+
+    EasyMock.verify(contextMock);
+  }
+
+  @Test public void testQuarantine() throws MilterException {
+    MilterContext contextMock = EasyMock.mock(MilterContext.class);
+
+    MessageModificationService service = new MessageModificationServiceImpl();
+
+    MilterPacket packet = new MilterPacket(SMFIR_QUARANTINE, HEX.toByteArray("7465737400"));
+
+    contextMock.sendPacket(packet);
+    EasyMock.expectLastCall().once();
+
+    EasyMock.replay(contextMock);
+
+    service.quarantine(contextMock, "test");
 
     EasyMock.verify(contextMock);
   }
@@ -233,37 +268,51 @@ public class MilterModificationServiceTest {
     Assert.assertArrayEquals(Arrays.copyOfRange(newBody, MILTER_CHUNK_SIZE * 2, newBody.length), packet3.getValue().payload());
   }
 
-  @Test public void testProgress() throws MilterException {
+  @Test public void testSendReply() throws MilterException {
     MilterContext contextMock = EasyMock.mock(MilterContext.class);
 
     MessageModificationService service = new MessageModificationServiceImpl();
 
-    MilterPacket packet = new MilterPacket(SMFIR_PROGRESS);
+    MilterPacket packet1 = new MilterPacket(SMFIR_REPLYCODE
+        , HEX.toByteArray("35333020352E372E302041757468656E7469636174696F6E20726571756972656400"));
 
-    contextMock.sendPacket(packet);
+    MilterPacket packet2 = new MilterPacket(SMFIR_REPLYCODE
+        , HEX.toByteArray("3533302041757468656E7469636174696F6E20726571756972656400"));
+
+    MilterPacket packet3 = new MilterPacket(SMFIR_REPLYCODE
+        , HEX.toByteArray("35333000"));
+
+    contextMock.sendPacket(packet1);
     EasyMock.expectLastCall().once();
+
+    contextMock.sendPacket(packet2);
+    EasyMock.expectLastCall().times(2);
+
+    contextMock.sendPacket(packet3);
+    EasyMock.expectLastCall().times(2);
 
     EasyMock.replay(contextMock);
 
-    service.progress(contextMock);
+    service.sendReply(contextMock, 530, "5.7.0", "Authentication required");
+    service.sendReply(contextMock, 530, "Authentication required");
+    service.sendReply(contextMock, 530, null, "Authentication required");
+    service.sendReply(contextMock, 530, null);
+    service.sendReply(contextMock, 530, null, null);
 
     EasyMock.verify(contextMock);
-  }
 
-  @Test public void testQuarantine() throws MilterException {
-    MilterContext contextMock = EasyMock.mock(MilterContext.class);
-    
-    MessageModificationService service = new MessageModificationServiceImpl();
+    try {
+      service.sendReply(contextMock, 399, "5.7.0", "Authentication required");
+      Assert.fail("should throw IllegalArgumentException");
+    } catch (IllegalArgumentException ex) {
+      Assert.assertEquals("Illegal reply code value '399'", ex.getMessage());
+    }
 
-    MilterPacket packet = new MilterPacket(SMFIR_QUARANTINE, HEX.toByteArray("7465737400"));
-    
-    contextMock.sendPacket(packet);
-    EasyMock.expectLastCall().once();
-    
-    EasyMock.replay(contextMock);
-
-    service.quarantine(contextMock, "test");
-
-    EasyMock.verify(contextMock);
+    try {
+      service.sendReply(contextMock, 600, "5.7.0", "Authentication required");
+      Assert.fail("should throw IllegalArgumentException");
+    } catch (IllegalArgumentException ex) {
+      Assert.assertEquals("Illegal reply code value '600'", ex.getMessage());
+    }
   }
 }

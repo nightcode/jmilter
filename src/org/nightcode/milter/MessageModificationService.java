@@ -30,41 +30,6 @@ public interface MessageModificationService {
   void addHeader(MilterContext context, String name, String value) throws MilterException;
 
   /**
-   * Change or delete a header.
-   *
-   * @param context milter context
-   * @param index a header index (1-based)
-   * @param name a header name
-   * @param value a header new value or NULL in case of delete action
-   *
-   * @throws MilterException if exception occurred
-   */
-  void changeHeader(MilterContext context, int index, String name, @Nullable String value) throws MilterException;
-
-  /**
-   * Insert a header into the message.
-   *
-   * @param context milter context
-   * @param index a header index (1-based)
-   * @param name a header name
-   * @param value a header value
-   *
-   * @throws MilterException if exception occurred
-   */
-  void insertHeader(MilterContext context, int index, String name, String value) throws MilterException;
-
-  /**
-   * Change the envelope sender address.
-   *
-   * @param context milter context
-   * @param from a new sender address
-   * @param args a ESMTP arguments
-   *
-   * @throws MilterException if exception occurred
-   */
-  void changeFrom(MilterContext context, String from, @Nullable String args) throws MilterException;
-
-  /**
    * Add a new recipient's address to the current message.
    *
    * @param context milter context
@@ -86,6 +51,29 @@ public interface MessageModificationService {
   void addRecipientEsmtpPar(MilterContext context, String recipient, String args) throws MilterException;
 
   /**
+   * Change the envelope sender address.
+   *
+   * @param context milter context
+   * @param from a new sender address
+   * @param args a ESMTP arguments
+   *
+   * @throws MilterException if exception occurred
+   */
+  void changeFrom(MilterContext context, String from, @Nullable String args) throws MilterException;
+
+  /**
+   * Change or delete a header.
+   *
+   * @param context milter context
+   * @param index a header index (1-based)
+   * @param name a header name
+   * @param value a header new value or NULL in case of delete action
+   *
+   * @throws MilterException if exception occurred
+   */
+  void changeHeader(MilterContext context, int index, String name, @Nullable String value) throws MilterException;
+
+  /**
    * Remove a recipient from the current message's envelope.
    *
    * @param context milter context
@@ -96,16 +84,16 @@ public interface MessageModificationService {
   void deleteRecipient(MilterContext context, String recipient) throws MilterException;
 
   /**
-   * Replace message-body data, which does not have to be null-terminated.
-   * If newBody is NULL, it is treated as having length == 0.
-   * Body data should be in CR/LF form.
+   * Insert a header into the message.
    *
    * @param context milter context
-   * @param body a new body data
+   * @param index a header index (1-based)
+   * @param name a header name
+   * @param value a header value
    *
    * @throws MilterException if exception occurred
    */
-  void replaceBody(MilterContext context, byte[] body) throws MilterException;
+  void insertHeader(MilterContext context, int index, String name, String value) throws MilterException;
 
   /**
    * Notify the MTA that an operation is still in progress.
@@ -125,4 +113,37 @@ public interface MessageModificationService {
    * @throws MilterException if exception occurred
    */
   void quarantine(MilterContext context, String reason) throws MilterException;
+
+  /**
+   * Replace message-body data, which does not have to be null-terminated.
+   * If newBody is NULL, it is treated as having length == 0.
+   * Body data should be in CR/LF form.
+   *
+   * @param context milter context
+   * @param body a new body data
+   *
+   * @throws MilterException if exception occurred
+   */
+  void replaceBody(MilterContext context, byte[] body) throws MilterException;
+
+  /**
+   * Send the SMTP error reply code. Only 4XX and 5XX replies are accepted.
+   *
+   * @param replyCode the three-digit SMTP reply code, cannot be NULL, and must be a valid 4XX or 5XX reply code (RFC 821)
+   * @param message the text part of SMTP reply
+   *
+   * @throws MilterException if exception occurred
+   */
+  void sendReply(MilterContext context, int replyCode, @Nullable String message) throws MilterException;
+
+  /**
+   * Send the SMTP error reply code. Only 4XX and 5XX replies are accepted.
+   *
+   * @param replyCode the three-digit SMTP reply code, cannot be NULL, and must be a valid 4XX or 5XX reply code (RFC 821)
+   * @param extendedReplyCode the extended reply code (RFC 2034)
+   * @param message the text part of SMTP reply
+   *
+   * @throws MilterException if exception occurred
+   */
+  void sendReply(MilterContext context, int replyCode, @Nullable String extendedReplyCode, @Nullable String message) throws MilterException;
 }
