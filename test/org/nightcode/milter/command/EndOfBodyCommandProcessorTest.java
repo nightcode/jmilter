@@ -40,10 +40,10 @@ public class EndOfBodyCommandProcessorTest extends AbstractCommandProcessorTest 
 
     CommandProcessor processor = new EndOfBodyCommandProcessor();
 
-    handlerMock.eob(context, null);
+    handlerMock.eom(context, null);
     EasyMock.expectLastCall().once();
 
-    handlerMock.eob(context, bodyChunk);
+    handlerMock.eom(context, bodyChunk);
     EasyMock.expectLastCall().once();
 
     EasyMock.replay(handlerMock);

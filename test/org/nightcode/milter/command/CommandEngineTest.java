@@ -180,7 +180,7 @@ public class CommandEngineTest {
 
     MilterPacket packet = new MilterPacket(SMFIC_EOB);
 
-    handlerMock.eob(EasyMock.eq(context), EasyMock.anyObject());
+    handlerMock.eom(EasyMock.eq(context), EasyMock.anyObject());
     EasyMock.expectLastCall().once();
 
     EasyMock.replay(handlerMock);

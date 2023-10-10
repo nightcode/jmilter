@@ -34,6 +34,6 @@ class EndOfBodyCommandProcessor implements CommandProcessor {
     if (packet.payload().length > 0) {
       bodyChunk = packet.payload();
     }
-    context.handler().eob(context, bodyChunk);
+    context.handler().eom(context, bodyChunk);
   }
 }

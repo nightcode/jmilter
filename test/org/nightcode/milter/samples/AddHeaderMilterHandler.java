@@ -73,12 +73,12 @@ public class AddHeaderMilterHandler extends AbstractMilterHandler {
     super.body(context, bodyChunk);
   }
 
-  @Override public void eob(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException {
-    Log.debug().log(getClass(), "<EOB> bodyChunk: " + Hexs.hex().fromByteArray(bodyChunk));
+  @Override public void eom(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException {
+    Log.debug().log(getClass(), "<EOM> final bodyChunk: " + Hexs.hex().fromByteArray(bodyChunk));
 
     messageModificationService.addHeader(context, "X-Received", "Tue, 31 Oct 2018 17:56:00 -0700 (PDT)");
 
-    super.eob(context, bodyChunk);
+    super.eom(context, bodyChunk);
   }
 
   @Override public void abort(MilterContext context, MilterPacket packet) throws MilterException {

@@ -316,7 +316,7 @@ public class AbstractMilterHandlerTest {
 
     EasyMock.replay(contextMock);
 
-    handler.eob(contextMock, null);
+    handler.eom(contextMock, null);
 
     EasyMock.verify(contextMock);
   }

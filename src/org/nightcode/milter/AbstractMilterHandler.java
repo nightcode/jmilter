@@ -61,8 +61,27 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     // do nothing
   }
 
+  @Override public void abortSession(MilterContext context, MilterPacket packet) {
+    if (MilterPackets.isMessageState(context.getSessionStep())) {
+      try {
+        abort(context, packet);
+      } catch (MilterException ex) {
+        Log.info().log(getClass(), () -> format("[%s] can't execute abort command", context.id()), ex);
+      }
+    }
+    closeSession(context);
+  }
+
   @Override public void body(MilterContext context, byte[] bodyChunk) throws MilterException {
     context.sendContinue();
+  }
+
+  @Override public void closeSession(MilterContext context) {
+    try {
+      quit(context);
+    } finally {
+      context.destroy();
+    }
   }
 
   @Override public void connect(MilterContext context, String hostname, int family, int port, @Nullable SocketAddress address)
@@ -70,23 +89,11 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.sendContinue();
   }
 
-  @Override public void macro(MilterContext context, int type, Map<String, String> macros) {
-    context.setMacros(type, macros);
+  @Override public MilterContext createContext(MilterPacketSender sender) {
+    return new MilterContextImpl(this, milterActions, milterProtocolSteps, milterMacros, sender);
   }
 
-  @Override public void eob(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException {
-    context.sendContinue();
-  }
-
-  @Override public void helo(MilterContext context, String helohost) throws MilterException {
-    context.sendContinue();
-  }
-
-  @Override public void quitNc(MilterContext context) {
-    // do nothing
-  }
-
-  @Override public void header(MilterContext context, String headerName, String headerValue) throws MilterException {
+  @Override public void data(MilterContext context, byte[] payload) throws MilterException {
     context.sendContinue();
   }
 
@@ -94,8 +101,28 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.sendContinue();
   }
 
+  @Override public void envrcpt(MilterContext context, List<String> recipients) throws MilterException {
+    context.sendContinue();
+  }
+
   @Override public void eoh(MilterContext context) throws MilterException {
     context.sendContinue();
+  }
+
+  @Override public void eom(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException {
+    context.sendContinue();
+  }
+
+  @Override public void header(MilterContext context, String headerName, String headerValue) throws MilterException {
+    context.sendContinue();
+  }
+
+  @Override public void helo(MilterContext context, String helohost) throws MilterException {
+    context.sendContinue();
+  }
+
+  @Override public void macro(MilterContext context, int type, Map<String, String> macros) {
+    context.setMacros(type, macros);
   }
 
   @Override public void optneg(MilterContext context, int mtaProtocolVersion, Actions mtaActions, ProtocolSteps mtaProtocolSteps)
@@ -159,38 +186,11 @@ public abstract class AbstractMilterHandler implements MilterHandler {
     context.sendPacket(response);
   }
 
-  @Override public void envrcpt(MilterContext context, List<String> recipients) throws MilterException {
-    context.sendContinue();
-  }
-
-  @Override public void data(MilterContext context, byte[] payload) throws MilterException {
-    context.sendContinue();
+  @Override public void quitNc(MilterContext context) {
+    // do nothing
   }
 
   @Override public void unknown(MilterContext context, byte[] payload) throws MilterException {
     context.sendContinue();
-  }
-
-  @Override public void abortSession(MilterContext context, MilterPacket packet) {
-    if (MilterPackets.isMessageState(context.getSessionStep())) {
-      try {
-        abort(context, packet);
-      } catch (MilterException ex) {
-        Log.info().log(getClass(), () -> format("[%s] can't execute abort command", context.id()), ex);
-      }
-    }
-    closeSession(context);
-  }
-
-  @Override public void closeSession(MilterContext context) {
-    try {
-      quit(context);
-    } finally {
-      context.destroy();
-    }
-  }
-
-  @Override public MilterContext createContext(MilterPacketSender sender) {
-    return new MilterContextImpl(this, milterActions, milterProtocolSteps, milterMacros, sender);
   }
 }

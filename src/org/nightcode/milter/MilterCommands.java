@@ -57,42 +57,53 @@ public interface MilterCommands {
   void connect(MilterContext context, String hostname, int family, int port, @Nullable SocketAddress address) throws MilterException;
 
   /**
-   * Define macros.
+   * DATA command.
    *
    * @param context milter context
-   * @param type command for which these macros apply
-   * @param macros array of strings
+   * @param payload payload
    *
    * @throws MilterException if exception occurred
    */
-  void macro(MilterContext context, int type, Map<String, String> macros) throws MilterException;
+  void data(MilterContext context, byte[] payload) throws MilterException;
 
   /**
-   * End of body.
+   * Envelope sender.
+   *
+   * @param context milter context
+   * @param from sender and ESMTP arguments, if any
+   *
+   * @throws MilterException if exception occurred
+   */
+  void envfrom(MilterContext context, List<String> from) throws MilterException;
+
+  /**
+   * Envelope recipient.
+   *
+   * @param context milter context
+   * @param recipients recipient and ESMTP arguments, if any
+   *
+   * @throws MilterException if exception occurred
+   */
+  void envrcpt(MilterContext context, List<String> recipients) throws MilterException;
+
+  /**
+   * End of header.
+   *
+   * @param context milter context
+   *
+   * @throws MilterException if exception occurred
+   */
+  void eoh(MilterContext context) throws MilterException;
+
+  /**
+   * End of message.
    *
    * @param context milter context
    * @param bodyChunk final body chunk, up to 65535 bytes
    *
    * @throws MilterException if exception occurred
    */
-  void eob(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException;
-
-  /**
-   * HELO.
-   *
-   * @param context milter context
-   * @param helohost HELO string
-   *
-   * @throws MilterException if exception occurred
-   */
-  void helo(MilterContext context, String helohost) throws MilterException;
-
-  /**
-   * QUIT but new connection follows.
-   *
-   * @param context milter context
-   */
-  void quitNc(MilterContext context);
+  void eom(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException;
 
   /**
    * Header.
@@ -106,23 +117,25 @@ public interface MilterCommands {
   void header(MilterContext context, String headerName, String headerValue) throws MilterException;
 
   /**
-   * Envelope sender.
+   * HELO.
    *
    * @param context milter context
-   * @param from sender and ESMTP arguments, if any
+   * @param helohost HELO string
    *
    * @throws MilterException if exception occurred
    */
-  void envfrom(MilterContext context, List<String> from) throws MilterException;
+  void helo(MilterContext context, String helohost) throws MilterException;
 
   /**
-   * End of header.
+   * Define macros.
    *
    * @param context milter context
+   * @param type command for which these macros apply
+   * @param macros array of strings
    *
    * @throws MilterException if exception occurred
    */
-  void eoh(MilterContext context) throws MilterException;
+  void macro(MilterContext context, int type, Map<String, String> macros) throws MilterException;
 
   /**
    * Option negotiation.
@@ -144,24 +157,11 @@ public interface MilterCommands {
   void quit(MilterContext context);
 
   /**
-   * Envelope recipient.
+   * QUIT but new connection follows.
    *
    * @param context milter context
-   * @param recipients recipient and ESMTP arguments, if any
-   *
-   * @throws MilterException if exception occurred
    */
-  void envrcpt(MilterContext context, List<String> recipients) throws MilterException;
-
-  /**
-   * DATA command.
-   *
-   * @param context milter context
-   * @param payload payload
-   *
-   * @throws MilterException if exception occurred
-   */
-  void data(MilterContext context, byte[] payload) throws MilterException;
+  void quitNc(MilterContext context);
 
   /**
    * Unknown SMTP command.

@@ -70,9 +70,9 @@ public class OverrideMacrosListMilterHandler extends AbstractMilterHandler {
     super.envrcpt(context, recipients);
   }
 
-  @Override public void eob(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException {
-    Log.debug().log(getClass(), "<EOB> bodyChunk: " + Hexs.hex().fromByteArray(bodyChunk));
-    super.eob(context, bodyChunk);
+  @Override public void eom(MilterContext context, @Nullable byte[] bodyChunk) throws MilterException {
+    Log.debug().log(getClass(), "<EOM> final bodyChunk: " + Hexs.hex().fromByteArray(bodyChunk));
+    super.eom(context, bodyChunk);
   }
 
   @Override public void eoh(MilterContext context) throws MilterException {
