@@ -129,6 +129,7 @@ public interface MessageModificationService {
   /**
    * Send the SMTP error reply code. Only 4XX and 5XX replies are accepted.
    *
+   * @param context milter context
    * @param replyCode the three-digit SMTP reply code, cannot be NULL, and must be a valid 4XX or 5XX reply code (RFC 821)
    * @param message the text part of SMTP reply
    *
@@ -139,6 +140,7 @@ public interface MessageModificationService {
   /**
    * Send the SMTP error reply code. Only 4XX and 5XX replies are accepted.
    *
+   * @param context milter context
    * @param replyCode the three-digit SMTP reply code, cannot be NULL, and must be a valid 4XX or 5XX reply code (RFC 821)
    * @param extendedReplyCode the extended reply code (RFC 2034)
    * @param message the text part of SMTP reply
