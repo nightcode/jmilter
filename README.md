@@ -92,18 +92,28 @@ The test folder contains the complete example code.
 
 #### Available options
 
-| Name                             | Possible values                 |
-|----------------------------------|---------------------------------|
-| jmilter.netty.loggingEnabled     | true, false                     |
-| jmilter.netty.logLevel           | TRACE, DEBUG, INFO, WARN, ERROR |
-| jmilter.netty.nThreads           | [0, 65535]                      |
-| jmilter.netty.connectTimeoutMs   | [0, Long.MAX_VALUE]             |
-| jmilter.netty.reconnectTimeoutMs | [0, Long.MAX_VALUE]             |
-| jmilter.netty.autoRead           | true, false                     |
-| jmilter.netty.keepAlive          | true, false                     |
-| jmilter.netty.tcpNoDelay         | true, false                     |
-| jmilter.netty.reuseAddress       | true, false                     |
-| jmilter.netty.soBacklog          | [0, 65535]                      |
+| Name                             | Possible values                 | Default value |
+|----------------------------------|---------------------------------|---------------|
+| jmilter.netty.loggingEnabled     | true, false                     | false         |
+| jmilter.netty.logLevel           | TRACE, DEBUG, INFO, WARN, ERROR | DEBUG         |
+| jmilter.netty.nThreads           | [0, 65535]                      | 0             |
+| jmilter.netty.connectTimeoutMs   | [0, Long.MAX_VALUE]             | 5000          |
+| jmilter.netty.reconnectTimeoutMs | [0, Long.MAX_VALUE]             | 1000          |
+| jmilter.netty.autoRead           | true, false                     | true          |
+| jmilter.netty.keepAlive          | true, false                     | true          |
+| jmilter.netty.tcpNoDelay         | true, false                     | true          |
+| jmilter.netty.reuseAddress       | true, false                     | true          |
+| jmilter.netty.soBacklog          | [0, 65535]                      | 128           |
+
+Set an option using Command Line
+```bash
+$ java -Djmilter.netty.logLevel="INFO"
+```
+
+Set an option using Java Code
+```java
+System.setProperty("jmilter.netty.logLevel", "INFO");
+```
 
 Download
 --------
