@@ -14,9 +14,11 @@
 
 package org.nightcode.milter.net;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,15 +138,21 @@ public class MilterGatewayManagerTest {
       }
     };
 
-    InetSocketAddress address = NetUtils.parseAddress(System.getProperty("jmilter.address", "127.0.0.10:4545"));
+    try (ServerSocket socket = new ServerSocket(0)) {
+      int port = socket.getLocalPort();
 
-    ServerFactory<InetSocketAddress> serverFactory = ServerFactory.tcpIpFactory(address);
+      InetSocketAddress address = NetUtils.parseAddress(System.getProperty("jmilter.address", "0.0.0.0:" + port));
 
-    try (MilterGatewayManager<InetSocketAddress> gatewayManager = new MilterGatewayManager<>(serverFactory, milterHandler)) {
-      gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
-      Assert.fail("should throw Exception");
-    } catch (Exception ex) {
-      Assert.assertEquals("java.net.BindException: Can't assign requested address", ex.getMessage());
+      ServerFactory<InetSocketAddress> serverFactory = ServerFactory.tcpIpFactory(address);
+
+      try (MilterGatewayManager<InetSocketAddress> gatewayManager = new MilterGatewayManager<>(serverFactory, milterHandler)) {
+        gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
+        Assert.fail("should throw Exception");
+      } catch (Exception ex) {
+        Assert.assertEquals("java.net.BindException: Address already in use", ex.getMessage());
+      }
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
     }
   }
 }
