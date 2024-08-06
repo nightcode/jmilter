@@ -33,8 +33,10 @@ import org.nightcode.milter.util.Log;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static org.nightcode.milter.MilterOptions.NETTY_FAIL_STOP_MODE;
 import static org.nightcode.milter.MilterOptions.NETTY_RECONNECT_TIMEOUT_MS;
 import static org.nightcode.milter.util.ExecutorUtils.namedThreadFactory;
+import static org.nightcode.milter.util.Properties.getBoolean;
 import static org.nightcode.milter.util.Properties.getLong;
 
 /**
@@ -48,11 +50,13 @@ public class MilterGatewayManager<A extends SocketAddress> implements ChannelFut
   public static final int CLOSING  = 0x00000004;
   public static final int CLOSED   = 0x00000008;
 
-  private static final long RECONNECT_TIMEOUT_MS = 1_000;
+  private static final boolean FAIL_STOP_MODE       = false;
+  private static final long    RECONNECT_TIMEOUT_MS = 1_000;
 
   private volatile ChannelFuture channelFuture;
 
-  private final long reconnectTimeoutNs;
+  private final boolean failStopMode;
+  private final long    reconnectTimeoutNs;
 
   private final ServerBootstrap serverBootstrap;
 
@@ -72,6 +76,8 @@ public class MilterGatewayManager<A extends SocketAddress> implements ChannelFut
     this.milterHandler = milterHandler;
 
     executor = new ScheduledThreadPoolExecutor(1, namedThreadFactory("jmilter-" + serverFactory.localAddress() + "-executor"));
+
+    failStopMode = getBoolean(NETTY_FAIL_STOP_MODE, FAIL_STOP_MODE);
 
     reconnectTimeoutNs = MILLISECONDS.toNanos(getLong(NETTY_RECONNECT_TIMEOUT_MS, RECONNECT_TIMEOUT_MS));
 
@@ -128,6 +134,11 @@ public class MilterGatewayManager<A extends SocketAddress> implements ChannelFut
             });
         channelFuture.channel().closeFuture().addListener(this);
       } catch (Exception ex) {
+        if (failStopMode) {
+          Log.warn().log(getClass(), format("unable bind to %s.", serverFactory.localAddress()), ex);
+          bindFuture.completeExceptionally(ex);
+          return;
+        }
         Log.warn().log(getClass(), format("unable bind to %s, will try again after %s ms.", serverFactory.localAddress()
                 , NANOSECONDS.toMillis(reconnectTimeoutNs)), ex);
         executor.schedule(this::connect, reconnectTimeoutNs, NANOSECONDS);

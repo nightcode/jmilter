@@ -14,6 +14,9 @@
 
 package org.nightcode.milter.net;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +28,14 @@ import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterHandler;
+import org.nightcode.milter.MilterOptions;
 import org.nightcode.milter.ProtocolSteps;
 import org.nightcode.milter.client.ConnectionFactory;
 import org.nightcode.milter.client.LocalConnectionFactory;
 import org.nightcode.milter.client.MilterSessionFactory;
 import org.nightcode.milter.client.MilterSessionFactoryBuilder;
+import org.nightcode.milter.util.NetUtils;
+import org.nightcode.milter.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -113,6 +119,32 @@ public class MilterGatewayManagerTest {
             .thenCompose(r -> r.session().quit())
             .get(500, TimeUnit.MILLISECONDS);
       }
+    }
+  }
+
+  @Test public void testFailStopMode() throws Exception {
+    Field field = Properties.class.getDeclaredField("OPTIONS");
+    field.setAccessible(true);
+    Method method = field.getType().getMethod("clear");
+    method.invoke(field.get(Properties.class));
+
+    System.setProperty(MilterOptions.NETTY_FAIL_STOP_MODE.key(), "true");
+
+    MilterHandler milterHandler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
+      @Override public void quit(MilterContext context) {
+        // do nothing
+      }
+    };
+
+    InetSocketAddress address = NetUtils.parseAddress(System.getProperty("jmilter.address", "127.0.0.10:4545"));
+
+    ServerFactory<InetSocketAddress> serverFactory = ServerFactory.tcpIpFactory(address);
+
+    try (MilterGatewayManager<InetSocketAddress> gatewayManager = new MilterGatewayManager<>(serverFactory, milterHandler)) {
+      gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
+      Assert.fail("should throw Exception");
+    } catch (Exception ex) {
+      Assert.assertEquals("java.net.BindException: Can't assign requested address", ex.getMessage());
     }
   }
 }

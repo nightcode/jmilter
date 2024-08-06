@@ -21,6 +21,7 @@ public enum MilterOptions implements ConfigOption {
   NETTY_LOGGING_ENABLED     ("jmilter.netty.loggingEnabled"),
   NETTY_LOG_LEVEL           ("jmilter.netty.logLevel"),
   NETTY_NUMBER_OF_THREADS   ("jmilter.netty.nThreads"),
+  NETTY_FAIL_STOP_MODE      ("jmilter.netty.failStopMode"),
   NETTY_CONNECT_TIMEOUT_MS  ("jmilter.netty.connectTimeoutMs"),
   NETTY_RECONNECT_TIMEOUT_MS("jmilter.netty.reconnectTimeoutMs"),
   NETTY_AUTO_READ           ("jmilter.netty.autoRead"),
