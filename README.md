@@ -97,6 +97,7 @@ The test folder contains the complete example code.
 | jmilter.netty.loggingEnabled     | true, false                     | false         |
 | jmilter.netty.logLevel           | TRACE, DEBUG, INFO, WARN, ERROR | DEBUG         |
 | jmilter.netty.nThreads           | [0, 65535]                      | 0             |
+| jmilter.netty.failStopMode       |  true, false                    | false         |
 | jmilter.netty.connectTimeoutMs   | [0, Long.MAX_VALUE]             | 5000          |
 | jmilter.netty.reconnectTimeoutMs | [0, Long.MAX_VALUE]             | 1000          |
 | jmilter.netty.autoRead           | true, false                     | true          |
@@ -123,7 +124,7 @@ Download [the latest release][3] via Maven:
 <dependency>
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
-  <version>0.6.1</version>
+  <version>0.7</version>
 </dependency>
 ```
 
