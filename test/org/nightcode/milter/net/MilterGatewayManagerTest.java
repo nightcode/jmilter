@@ -149,7 +149,7 @@ public class MilterGatewayManagerTest {
         gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
         Assert.fail("should throw Exception");
       } catch (Exception ex) {
-        Assert.assertEquals("java.net.BindException: Address already in use", ex.getMessage());
+        Assert.assertTrue(ex.getMessage().contains("Address already in use"));
       }
     } catch (IOException ex) {
       throw new RuntimeException(ex);
