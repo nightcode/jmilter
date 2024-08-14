@@ -47,8 +47,9 @@ public class MilterGatewayManager<A extends SocketAddress> implements ChannelFut
   public static final int NEW      = 0x00000000;
   public static final int STARTING = 0x00000001;
   public static final int RUNNING  = 0x00000002;
-  public static final int CLOSING  = 0x00000004;
-  public static final int CLOSED   = 0x00000008;
+  public static final int FAILED   = 0x00000004;
+  public static final int CLOSING  = 0x00000008;
+  public static final int CLOSED   = 0x00000010;
 
   private static final boolean FAIL_STOP_MODE       = false;
   private static final long    RECONNECT_TIMEOUT_MS = 1_000;
@@ -100,7 +101,7 @@ public class MilterGatewayManager<A extends SocketAddress> implements ChannelFut
   }
 
   @Override public void close() {
-    if (!state.compareAndSet(RUNNING, CLOSING)) {
+    if (!state.compareAndSet(RUNNING, CLOSING) && !state.compareAndSet(FAILED, CLOSING)) {
       return;
     }
 
@@ -136,6 +137,7 @@ public class MilterGatewayManager<A extends SocketAddress> implements ChannelFut
       } catch (Exception ex) {
         if (failStopMode) {
           Log.warn().log(getClass(), format("unable bind to %s.", serverFactory.localAddress()), ex);
+          state.set(FAILED);
           bindFuture.completeExceptionally(ex);
           return;
         }

@@ -145,12 +145,16 @@ public class MilterGatewayManagerTest {
 
       ServerFactory<InetSocketAddress> serverFactory = ServerFactory.tcpIpFactory(address);
 
-      try (MilterGatewayManager<InetSocketAddress> gatewayManager = new MilterGatewayManager<>(serverFactory, milterHandler)) {
-        gatewayManager.bind().get(500, TimeUnit.MILLISECONDS);
+      MilterGatewayManager<InetSocketAddress> gatewayManager = null;
+      try (MilterGatewayManager<InetSocketAddress> gm = new MilterGatewayManager<>(serverFactory, milterHandler)) {
+        gatewayManager = gm;
+        gm.bind().get(500, TimeUnit.MILLISECONDS);
         Assert.fail("should throw Exception");
       } catch (Exception ex) {
         Assert.assertTrue(ex.getMessage().contains("Address already in use"));
       }
+      Assert.assertNotNull(gatewayManager);
+      Assert.assertEquals(MilterGatewayManager.CLOSED, gatewayManager.getState());
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
