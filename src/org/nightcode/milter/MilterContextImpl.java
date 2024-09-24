@@ -55,6 +55,12 @@ public class MilterContextImpl implements MilterContext {
     return handler;
   }
 
+  @Override public void clearMacros() {
+    synchronized (macros) {
+      macros.clear();
+    }
+  }
+
   @Override public void destroy() {
     milterPacketSender.close();
   }

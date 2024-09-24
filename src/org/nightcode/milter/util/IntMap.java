@@ -42,6 +42,17 @@ public final class IntMap<E> {
   private volatile int size;
 
   /**
+   * Removes all of the mappings from this map.
+   * The map will be empty after this call returns.
+   *
+   * NOTE: needs external synchronization
+   */
+  public void clear() {
+    size = 0;
+    core = new Core(MAX_SHIFT);
+  }
+
+  /**
    * Returns the value to which the specified key is mapped,
    * or {@code null} if this map contains no mapping for the key.
    *

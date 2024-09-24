@@ -29,8 +29,6 @@ public class MilterMacrosTest {
         .envrcptMarcos("{rcpt_addr}")
         .build();
 
-    System.out.println(HEX.fromByteArray(milterMacros.array()));
-    
     Assert.assertArrayEquals(HEX.toByteArray("0000000200000000037B726370745F616464727D00"), milterMacros.array());
   }
 }

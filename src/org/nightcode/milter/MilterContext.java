@@ -25,6 +25,8 @@ public interface MilterContext {
 
   MilterHandler handler();
 
+  void clearMacros();
+
   void destroy();
 
   Map<String, String> getMacros(int type);
