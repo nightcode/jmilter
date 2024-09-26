@@ -14,7 +14,6 @@
 
 package org.nightcode.milter;
 
-import java.util.Map;
 import java.util.UUID;
 
 import org.nightcode.milter.codec.MilterPacket;
@@ -25,19 +24,7 @@ public interface MilterContext {
 
   MilterHandler handler();
 
-  /**
-   * @deprecated will be removed in the next release
-   */
-  @Deprecated
-  void clearMacros();
-
   void destroy();
-
-  /**
-   * @deprecated will be removed in the next release
-   */
-  @Deprecated
-  Map<String, String> getMacros(int type);
 
   Actions getMtaActions();
 
@@ -64,12 +51,6 @@ public interface MilterContext {
   void sendContinue() throws MilterException;
 
   void sendPacket(MilterPacket packet) throws MilterException;
-
-  /**
-   * @deprecated will be removed in the next release
-   */
-  @Deprecated
-  void setMacros(int type, Map<String, String> macros);
 
   void setMtaActions(Actions mtaActions);
 

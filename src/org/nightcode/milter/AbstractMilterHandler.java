@@ -122,7 +122,7 @@ public abstract class AbstractMilterHandler implements MilterHandler {
   }
 
   @Override public void macro(MilterContext context, int type, Map<String, String> macros) {
-    context.setMacros(type, macros);
+    // do nothing
   }
 
   @Override public void optneg(MilterContext context, int mtaProtocolVersion, Actions mtaActions, ProtocolSteps mtaProtocolSteps)

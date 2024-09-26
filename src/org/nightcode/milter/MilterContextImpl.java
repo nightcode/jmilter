@@ -1,12 +1,10 @@
 package org.nightcode.milter;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterPacketSender;
-import org.nightcode.milter.util.IntMap;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.MilterPackets;
 
@@ -33,8 +31,6 @@ public class MilterContextImpl implements MilterContext {
   private volatile ProtocolSteps sessionProtocolSteps;
   private volatile CommandCode   sessionStep;
 
-  private final IntMap<Map<String, String>> macros = new IntMap<>();
-
   public MilterContextImpl(MilterHandler handler, Actions milterActions, ProtocolSteps milterProtocolSteps,
                            MilterPacketSender milterPacketSender) {
     this(handler, milterActions, milterProtocolSteps, MilterMacros.instance(), milterPacketSender);
@@ -55,18 +51,8 @@ public class MilterContextImpl implements MilterContext {
     return handler;
   }
 
-  @Override public void clearMacros() {
-    synchronized (macros) {
-      macros.clear();
-    }
-  }
-
   @Override public void destroy() {
     milterPacketSender.close();
-  }
-
-  @Override public Map<String, String> getMacros(int type) {
-    return macros.get(type);
   }
 
   @Override public Actions getMtaActions() {
@@ -131,12 +117,6 @@ public class MilterContextImpl implements MilterContext {
     }
 
     sendPacket0(packet);
-  }
-
-  @Override public void setMacros(int type, Map<String, String> macros) {
-    synchronized (this.macros) {
-      this.macros.put(type, macros);
-    }
   }
 
   @Override public void setMtaActions(Actions mtaActions) {
