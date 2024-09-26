@@ -124,7 +124,7 @@ Download [the latest release][3] via Maven:
 <dependency>
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
-  <version>0.7.3</version>
+  <version>0.8</version>
 </dependency>
 ```
 
