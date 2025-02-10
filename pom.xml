@@ -36,7 +36,7 @@
 
     <java.version>8</java.version>
 
-    <netty.version>4.1.112.Final</netty.version>
+    <netty.version>4.1.118.Final</netty.version>
 
     <junit.version>4.13.1</junit.version>
     <easymock.version>3.6</easymock.version>
