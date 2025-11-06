@@ -18,11 +18,16 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.unix.DomainSocketAddress;
 
 public interface ServerFactory<A extends SocketAddress> {
 
   static ServerFactory<InetSocketAddress> tcpIpFactory(InetSocketAddress address) {
     return new TcpIpServerFactory(address);
+  }
+
+  static ServerFactory<DomainSocketAddress> unixSocketFactory(DomainSocketAddress domainSocketAddress) {
+    return new UnixSocketServerFactory(domainSocketAddress);
   }
 
   ServerBootstrap create();
