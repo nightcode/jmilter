@@ -18,16 +18,16 @@
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
   <packaging>jar</packaging>
-  <version>0.8</version>
+  <version>0.9-SNAPSHOT</version>
 
   <name>JMilter</name>
   <description>Java implementation of the Sendmail Milter protocol.</description>
-  <url>http://github.com/nightcode/jmilter/</url>
+  <url>https://github.com/nightcode/jmilter/</url>
 
   <licenses>
     <license>
       <name>Apache License Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
 
@@ -76,6 +76,22 @@
         <classifier>linux-x86_64</classifier>
         <version>${netty.version}</version>
       </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-transport-native-kqueue</artifactId>
+        <classifier>osx-aarch_64</classifier>
+        <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-transport-classes-epoll</artifactId>
+        <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-transport-classes-kqueue</artifactId>
+        <version>${netty.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>junit</groupId>
@@ -116,6 +132,22 @@
       <groupId>io.netty</groupId>
       <artifactId>netty-transport-native-epoll</artifactId>
       <classifier>linux-x86_64</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-transport-native-kqueue</artifactId>
+      <classifier>osx-aarch_64</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-transport-classes-epoll</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-transport-classes-kqueue</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -231,7 +263,6 @@
           <configLocation>checkstyle.xml</configLocation>
           <failsOnError>true</failsOnError>
           <consoleOutput>true</consoleOutput>
-          <enableRSS>false</enableRSS>
           <linkXRef>false</linkXRef>
         </configuration>
         <executions>
@@ -353,7 +384,7 @@
 
   <issueManagement>
     <system>GitHub Issues</system>
-    <url>http://github.com/nightcode/jmilter/issues/</url>
+    <url>https://github.com/nightcode/jmilter/issues/</url>
   </issueManagement> 
 
   <distributionManagement>
@@ -368,7 +399,7 @@
   </distributionManagement>
 
   <scm>
-    <url>http://github.com/nightcode/jmilter/</url>
+    <url>https://github.com/nightcode/jmilter/</url>
     <connection>scm:git:git://github.com/nightcode/jmilter.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/nightcode/jmilter.git</developerConnection>
     <tag>HEAD</tag>

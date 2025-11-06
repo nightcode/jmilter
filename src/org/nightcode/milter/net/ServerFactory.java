@@ -25,6 +25,10 @@ public interface ServerFactory<A extends SocketAddress> {
     return new TcpIpServerFactory(address);
   }
 
+  static ServerFactory<SocketAddress> socketFactory(SocketAddress address) {
+    return new SocketServerFactory(address);
+  }
+
   ServerBootstrap create();
 
   A localAddress();
