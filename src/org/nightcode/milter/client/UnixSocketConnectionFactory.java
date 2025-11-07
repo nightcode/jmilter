@@ -41,10 +41,12 @@ public class UnixSocketConnectionFactory implements ConnectionFactory<DomainSock
         // 1. Select the appropriate native transport (Epoll or KQueue)
         try {
             if (Epoll.isAvailable()) { // **Linux (Epoll)**
-                workerGroup = new EpollEventLoopGroup(nThreads, namedThreadFactory("jmilter-uds-" + domainSocketAddress + "-worker-epoll"));
+                workerGroup = new EpollEventLoopGroup(nThreads,
+                        namedThreadFactory("jmilter-uds-" + domainSocketAddress + "-worker-epoll"));
                 channelClass = EpollDomainSocketChannel.class;
             } else if (KQueue.isAvailable()) { // **macOS/BSD (KQueue)**
-                workerGroup = new KQueueEventLoopGroup(nThreads, namedThreadFactory("jmilter-uds-" + domainSocketAddress + "-worker-kqueue"));
+                workerGroup = new KQueueEventLoopGroup(nThreads,
+                        namedThreadFactory("jmilter-uds-" + domainSocketAddress + "-worker-kqueue"));
                 channelClass = KQueueDomainSocketChannel.class;
             } else {
                 // No native transport fallback available for UDS
