@@ -1,4 +1,23 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.nightcode.milter.net;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -15,72 +34,59 @@ import io.netty.channel.unix.DomainSocketAddress;
 import org.nightcode.milter.util.Log;
 import org.nightcode.milter.util.Throwables;
 
-import java.io.File;
-
 import static org.nightcode.milter.MilterOptions.NETTY_NUMBER_OF_THREADS;
 import static org.nightcode.milter.MilterOptions.NETTY_SO_BACKLOG;
 import static org.nightcode.milter.util.ExecutorUtils.namedThreadFactory;
 import static org.nightcode.milter.util.Properties.getInt;
 
-public class UnixSocketServerFactory implements ServerFactory<DomainSocketAddress> {
+class UnixSocketServerFactory implements ServerFactory<DomainSocketAddress> {
 
-    private final DomainSocketAddress domainSocketAddress;
+  private final DomainSocketAddress address;
 
-    public UnixSocketServerFactory(DomainSocketAddress domainSocketAddress) {
-        this.domainSocketAddress = domainSocketAddress;
+  UnixSocketServerFactory(DomainSocketAddress address) {
+    this.address = address;
+  }
+
+  @Override public ServerBootstrap create() {
+    int nThreads = getInt(NETTY_NUMBER_OF_THREADS, 0);
+
+    EventLoopGroup                 acceptorGroup;
+    EventLoopGroup                 workerGroup;
+    Class<? extends ServerChannel> channelClass;
+
+    if (Epoll.isAvailable()) { // Linux (Epoll)
+      acceptorGroup = new EpollEventLoopGroup(1, namedThreadFactory("jmilter-" + address + "-acceptor-epoll"));
+      workerGroup   = new EpollEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-epoll"));
+      channelClass  = EpollServerDomainSocketChannel.class;
+    } else if (KQueue.isAvailable()) { // macOS/BSD (KQueue)
+      acceptorGroup = new KQueueEventLoopGroup(1, namedThreadFactory("jmilter-" + address + "-acceptor-kqueue"));
+      workerGroup   = new KQueueEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-kqueue"));
+      channelClass  = KQueueServerDomainSocketChannel.class;
+    } else {
+      throw new IllegalStateException("netty native transport (Epoll/KQueue) is required for Unix Domain Socket");
     }
 
-    @Override
-    public ServerBootstrap create() {
-        int nThreads = getInt(NETTY_NUMBER_OF_THREADS, 0);
-
-        EventLoopGroup acceptorGroup = null;
-        EventLoopGroup workerGroup = null;
-        Class<? extends ServerChannel> channelClass = null;
-
-        try {
-            if (Epoll.isAvailable()) { // **Linux (Epoll)**
-                acceptorGroup = new EpollEventLoopGroup(1, namedThreadFactory("jmilter-" + domainSocketAddress + "-acceptor-epoll"));
-                workerGroup = new EpollEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + domainSocketAddress + "-worker-epoll"));
-                channelClass = EpollServerDomainSocketChannel.class;
-            } else if (KQueue.isAvailable()) { // **macOS/BSD (KQueue)**
-                acceptorGroup = new KQueueEventLoopGroup(1, namedThreadFactory("jmilter-" + domainSocketAddress + "-acceptor-kqueue"));
-                workerGroup = new KQueueEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + domainSocketAddress + "-worker-kqueue"));
-                channelClass = KQueueServerDomainSocketChannel.class;
-            } else {
-                // Netty has NO pure-Java fallback for Domain Sockets (unlike TCP/IP),
-                // so we must throw an exception if native transport is missing.
-                String errorMessage = "Netty native transport (Epoll/KQueue) is required for Unix Domain Sockets but is unavailable.";
-                Log.error().log(getClass(), () -> errorMessage);
-                throw new IllegalStateException(errorMessage);
-            }
-
-        } catch (Throwable ex) {
-            String errorMessage = "Failed to initialize native UDS transport: " + Throwables.getRootCause(ex).getMessage();
-            Log.error().log(getClass(), () -> errorMessage);
-            throw new IllegalStateException(errorMessage, ex);
-        }
-
-        // Clean up old socket file if it exists
-        File socketFile = new File(domainSocketAddress.path());
-        if (socketFile.exists() && !socketFile.delete()) {
-            throw new IllegalStateException("Cannot delete existing socket file: " + socketFile.getAbsolutePath());
-        }
-
-        // 2. Configure the ServerBootstrap
-        ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap
-                .group(acceptorGroup, workerGroup)
-                .channel(channelClass)
-                .option(ChannelOption.SO_BACKLOG, getInt(NETTY_SO_BACKLOG, 128))
-                .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .localAddress(domainSocketAddress);
-
-        return serverBootstrap;
+    Path socketPath = Paths.get(address.path());
+    try {
+      // clean up old socket file if it exists
+      Files.deleteIfExists(socketPath);
+    } catch (IOException ex) {
+      Log.debug().log(getClass(), "unable to delete existing socket file: {}", socketPath);
+      throw Throwables.rethrow(ex);
     }
 
-    @Override
-    public DomainSocketAddress localAddress() {
-        return domainSocketAddress;
-    }
+    ServerBootstrap serverBootstrap = new ServerBootstrap();
+    serverBootstrap
+        .group(acceptorGroup, workerGroup)
+        .channel(channelClass)
+        .option(ChannelOption.SO_BACKLOG, getInt(NETTY_SO_BACKLOG, 2048))
+        .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+        .localAddress(address);
+
+    return serverBootstrap;
+  }
+
+  @Override public DomainSocketAddress localAddress() {
+    return address;
+  }
 }

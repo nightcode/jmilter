@@ -19,8 +19,6 @@ import java.net.SocketAddress;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.unix.DomainSocketAddress;
-import org.nightcode.milter.net.ServerFactory;
-import org.nightcode.milter.net.UnixSocketServerFactory;
 
 public interface ConnectionFactory<A extends SocketAddress> {
 
@@ -28,8 +26,8 @@ public interface ConnectionFactory<A extends SocketAddress> {
     return new TcpIpConnectionFactory(address);
   }
 
-  static ServerFactory<DomainSocketAddress> unixSocketFactory(String path) {
-    return new UnixSocketServerFactory(new DomainSocketAddress(path));
+  static ConnectionFactory<DomainSocketAddress> unixSocketFactory(DomainSocketAddress address) {
+    return new UnixSocketConnectionFactory(address);
   }
 
   Bootstrap create();

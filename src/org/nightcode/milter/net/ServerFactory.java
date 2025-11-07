@@ -26,8 +26,8 @@ public interface ServerFactory<A extends SocketAddress> {
     return new TcpIpServerFactory(address);
   }
 
-  static ServerFactory<DomainSocketAddress> unixSocketFactory(DomainSocketAddress domainSocketAddress) {
-    return new UnixSocketServerFactory(domainSocketAddress);
+  static ServerFactory<DomainSocketAddress> unixSocketFactory(DomainSocketAddress address) {
+    return new UnixSocketServerFactory(address);
   }
 
   ServerBootstrap create();
