@@ -82,16 +82,6 @@
         <classifier>osx-aarch_64</classifier>
         <version>${netty.version}</version>
       </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-transport-classes-epoll</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-transport-classes-kqueue</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
 
       <dependency>
         <groupId>junit</groupId>
@@ -138,16 +128,6 @@
       <groupId>io.netty</groupId>
       <artifactId>netty-transport-native-kqueue</artifactId>
       <classifier>osx-aarch_64</classifier>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-transport-classes-epoll</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-transport-classes-kqueue</artifactId>
       <scope>provided</scope>
     </dependency>
 

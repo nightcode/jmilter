@@ -18,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.unix.DomainSocketAddress;
 
 public interface ServerFactory<A extends SocketAddress> {
 
@@ -25,8 +26,8 @@ public interface ServerFactory<A extends SocketAddress> {
     return new TcpIpServerFactory(address);
   }
 
-  static ServerFactory<SocketAddress> socketFactory(SocketAddress address) {
-    return new SocketServerFactory(address);
+  static ServerFactory<DomainSocketAddress> unixSocketFactory(DomainSocketAddress domainSocketAddress) {
+    return new UnixSocketServerFactory(domainSocketAddress);
   }
 
   ServerBootstrap create();
