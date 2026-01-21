@@ -60,9 +60,11 @@ class UnixSocketServerFactory implements ServerFactory<DomainSocketAddress> {
     if (Epoll.isAvailable()) {
       factorySupplier = EpollIoHandler::newFactory;
       channelClass    = EpollServerDomainSocketChannel.class;
+      Log.info().log(getClass(), "initialize netty EPOLL transport");
     } else if (KQueue.isAvailable()) {
       factorySupplier = KQueueIoHandler::newFactory;
       channelClass    = KQueueServerDomainSocketChannel.class;
+      Log.info().log(getClass(), "initialize netty KQUEUE transport");
     } else {
       throw new IllegalStateException("netty native transport (Epoll/KQueue) is required for Unix Domain Socket");
     }

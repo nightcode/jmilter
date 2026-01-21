@@ -57,7 +57,7 @@ public class UnixSocketTest {
     Files.deleteIfExists(Paths.get(TEST_ADDRESS.path()));
   }
 
-  @Test public void testUnixSocketConnectionFactory() throws Exception {
+  @Test public void testUnixSocketConnectionFactory() throws Throwable {
     final CountDownLatch negotiateLatch = new CountDownLatch(1);
 
     MilterHandler milterHandler = new AbstractMilterHandler(Actions.DEF_ACTIONS, ProtocolSteps.DEF_PROTOCOL_STEPS) {
@@ -88,7 +88,11 @@ public class UnixSocketTest {
           }));
 
       ChannelFuture channelFuture = clientBootstrap.connect(TEST_ADDRESS);
-      Assert.assertTrue(channelFuture.awaitUninterruptibly().isSuccess());
+
+      ChannelFuture result = channelFuture.awaitUninterruptibly();
+      if (!result.isSuccess()) {
+        throw result.cause();
+      }
 
       Channel clientChannel = channelFuture.channel();
       clientChannel.writeAndFlush(Unpooled.copiedBuffer(new byte[]{(byte) SMFIC_OPTNEG.code()

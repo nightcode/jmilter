@@ -31,6 +31,8 @@ import io.netty.channel.kqueue.KQueueDomainSocketChannel;
 import io.netty.channel.kqueue.KQueueIoHandler;
 import io.netty.channel.unix.DomainSocketAddress;
 
+import org.nightcode.milter.util.Log;
+
 import static org.nightcode.milter.MilterOptions.NETTY_AUTO_READ;
 import static org.nightcode.milter.MilterOptions.NETTY_CONNECT_TIMEOUT_MS;
 import static org.nightcode.milter.MilterOptions.NETTY_NUMBER_OF_THREADS;
@@ -55,9 +57,11 @@ class UnixSocketConnectionFactory implements ConnectionFactory<DomainSocketAddre
     if (Epoll.isAvailable()) {
       factorySupplier = EpollIoHandler::newFactory;
       channelClass    = EpollSocketChannel.class;
+      Log.info().log(getClass(), "initialize netty EPOLL transport");
     } else if (KQueue.isAvailable()) {
       factorySupplier = KQueueIoHandler::newFactory;
       channelClass    = KQueueDomainSocketChannel.class;
+      Log.info().log(getClass(), "initialize netty KQUEUE transport");
     } else {
       throw new IllegalStateException("netty native transport (Epoll/KQueue) is required for Unix Domain Socket");
     }
