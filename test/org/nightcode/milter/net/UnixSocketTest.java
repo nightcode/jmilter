@@ -47,10 +47,6 @@ import static org.nightcode.milter.CommandCode.SMFIC_OPTNEG;
 
 public class UnixSocketTest {
 
-  static {
-    System.setProperty("java.net.preferIPv4Stack", "true");
-  }
-
   private static final DomainSocketAddress TEST_ADDRESS = new DomainSocketAddress("target/jmilter-test.sock");
 
   @Before public void setUp() {

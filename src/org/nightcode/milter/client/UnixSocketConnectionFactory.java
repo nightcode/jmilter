@@ -24,13 +24,12 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.IoHandlerFactory;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollDomainSocketChannel;
 import io.netty.channel.epoll.EpollIoHandler;
-import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.kqueue.KQueue;
 import io.netty.channel.kqueue.KQueueDomainSocketChannel;
 import io.netty.channel.kqueue.KQueueIoHandler;
 import io.netty.channel.unix.DomainSocketAddress;
-
 import org.nightcode.milter.util.Log;
 
 import static org.nightcode.milter.MilterOptions.NETTY_AUTO_READ;
@@ -56,7 +55,7 @@ class UnixSocketConnectionFactory implements ConnectionFactory<DomainSocketAddre
 
     if (Epoll.isAvailable()) {
       factorySupplier = EpollIoHandler::newFactory;
-      channelClass    = EpollSocketChannel.class;
+      channelClass    = EpollDomainSocketChannel.class;
       Log.info().log(getClass(), "initialize netty EPOLL transport");
     } else if (KQueue.isAvailable()) {
       factorySupplier = KQueueIoHandler::newFactory;
