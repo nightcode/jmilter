@@ -15,19 +15,22 @@
 package org.nightcode.milter.client;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Supplier;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.IoHandlerFactory;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollIoHandler;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.kqueue.KQueue;
-import io.netty.channel.kqueue.KQueueEventLoopGroup;
+import io.netty.channel.kqueue.KQueueIoHandler;
 import io.netty.channel.kqueue.KQueueSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.nightcode.milter.util.Log;
 
@@ -52,24 +55,27 @@ class TcpIpConnectionFactory implements ConnectionFactory<InetSocketAddress> {
   @Override public Bootstrap create() {
     int nThreads = getInt(NETTY_NUMBER_OF_THREADS, 0);
 
-    EventLoopGroup           workerGroup;
-    Class<? extends Channel> channelClass;
+    Supplier<IoHandlerFactory> factorySupplier;
+    Class<? extends Channel>   channelClass;
 
     if (Epoll.isAvailable()) {
-      workerGroup  = new EpollEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-epoll"));
-      channelClass = EpollSocketChannel.class;
+      factorySupplier = EpollIoHandler::newFactory;
+      channelClass    = EpollSocketChannel.class;
+      Log.info().log(getClass(), "initialize netty EPOLL transport");
     } else if (KQueue.isAvailable()) {
-      workerGroup  = new KQueueEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-kqueue"));
-      channelClass = KQueueSocketChannel.class;
+      factorySupplier = KQueueIoHandler::newFactory;
+      channelClass    = KQueueSocketChannel.class;
+      Log.info().log(getClass(), "initialize netty KQUEUE transport");
     } else {
-      Log.info().log(getClass(), "unable to initialize netty native transport (Epoll/KQueue), switch to NIO");
-      workerGroup  = new NioEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-nio"));
-      channelClass = NioSocketChannel.class;
+      factorySupplier = NioIoHandler::newFactory;
+      channelClass    = NioSocketChannel.class;
     }
+
+    ThreadFactory tf = namedThreadFactory("jmilter-" + address + "-" + channelClass.getSimpleName() + "-worker");
 
     Bootstrap bootstrap = new Bootstrap();
     bootstrap
-        .group(workerGroup)
+        .group(new MultiThreadIoEventLoopGroup(nThreads, tf, factorySupplier.get()))
         .channel(channelClass)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getInt(NETTY_CONNECT_TIMEOUT_MS, 5_000))
         .option(ChannelOption.AUTO_READ,              getBoolean(NETTY_AUTO_READ, true))

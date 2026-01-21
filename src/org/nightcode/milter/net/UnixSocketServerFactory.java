@@ -18,17 +18,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Supplier;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.IoHandlerFactory;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.ServerChannel;
+import io.netty.channel.SingleThreadIoEventLoop;
 import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollIoHandler;
 import io.netty.channel.epoll.EpollServerDomainSocketChannel;
 import io.netty.channel.kqueue.KQueue;
-import io.netty.channel.kqueue.KQueueEventLoopGroup;
+import io.netty.channel.kqueue.KQueueIoHandler;
 import io.netty.channel.kqueue.KQueueServerDomainSocketChannel;
 import io.netty.channel.unix.DomainSocketAddress;
 import org.nightcode.milter.util.Log;
@@ -50,21 +54,21 @@ class UnixSocketServerFactory implements ServerFactory<DomainSocketAddress> {
   @Override public ServerBootstrap create() {
     int nThreads = getInt(NETTY_NUMBER_OF_THREADS, 0);
 
-    EventLoopGroup                 acceptorGroup;
-    EventLoopGroup                 workerGroup;
+    Supplier<IoHandlerFactory> factorySupplier;
     Class<? extends ServerChannel> channelClass;
 
-    if (Epoll.isAvailable()) { // Linux (Epoll)
-      acceptorGroup = new EpollEventLoopGroup(1, namedThreadFactory("jmilter-" + address + "-acceptor-epoll"));
-      workerGroup   = new EpollEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-epoll"));
-      channelClass  = EpollServerDomainSocketChannel.class;
-    } else if (KQueue.isAvailable()) { // macOS/BSD (KQueue)
-      acceptorGroup = new KQueueEventLoopGroup(1, namedThreadFactory("jmilter-" + address + "-acceptor-kqueue"));
-      workerGroup   = new KQueueEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-kqueue"));
-      channelClass  = KQueueServerDomainSocketChannel.class;
+    if (Epoll.isAvailable()) {
+      factorySupplier = EpollIoHandler::newFactory;
+      channelClass    = EpollServerDomainSocketChannel.class;
+    } else if (KQueue.isAvailable()) {
+      factorySupplier = KQueueIoHandler::newFactory;
+      channelClass    = KQueueServerDomainSocketChannel.class;
     } else {
       throw new IllegalStateException("netty native transport (Epoll/KQueue) is required for Unix Domain Socket");
     }
+
+    ThreadFactory acceptorTf = namedThreadFactory("jmilter-" + address + "-" + channelClass.getSimpleName() + "-acceptor");
+    ThreadFactory workerTf   = namedThreadFactory("jmilter-" + address + "-" + channelClass.getSimpleName() + "-worker");
 
     Path socketPath = Paths.get(address.path());
     try {
@@ -77,7 +81,8 @@ class UnixSocketServerFactory implements ServerFactory<DomainSocketAddress> {
 
     ServerBootstrap serverBootstrap = new ServerBootstrap();
     serverBootstrap
-        .group(acceptorGroup, workerGroup)
+        .group(new SingleThreadIoEventLoop(null, acceptorTf, factorySupplier.get())
+            , new MultiThreadIoEventLoopGroup(nThreads, workerTf, factorySupplier.get()))
         .channel(channelClass)
         .option(ChannelOption.SO_BACKLOG, getInt(NETTY_SO_BACKLOG, 2048))
         .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)

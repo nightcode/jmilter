@@ -24,11 +24,13 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.SingleThreadIoEventLoop;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.local.LocalChannel;
+import io.netty.channel.local.LocalIoHandler;
 import io.netty.channel.local.LocalServerChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.nightcode.milter.AbstractMilterHandler;
@@ -41,6 +43,7 @@ import org.nightcode.milter.ProtocolSteps;
 import org.nightcode.milter.codec.MilterPacket;
 import org.nightcode.milter.net.MilterChannelHandler;
 import org.nightcode.milter.net.SessionInitializer;
+import org.nightcode.milter.util.ExecutorUtils;
 import org.nightcode.milter.util.Log;
 
 import org.junit.Assert;
@@ -75,11 +78,11 @@ public class ResponseHandlerTest {
         }
       };
 
-      serverBootstrap.group(new NioEventLoopGroup(2))
+      serverBootstrap.group(new MultiThreadIoEventLoopGroup(2, LocalIoHandler.newFactory()))
           .channel(LocalServerChannel.class)
           .childHandler(new SessionInitializer(() -> new MilterChannelHandler(milterHandler)));
 
-      clientBootstrap.group(new NioEventLoopGroup(1))
+      clientBootstrap.group(new SingleThreadIoEventLoop(null, ExecutorUtils.namedThreadFactory("test"), LocalIoHandler.newFactory()))
           .channel(LocalChannel.class)
           .handler(new SessionInitializer(ResponseHandler::new));
 

@@ -14,17 +14,21 @@
 
 package org.nightcode.milter.client;
 
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Supplier;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.IoHandlerFactory;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollDomainSocketChannel;
-import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollIoHandler;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.kqueue.KQueue;
 import io.netty.channel.kqueue.KQueueDomainSocketChannel;
-import io.netty.channel.kqueue.KQueueEventLoopGroup;
+import io.netty.channel.kqueue.KQueueIoHandler;
 import io.netty.channel.unix.DomainSocketAddress;
 
 import static org.nightcode.milter.MilterOptions.NETTY_AUTO_READ;
@@ -45,22 +49,24 @@ class UnixSocketConnectionFactory implements ConnectionFactory<DomainSocketAddre
   @Override public Bootstrap create() {
     int nThreads = getInt(NETTY_NUMBER_OF_THREADS, 0);
 
-    EventLoopGroup           workerGroup;
-    Class<? extends Channel> channelClass;
+    Supplier<IoHandlerFactory> factorySupplier;
+    Class<? extends Channel>   channelClass;
 
-    if (Epoll.isAvailable()) { // Linux (Epoll)
-      workerGroup  = new EpollEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-epoll"));
-      channelClass = EpollDomainSocketChannel.class;
-    } else if (KQueue.isAvailable()) { // macOS/BSD (KQueue)
-      workerGroup  = new KQueueEventLoopGroup(nThreads, namedThreadFactory("jmilter-" + address + "-worker-kqueue"));
-      channelClass = KQueueDomainSocketChannel.class;
+    if (Epoll.isAvailable()) {
+      factorySupplier = EpollIoHandler::newFactory;
+      channelClass    = EpollSocketChannel.class;
+    } else if (KQueue.isAvailable()) {
+      factorySupplier = KQueueIoHandler::newFactory;
+      channelClass    = KQueueDomainSocketChannel.class;
     } else {
       throw new IllegalStateException("netty native transport (Epoll/KQueue) is required for Unix Domain Socket");
     }
 
+    ThreadFactory tf = namedThreadFactory("jmilter-" + address + "-" + channelClass.getSimpleName() + "-worker");
+
     Bootstrap bootstrap = new Bootstrap();
     bootstrap
-        .group(workerGroup)
+        .group(new MultiThreadIoEventLoopGroup(nThreads, tf, factorySupplier.get()))
         .channel(channelClass)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getInt(NETTY_CONNECT_TIMEOUT_MS, 5_000))
         .option(ChannelOption.AUTO_READ,              getBoolean(NETTY_AUTO_READ, true))

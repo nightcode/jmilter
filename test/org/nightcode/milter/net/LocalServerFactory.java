@@ -17,9 +17,12 @@ package org.nightcode.milter.net;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.SingleThreadIoEventLoop;
 import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalIoHandler;
 import io.netty.channel.local.LocalServerChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
+import org.nightcode.milter.util.ExecutorUtils;
 
 public class LocalServerFactory implements ServerFactory<LocalAddress> {
 
@@ -28,7 +31,8 @@ public class LocalServerFactory implements ServerFactory<LocalAddress> {
   @Override public ServerBootstrap create() {
     ServerBootstrap serverBootstrap = new ServerBootstrap();
     serverBootstrap
-        .group(new NioEventLoopGroup(1), new NioEventLoopGroup(1))
+        .group(new SingleThreadIoEventLoop(null, ExecutorUtils.namedThreadFactory("test"), LocalIoHandler.newFactory())
+            , new MultiThreadIoEventLoopGroup(1, LocalIoHandler.newFactory()))
         .channel(LocalServerChannel.class)
         .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
         .localAddress(TEST_ADDRESS);

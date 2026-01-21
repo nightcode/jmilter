@@ -34,8 +34,7 @@ public enum ExecutorUtils {
     private final AtomicInteger threadNumber = new AtomicInteger(1);
 
     private NamedThreadFactory(String prefix) {
-      SecurityManager securityManager = System.getSecurityManager();
-      group = (securityManager != null) ? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
+      group = Thread.currentThread().getThreadGroup();
       namePrefix = prefix + "-thread-";
     }
 

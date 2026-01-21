@@ -17,9 +17,11 @@ package org.nightcode.milter.client;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.SingleThreadIoEventLoop;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.local.LocalChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.local.LocalIoHandler;
+import org.nightcode.milter.util.ExecutorUtils;
 
 import static org.nightcode.milter.MilterOptions.NETTY_AUTO_READ;
 import static org.nightcode.milter.MilterOptions.NETTY_CONNECT_TIMEOUT_MS;
@@ -33,7 +35,7 @@ public class LocalConnectionFactory implements ConnectionFactory<LocalAddress> {
   @Override public Bootstrap create() {
     Bootstrap bootstrap = new Bootstrap();
     bootstrap
-        .group(new NioEventLoopGroup(1))
+        .group(new SingleThreadIoEventLoop(null, ExecutorUtils.namedThreadFactory("test"), LocalIoHandler.newFactory()))
         .channel(LocalChannel.class)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getInt(NETTY_CONNECT_TIMEOUT_MS, 5_000))
         .option(ChannelOption.AUTO_READ,              getBoolean(NETTY_AUTO_READ, true))

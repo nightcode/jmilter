@@ -21,9 +21,10 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalIoHandler;
 import io.netty.channel.local.LocalServerChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterContext;
@@ -61,8 +62,8 @@ public class ClientTest {
           // do nothing
         }
       };
-      
-      serverBootstrap.group(new NioEventLoopGroup(2))
+
+      serverBootstrap.group(new MultiThreadIoEventLoopGroup(2, LocalIoHandler.newFactory()))
           .channel(LocalServerChannel.class)
           .childHandler(new SessionInitializer(() -> new MilterChannelHandler(milterHandler)));
 

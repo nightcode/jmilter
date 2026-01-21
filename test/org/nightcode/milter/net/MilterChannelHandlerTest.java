@@ -23,19 +23,21 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.SingleThreadIoEventLoop;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.local.LocalChannel;
+import io.netty.channel.local.LocalIoHandler;
 import io.netty.channel.local.LocalServerChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
 import org.nightcode.milter.AbstractMilterHandler;
 import org.nightcode.milter.Actions;
 import org.nightcode.milter.MilterContext;
 import org.nightcode.milter.MilterException;
 import org.nightcode.milter.MilterHandler;
 import org.nightcode.milter.ProtocolSteps;
+import org.nightcode.milter.util.ExecutorUtils;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -52,7 +54,7 @@ public class MilterChannelHandlerTest {
   private static EventLoopGroup sharedGroup;
 
   @BeforeClass public static void beforeClass() {
-    sharedGroup = new DefaultEventLoopGroup(1);
+    sharedGroup = new MultiThreadIoEventLoopGroup(1, ExecutorUtils.namedThreadFactory("test"), LocalIoHandler.newFactory());
   }
 
   @AfterClass public static void afterClass() throws InterruptedException {
@@ -78,11 +80,11 @@ public class MilterChannelHandlerTest {
         }
       };
 
-      serverBootstrap.group(new NioEventLoopGroup(2))
+      serverBootstrap.group(new MultiThreadIoEventLoopGroup(2, LocalIoHandler.newFactory()))
           .channel(LocalServerChannel.class)
           .childHandler(new SessionInitializer(() -> new MilterChannelHandler(milterHandler)));
 
-      clientBootstrap.group(new NioEventLoopGroup(1))
+      clientBootstrap.group(new SingleThreadIoEventLoop(null, ExecutorUtils.namedThreadFactory("test"), LocalIoHandler.newFactory()))
           .channel(LocalChannel.class)
           .handler(new SessionInitializer(() -> new SimpleChannelInboundHandler<ByteBuf>() {
             @Override protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {

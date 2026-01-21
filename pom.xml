@@ -18,7 +18,7 @@
   <groupId>org.nightcode</groupId>
   <artifactId>jmilter</artifactId>
   <packaging>jar</packaging>
-  <version>0.9</version>
+  <version>0.10-SNAPSHOT</version>
 
   <name>JMilter</name>
   <description>Java implementation of the Sendmail Milter protocol.</description>
@@ -36,7 +36,7 @@
 
     <java.version>8</java.version>
 
-    <netty.version>4.1.125.Final</netty.version>
+    <netty.version>4.2.9.Final</netty.version>
 
     <junit.version>4.13.1</junit.version>
     <easymock.version>3.6</easymock.version>
@@ -52,35 +52,10 @@
 
       <dependency>
         <groupId>io.netty</groupId>
-        <artifactId>netty-transport</artifactId>
+        <artifactId>netty-bom</artifactId>
         <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-codec</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-resolver</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-handler</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-transport-native-epoll</artifactId>
-        <classifier>linux-x86_64</classifier>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-transport-native-kqueue</artifactId>
-        <classifier>osx-aarch_64</classifier>
-        <version>${netty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <dependency>
